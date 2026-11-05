@@ -10,11 +10,13 @@ import {
 import Avatar from '../UI/Avatar';
 import Icon from '../UI/Icon';
 import InlineMessage from '../UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export function FriendActions({ user, showProfile = true }) {
   const { userData } = useContext(AppContext);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
   const friend = Boolean(userData.friends?.[user.username]);
   const incoming = Boolean(userData.requests?.[user.username]);
   const outgoing = Boolean(userData.myRequests?.[user.username]);
@@ -43,11 +45,11 @@ export function FriendActions({ user, showProfile = true }) {
                 name='check'
                 size={15}
               />
-              Accept request
+              {t('people.accept')}
             </button>
             <button
               className='icon-button danger-icon'
-              aria-label={`Decline request from ${user.username}`}
+              aria-label={t('people.decline', { name: user.username })}
               disabled={busy}
               onClick={() => act(removeFriendRequestService)}
             >
@@ -62,13 +64,13 @@ export function FriendActions({ user, showProfile = true }) {
             className='btn btn-danger'
             disabled={busy}
             onClick={() => act(removeFriendService)}
-            aria-label={`Remove ${user.username} from friends`}
+            aria-label={t('people.removeLabel', { name: user.username })}
           >
             <Icon
               name='users'
               size={15}
             />
-            Remove friend
+            {t('people.remove')}
           </button>
         ) : outgoing ? (
           <button
@@ -80,7 +82,7 @@ export function FriendActions({ user, showProfile = true }) {
               name='close'
               size={15}
             />
-            Cancel request
+            {t('people.cancelRequest')}
           </button>
         ) : (
           <button
@@ -92,7 +94,7 @@ export function FriendActions({ user, showProfile = true }) {
               name='plus'
               size={15}
             />
-            {busy ? 'Connecting…' : 'Add mate'}
+            {t(busy ? 'people.connecting' : 'people.add')}
           </button>
         )}
         {showProfile && (
@@ -100,7 +102,7 @@ export function FriendActions({ user, showProfile = true }) {
             className='btn btn-ghost'
             to={`/users/${encodeURIComponent(user.username)}`}
           >
-            Profile
+            {t('people.profile')}
             <Icon
               name='arrowUp'
               size={14}
@@ -117,6 +119,7 @@ export default function SingleUserView({ user }) {
   const { userData } = useContext(AppContext);
   const friend = Boolean(userData.friends?.[user.username]);
   const pending = Boolean(userData.myRequests?.[user.username]);
+  const { t, formatDate } = useTranslation();
   const name =
     [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
   return (
@@ -132,10 +135,10 @@ export default function SingleUserView({ user }) {
               name='check'
               size={11}
             />
-            Your mate
+            {t('people.yourMate')}
           </span>
         ) : pending ? (
-          <span className='pill pill-neutral'>Request sent</span>
+          <span className='pill pill-neutral'>{t('people.requestSent')}</span>
         ) : (
           <span
             className='person-flower'
@@ -160,10 +163,8 @@ export default function SingleUserView({ user }) {
           name='calendar'
           size={12}
         />
-        Moving since{' '}
-        {new Date(user.createdOn).toLocaleDateString('en-GB', {
-          month: 'short',
-          year: 'numeric',
+        {t('profile.movingSince', {
+          date: formatDate(user.createdOn, { month: 'short', year: 'numeric' }),
         })}
       </p>
       <FriendActions user={user} />

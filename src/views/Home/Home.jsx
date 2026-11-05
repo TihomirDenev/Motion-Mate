@@ -8,13 +8,13 @@ import { getAllCategories } from '../../services/category.service';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import Icon from '../../components/UI/Icon';
 import Authenticated from '../../hoc/Authenticated/Authenticated';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Home() {
   const { userData } = useContext(AppContext);
+  const { t, formatNumber } = useTranslation();
   usePageTitle(
-    userData
-      ? 'Motion Mate | Your overview'
-      : 'Motion Mate | Your daily momentum'
+    `Motion Mate | ${t(userData ? 'titles.overview' : 'titles.landing')}`
   );
   const [counts, setCounts] = useState(null);
   useEffect(() => {
@@ -40,30 +40,31 @@ export default function Home() {
     };
   }, [userData]);
 
-  if (userData) return <Authenticated><HomeAuthenticated /></Authenticated>;
+  if (userData)
+    return (
+      <Authenticated>
+        <HomeAuthenticated />
+      </Authenticated>
+    );
   return (
     <div className='landing page-enter'>
       <section className='landing-hero'>
         <div className='landing-copy'>
           <span className='landing-badge'>
-            <span className='status-dot' /> A LITTLE MOVEMENT. A LOT OF
-            POSSIBILITY.
+            <span className='status-dot' /> {t('landing.badge')}
           </span>
           <h1>
-            Find your pace.
+            {t('landing.titleLine1')}
             <br />
-            Feel your <span>potential.</span>
+            {t('landing.titleLine2')} <span>{t('landing.titleHighlight')}</span>
           </h1>
-          <p>
-            A stronger body. A clearer mind. A little more you. Build a routine
-            you love, track your progress, and move forward together.
-          </p>
+          <p>{t('landing.description')}</p>
           <div className='landing-actions'>
             <Link
               className='btn btn-primary'
               to='/register'
             >
-              Find your momentum{' '}
+              {t('landing.primaryCta')}{' '}
               <Icon
                 name='arrow'
                 size={18}
@@ -73,7 +74,7 @@ export default function Home() {
               className='text-button'
               to='/about'
             >
-              Meet Motion Mate{' '}
+              {t('landing.secondaryCta')}{' '}
               <Icon
                 name='arrowUp'
                 size={16}
@@ -90,11 +91,11 @@ export default function Home() {
               <span>RM</span>
             </div>
             <div>
-              <strong>Better, together.</strong>
+              <strong>{t('landing.communityTitle')}</strong>
               <small>
                 {counts
-                  ? `${counts.users} people finding their rhythm`
-                  : 'Find your people. Find your rhythm.'}
+                  ? t('landing.communityCount', { count: counts.users })
+                  : t('landing.communityFallback')}
               </small>
             </div>
           </div>
@@ -102,15 +103,16 @@ export default function Home() {
         <div className='landing-visual'>
           <img
             src='/images/runner.jpg'
-            alt='Runner taking a moment outdoors before her next workout'
+            alt={t('landing.imageAlt')}
             fetchPriority='high'
           />
           <div className='landing-image-shade' />
-          <span className='image-kicker'>YOUR JOURNEY. YOUR PACE.</span>
+          <span className='image-kicker'>{t('landing.imageKicker')}</span>
           <div className='image-caption'>
-            Every move
+            {t('landing.captionLine1')}
             <br />
-            is a fresh start<span>.</span>
+            {t('landing.captionLine2')}
+            <span>.</span>
           </div>
           <div className='floating-note'>
             <span className='icon-tile'>
@@ -120,8 +122,8 @@ export default function Home() {
               />
             </span>
             <div>
-              <strong>Small steps. Real change.</strong>
-              <small>Show up for yourself today.</small>
+              <strong>{t('landing.noteTitle')}</strong>
+              <small>{t('landing.noteText')}</small>
             </div>
             <Icon
               name='arrowUp'
@@ -136,50 +138,48 @@ export default function Home() {
       </section>
       <div className='landing-stats'>
         <div>
-          <strong>{counts?.categories ?? '—'}</strong>
-          <span>ways to move</span>
+          <strong>{counts ? formatNumber(counts.categories) : '—'}</strong>
+          <span>{t('landing.statCategories')}</span>
         </div>
         <div>
-          <strong>{counts?.exercises ?? '—'}</strong>
-          <span>exercises to make your own</span>
+          <strong>{counts ? formatNumber(counts.exercises) : '—'}</strong>
+          <span>{t('landing.statExercises')}</span>
         </div>
         <div>
-          <strong>{counts?.users ?? '—'}</strong>
-          <span>Motion Mates & counting</span>
+          <strong>{counts ? formatNumber(counts.users) : '—'}</strong>
+          <span>{t('landing.statUsers')}</span>
         </div>
       </div>
       <section className='landing-features'>
         <div className='landing-section-heading'>
-          <p className='eyebrow'>MORE THAN A WORKOUT APP</p>
+          <p className='eyebrow'>{t('landing.featuresEyebrow')}</p>
           <h2>
-            Everything you need.
+            {t('landing.featuresTitleLine1')}
             <br />
-            All moving with you.
+            {t('landing.featuresTitleLine2')}
           </h2>
-          <p>
-            Less overthinking. More doing. Make space for a healthier everyday.
-          </p>
+          <p>{t('landing.featuresDescription')}</p>
         </div>
         <div className='card-grid'>
           {[
             {
               icon: 'dumbbell',
-              title: 'Move your way',
-              text: 'Build your exercise library, set your timer, and find a routine that feels like you.',
+              title: t('landing.feature1Title'),
+              text: t('landing.feature1Text'),
               tone: 'mint',
               number: '01',
             },
             {
               icon: 'target',
-              title: 'Make progress personal',
-              text: 'Turn “one day” into day one. Set meaningful goals and celebrate every step forward.',
+              title: t('landing.feature2Title'),
+              text: t('landing.feature2Text'),
               tone: 'lavender',
               number: '02',
             },
             {
               icon: 'heart',
-              title: 'Look after the whole you',
-              text: 'Get to know your body with simple tools for hydration, daily calories, and BMI.',
+              title: t('landing.feature3Title'),
+              text: t('landing.feature3Text'),
               tone: 'peach',
               number: '03',
             },
@@ -201,7 +201,7 @@ export default function Home() {
               <p>{feature.text}</p>
               <Link
                 to='/register'
-                aria-label={`Get started: ${feature.title}`}
+                aria-label={t('landing.featureLink', { title: feature.title })}
               >
                 <Icon name='arrowUp' />
               </Link>
@@ -211,18 +211,18 @@ export default function Home() {
       </section>
       <section className='landing-cta'>
         <div>
-          <p className='eyebrow'>YOUR NEXT CHAPTER</p>
+          <p className='eyebrow'>{t('landing.ctaEyebrow')}</p>
           <h2>
-            Good things start
+            {t('landing.ctaTitleLine1')}
             <br />
-            with a little motion.
+            {t('landing.ctaTitleLine2')}
           </h2>
         </div>
         <Link
           className='btn btn-lime'
           to='/register'
         >
-          Let’s get moving <Icon name='arrow' />
+          {t('landing.ctaButton')} <Icon name='arrow' />
         </Link>
         <div
           className='cta-rings'

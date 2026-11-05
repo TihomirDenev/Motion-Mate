@@ -2,12 +2,14 @@ import { Link } from 'react-router';
 import Goal from './Goal';
 import EmptyState from '../UI/EmptyState';
 import Icon from '../UI/Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function GoalsTable({
   goals,
   myGoals = false,
   filtered = false,
 }) {
+  const { t } = useTranslation();
   return goals?.length ? (
     <div className='goals-grid'>
       {goals.map((goal) => (
@@ -23,27 +25,27 @@ export default function GoalsTable({
     <div className='surface'>
       <EmptyState
         icon={myGoals ? 'target' : 'users'}
-        title={
+        title={t(
           filtered
-            ? 'A fresh space for progress'
+            ? 'goals.filteredEmptyTitle'
             : myGoals
-              ? 'Every great journey starts with a goal'
-              : 'Grow together'
-        }
-        description={
+              ? 'goals.emptyTitle'
+              : 'goals.friendsEmptyTitle'
+        )}
+        description={t(
           filtered
-            ? 'Your goals will appear here as you move through your journey.'
+            ? 'goals.filteredEmptyDescription'
             : myGoals
-              ? 'Choose something that matters to you and create your first goal with the button above.'
-              : 'Connect with Motion Mates to share a little motivation and see their goals.'
-        }
+              ? 'goals.emptyDescription'
+              : 'goals.friendsEmptyDescription'
+        )}
       >
         {!myGoals && (
           <Link
             className='text-button'
             to='/all-users'
           >
-            Find your people{' '}
+            {t('overview.communityTitle')}{' '}
             <Icon
               name='arrow'
               size={16}

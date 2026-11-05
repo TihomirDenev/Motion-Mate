@@ -10,9 +10,11 @@ import Avatar from '../../components/UI/Avatar';
 import EmptyState from '../../components/UI/EmptyState';
 import LoadingState from '../../components/UI/LoadingState';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function AllUsers() {
-  usePageTitle('Motion Mate | Find your people');
+  const { t, locale, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('overview.communityTitle')}`);
   const { userData } = useContext(AppContext);
   const { data, loading, error } = useDatabaseValue('users');
   const [params, setParams] = useSearchParams();
@@ -32,7 +34,10 @@ export default function AllUsers() {
     .sort((a, b) =>
       sort === 'newest'
         ? Number(b.createdOn) - Number(a.createdOn)
-        : (a.firstName || a.username).localeCompare(b.firstName || b.username)
+        : (a.firstName || a.username).localeCompare(
+            b.firstName || b.username,
+            locale
+          )
     );
   const updateSearch = (value) => {
     setParams(value ? { search: value } : {}, { replace: true });
@@ -41,9 +46,9 @@ export default function AllUsers() {
   return (
     <div className='community-page page-enter'>
       <PageHeader
-        eyebrow='GOOD ENERGY. GREAT COMPANY.'
-        title='Find your people.'
-        description='A little encouragement can take you a long way. Find your Motion Mates.'
+        eyebrow={t('community.eyebrow')}
+        title={t('community.title')}
+        description={t('community.description')}
         actions={
           <Link
             className='btn btn-primary'
@@ -53,7 +58,7 @@ export default function AllUsers() {
               name='users'
               size={16}
             />
-            My circle{' '}
+            {t('community.myCircle')}{' '}
             <span className='button-count'>
               {Object.keys(userData.friends || {}).length}
             </span>
@@ -62,15 +67,15 @@ export default function AllUsers() {
       />
       <section className='community-banner'>
         <div>
-          <span className='pill pill-lavender'>BETTER, TOGETHER</span>
+          <span className='pill pill-lavender'>
+            {t('community.bannerPill')}
+          </span>
           <h2>
-            Your kind of people.
+            {t('community.bannerLine1')}
             <br />
-            Your kind of momentum.
+            {t('community.bannerLine2')}
           </h2>
-          <p>
-            Share exercises, cheer on each other’s goals, and keep showing up.
-          </p>
+          <p>{t('community.bannerText')}</p>
         </div>
         <div className='community-banner-avatars'>
           {users.slice(0, 3).map((user) => (
@@ -88,8 +93,11 @@ export default function AllUsers() {
           </span>
           <small>
             {users.length
-              ? `${users.length} potential Motion Mates`
-              : 'Good company starts here'}
+              ? t('community.potential', {
+                  count: users.length,
+                  formatted: formatNumber(users.length),
+                })
+              : t('community.goodCompany')}
           </small>
         </div>
       </section>
@@ -101,20 +109,20 @@ export default function AllUsers() {
           />
           <input
             type='search'
-            aria-label='Search people by name or username'
-            placeholder='Search a name or username…'
+            aria-label={t('community.searchLabel')}
+            placeholder={t('community.searchPlaceholder')}
             value={search}
             onChange={(event) => updateSearch(event.target.value)}
           />
         </label>
         <label className='sort-control'>
-          Sort by
+          {t('community.sortBy')}
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value)}
           >
-            <option value='name'>Name, A–Z</option>
-            <option value='newest'>Newest members</option>
+            <option value='name'>{t('community.sortName')}</option>
+            <option value='newest'>{t('community.sortNewest')}</option>
           </select>
           <Icon
             name='down'
@@ -123,9 +131,9 @@ export default function AllUsers() {
         </label>
       </div>
       <div className='section-heading'>
-        <h2>{search ? 'Your search results' : 'Meet the community'}</h2>
+        <h2>{t(search ? 'community.results' : 'community.meet')}</h2>
         <span className='result-count'>
-          {filtered.length} {filtered.length === 1 ? 'person' : 'people'}
+          {t('community.people', { count: filtered.length })}
         </span>
       </div>
       <InlineMessage>{error}</InlineMessage>
@@ -150,7 +158,7 @@ export default function AllUsers() {
                 className='btn btn-ghost'
                 onClick={() => setLimit((value) => value + 12)}
               >
-                Meet more mates{' '}
+                {t('community.more')}{' '}
                 <Icon
                   name='down'
                   size={16}
@@ -163,14 +171,14 @@ export default function AllUsers() {
         <div className='surface'>
           <EmptyState
             icon='search'
-            title='Your people are out there'
-            description='Try a different name or username to find them.'
+            title={t('community.emptyTitle')}
+            description={t('community.emptyDescription')}
           >
             <button
               className='btn btn-ghost'
               onClick={() => updateSearch('')}
             >
-              Clear search
+              {t('common.clearSearch')}
             </button>
           </EmptyState>
         </div>

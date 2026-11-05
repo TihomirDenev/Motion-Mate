@@ -4,7 +4,6 @@ import { AppContext } from '../../context/AppContext';
 import { useDatabaseValue } from '../../hooks/useDatabaseValue';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { updateGoalProgress } from '../../services/goal.service';
-import { shortFormatDate } from '../../helper/format-date';
 import { getGoalStatus } from '../../helper/goal-status';
 import PageHeader from '../UI/PageHeader';
 import Icon from '../UI/Icon';
@@ -13,6 +12,7 @@ import EmptyState from '../UI/EmptyState';
 import InlineMessage from '../UI/InlineMessage';
 import FormField from '../UI/FormField';
 import Progress from './Progress';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function DetailedGoal() {
   const { id } = useParams();
@@ -36,7 +36,8 @@ export default function DetailedGoal() {
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
   const [now] = useState(() => Date.now());
-  usePageTitle(`Motion Mate | ${goal?.name || 'Goal progress'}`);
+  const { t, formatDate, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${goal?.name || t('goals.progressLabel')}`);
   const own = owner === userData.username;
   const save = async (event) => {
     event.preventDefault();
@@ -58,14 +59,14 @@ export default function DetailedGoal() {
     return (
       <EmptyState
         icon='target'
-        title='This goal isn’t here'
-        description='It may have been removed, or it belongs to someone outside your circle.'
+        title={t('goalDetail.missingTitle')}
+        description={t('goalDetail.missingDescription')}
       >
         <Link
           className='btn btn-primary'
           to='/goals'
         >
-          Back to goals
+          {t('goalDetail.back')}
         </Link>
       </EmptyState>
     );
@@ -73,37 +74,43 @@ export default function DetailedGoal() {
   return (
     <div className='goal-detail page-enter'>
       <PageHeader
-        back={{ to: '/goals', label: 'All goals' }}
-        eyebrow={own ? 'YOUR PERSONAL JOURNEY' : `${owner}’S JOURNEY`}
-        title={goal.name}
-        description={
-          status === 'Completed'
-            ? 'You showed up. You made it happen. Take a moment to celebrate.'
-            : 'Every small step brings you a little closer.'
+        back={{ to: '/goals', label: t('overview.allGoals') }}
+        eyebrow={
+          own
+            ? t('goalDetail.ownEyebrow')
+            : t('goalDetail.friendEyebrow', { name: owner })
         }
+        title={goal.name}
+        description={t(
+          status === 'Completed'
+            ? 'goalDetail.completedDescription'
+            : 'goalDetail.description'
+        )}
       />
       <section className='goal-detail-hero surface'>
         <div className='goal-detail-visual'>
           <Progress progress={editing ? progress : goal.progress} />
-          <span className='pill'>{status}</span>
+          <span className='pill'>{t(`goals.status.${status}`)}</span>
         </div>
         <div>
           <p className='eyebrow'>
-            {goal.type === 'manual'
-              ? 'PERSONAL MILESTONE'
-              : goal.type === 'exercises'
-                ? 'MOVEMENT GOAL'
-                : 'ENERGY GOAL'}
+            {t(
+              `goals.types.${goal.type === 'manual' || goal.type === 'calories' ? goal.type : 'exercises'}`
+            )}
           </p>
           <h2>
-            {status === 'Completed'
-              ? 'That’s a win worth celebrating.'
-              : 'Keep moving. It all adds up.'}
+            {t(
+              status === 'Completed'
+                ? 'goalDetail.completedTitle'
+                : 'goalDetail.title'
+            )}
           </h2>
           <p>
-            {goal.type === 'manual'
-              ? 'Track your progress at your own pace. Every step forward counts.'
-              : 'Every completed exercise within your goal dates moves your progress forward automatically.'}
+            {t(
+              goal.type === 'manual'
+                ? 'goalDetail.manualText'
+                : 'goalDetail.automaticText'
+            )}
           </p>
           {own && goal.type === 'manual' && !editing && (
             <button
@@ -118,13 +125,13 @@ export default function DetailedGoal() {
                 name='edit'
                 size={16}
               />
-              Update progress
+              {t('goalDetail.update')}
             </button>
           )}
         </div>
       </section>
       <InlineMessage type='success'>
-        {saved ? 'Your progress is saved. Keep that momentum going.' : ''}
+        {saved ? t('goalDetail.saved') : ''}
       </InlineMessage>
       {editing && (
         <form
@@ -132,7 +139,7 @@ export default function DetailedGoal() {
           onSubmit={save}
         >
           <FormField
-            label={`Your progress · ${progress}%`}
+            label={t('goalDetail.progressField', { progress })}
             type='range'
             min={0}
             max={100}
@@ -141,9 +148,9 @@ export default function DetailedGoal() {
             onChange={(event) => setProgress(event.target.value)}
           />
           <div className='range-labels'>
-            <span>Just starting</span>
-            <span>Halfway there</span>
-            <span>Made it!</span>
+            <span>{t('goalDetail.rangeStart')}</span>
+            <span>{t('goalDetail.rangeMiddle')}</span>
+            <span>{t('goalDetail.rangeEnd')}</span>
           </div>
           <InlineMessage>{error}</InlineMessage>
           <div className='dialog-actions'>
@@ -153,14 +160,14 @@ export default function DetailedGoal() {
               disabled={busy}
               onClick={() => setEditing(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               className='btn btn-primary'
               type='submit'
               disabled={busy}
             >
-              {busy ? 'Saving…' : 'Save progress'}
+              {t(busy ? 'common.saving' : 'goalDetail.save')}
               <Icon
                 name='check'
                 size={16}
@@ -175,29 +182,34 @@ export default function DetailedGoal() {
             <Icon name='dumbbell' />
           </span>
           <strong>
-            {goal.exercisesDone || 0}
+            {formatNumber(goal.exercisesDone || 0)}
             <small>
-              {goal.type === 'exercises' ? ` / ${goal.exercises}` : ''}
+              {goal.type === 'exercises'
+                ? ` / ${formatNumber(goal.exercises)}`
+                : ''}
             </small>
           </strong>
-          <p>Exercises completed</p>
+          <p>{t('overview.statExercises')}</p>
         </div>
         <div className='surface'>
           <span className='icon-tile tone-peach'>
             <Icon name='flame' />
           </span>
           <strong>
-            {goal.caloriesBurned || 0}
+            {formatNumber(goal.caloriesBurned || 0)}
             <small>
-              {goal.type === 'calories' ? ` / ${goal.calories}` : ''} kcal
+              {goal.type === 'calories'
+                ? ` / ${formatNumber(goal.calories)}`
+                : ''}{' '}
+              {t('common.kcal')}
             </small>
           </strong>
-          <p>Energy put into you</p>
+          <p>{t('goalDetail.energy')}</p>
         </div>
       </div>
       <section className='surface surface-padding goal-timeline'>
         <div className='section-heading'>
-          <h2>Your timeline</h2>
+          <h2>{t('goalDetail.timeline')}</h2>
           <Icon
             name='calendar'
             size={20}
@@ -206,14 +218,26 @@ export default function DetailedGoal() {
         <div>
           <span className='timeline-point' />
           <div>
-            <small>THE FIRST STEP</small>
-            <strong>{shortFormatDate(goal.timePeriod?.from)}</strong>
+            <small>{t('goalDetail.firstStep')}</small>
+            <strong>
+              {formatDate(goal.timePeriod?.from, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </strong>
           </div>
           <div className='timeline-line' />
           <span className='timeline-point timeline-finish' />
           <div>
-            <small>YOUR FINISH LINE</small>
-            <strong>{shortFormatDate(goal.timePeriod?.to)}</strong>
+            <small>{t('goalDetail.finishLine')}</small>
+            <strong>
+              {formatDate(goal.timePeriod?.to, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </strong>
           </div>
         </div>
       </section>

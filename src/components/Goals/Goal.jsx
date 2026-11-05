@@ -3,10 +3,10 @@ import { Link } from 'react-router';
 import { AppContext } from '../../context/AppContext';
 import { deleteGoal } from '../../services/goal.service';
 import { getGoalStatus } from '../../helper/goal-status';
-import { shortFormatDate } from '../../helper/format-date';
 import Icon from '../UI/Icon';
 import InlineMessage from '../UI/InlineMessage';
 import Progress from './Progress';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Goal({
   id,
@@ -21,6 +21,7 @@ export default function Goal({
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [now] = useState(() => Date.now());
+  const { t, formatDate } = useTranslation();
   const status = getGoalStatus({ progress, timePeriod: { from, to } }, now);
   const own = owner === userData.username;
   const remove = async () => {
@@ -54,14 +55,14 @@ export default function Goal({
         <span
           className={`pill ${status === 'Archived' ? 'pill-neutral' : status === 'Upcoming' ? 'pill-lavender' : ''}`}
         >
-          {status}
+          {t(`goals.status.${status}`)}
         </span>
         {(own || userData.userRole === 'admin') && (
           <button
             className='icon-button goal-delete'
             disabled={busy}
             onClick={remove}
-            aria-label={`Delete goal ${name}`}
+            aria-label={t('goals.delete', { name })}
           >
             <Icon
               name='trash'
@@ -73,14 +74,14 @@ export default function Goal({
       <div className='goal-card-main'>
         <div>
           <span className='goal-kind'>
-            {type === 'manual'
-              ? 'PERSONAL MILESTONE'
-              : type === 'calories'
-                ? 'ENERGY GOAL'
-                : 'MOVEMENT GOAL'}
+            {t(
+              `goals.types.${type === 'manual' || type === 'calories' ? type : 'exercises'}`
+            )}
           </span>
           <h3>{name}</h3>
-          <p>{own ? 'Your personal journey' : `A goal by ${owner}`}</p>
+          <p>
+            {own ? t('goals.yourJourney') : t('goals.goalBy', { name: owner })}
+          </p>
         </div>
         <Progress progress={progress} />
       </div>
@@ -100,12 +101,12 @@ export default function Goal({
             name='calendar'
             size={13}
           />
-          {shortFormatDate(to)}
+          {formatDate(to, { year: 'numeric', month: 'long', day: 'numeric' })}
         </span>
         <Link
           to={`/goals/${id}${own ? '' : `?owner=${encodeURIComponent(owner)}`}`}
         >
-          View progress{' '}
+          {t('goals.viewProgress')}{' '}
           <Icon
             name='arrow'
             size={14}

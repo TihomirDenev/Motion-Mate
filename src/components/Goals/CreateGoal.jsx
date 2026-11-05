@@ -7,6 +7,7 @@ import Modal from '../UI/Modal';
 import Icon from '../UI/Icon';
 import FormField from '../UI/FormField';
 import InlineMessage from '../UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 const initialForm = () => {
   const end = new Date();
@@ -28,6 +29,7 @@ export default function CreateGoal() {
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
   const change = (key) => (event) =>
     setForm((value) => ({ ...value, [key]: event.target.value }));
   const submit = async (event) => {
@@ -39,9 +41,9 @@ export default function CreateGoal() {
         to = new Date(`${form.to}T23:59:59`).getTime();
       validateGoalForm(form.name.trim(), userData.username, from, to);
       if (form.type === 'exercises' && Number(form.exercises) < 1)
-        throw new Error('Aim for at least one exercise.');
+        throw new Error(t('errors.goalExercises'));
       if (form.type === 'calories' && Number(form.calories) < 1)
-        throw new Error('Set a calorie target greater than zero.');
+        throw new Error(t('errors.goalCalories'));
       await createGoal(
         form.name.trim(),
         userData.username,
@@ -73,36 +75,34 @@ export default function CreateGoal() {
           name='plus'
           size={17}
         />
-        Create a goal
+        {t('goals.create')}
       </button>
       <Modal
         open={open}
         onClose={() => !busy && setOpen(false)}
-        title='Give your progress a purpose'
-        description='One intention. A few small steps. Something worth showing up for.'
+        title={t('goals.createTitle')}
+        description={t('goals.createDescription')}
       >
         <form
           onSubmit={submit}
           className='form-stack'
         >
           <FormField
-            label='Name your goal'
+            label={t('goals.name')}
             required
             minLength={3}
             maxLength={30}
-            placeholder='e.g. A stronger kind of week'
+            placeholder={t('goals.namePlaceholder')}
             value={form.name}
             onChange={change('name')}
           />
           <fieldset>
-            <legend className='field-legend'>
-              How would you like to track it?
-            </legend>
+            <legend className='field-legend'>{t('goals.trackQuestion')}</legend>
             <div className='goal-type-options'>
               {[
-                { value: 'exercises', icon: 'dumbbell', label: 'Exercises' },
-                { value: 'calories', icon: 'flame', label: 'Calories' },
-                { value: 'manual', icon: 'target', label: 'My progress' },
+                { value: 'exercises', icon: 'dumbbell' },
+                { value: 'calories', icon: 'flame' },
+                { value: 'manual', icon: 'target' },
               ].map((item) => (
                 <button
                   type='button'
@@ -116,21 +116,21 @@ export default function CreateGoal() {
                     name={item.icon}
                     size={22}
                   />
-                  <span>{item.label}</span>
+                  <span>{t(`goals.trackOptions.${item.value}`)}</span>
                 </button>
               ))}
             </div>
           </fieldset>
           <div className='form-grid'>
             <FormField
-              label='Start date'
+              label={t('goals.startDate')}
               type='date'
               required
               value={form.from}
               onChange={change('from')}
             />
             <FormField
-              label='Finish date'
+              label={t('goals.finishDate')}
               type='date'
               required
               min={form.from}
@@ -140,35 +140,35 @@ export default function CreateGoal() {
           </div>
           {form.type === 'exercises' ? (
             <FormField
-              label='Exercise target'
+              label={t('goals.exerciseTarget')}
               type='number'
               required
               min={1}
               max={100}
               value={form.exercises}
               onChange={change('exercises')}
-              hint='Completed exercise timers automatically count towards this goal.'
+              hint={t('goals.exerciseHint')}
             />
           ) : form.type === 'calories' ? (
             <FormField
-              label='Calories to burn (kcal)'
+              label={t('goals.calorieTarget')}
               type='number'
               required
               min={1}
               max={10000}
               value={form.calories}
               onChange={change('calories')}
-              hint='Calories from completed exercises will move you towards your target.'
+              hint={t('goals.calorieHint')}
             />
           ) : (
             <FormField
-              label={`Starting progress · ${form.progress}%`}
+              label={t('goals.startingProgress', { progress: form.progress })}
               type='range'
               min={0}
               max={100}
               value={form.progress}
               onChange={change('progress')}
-              hint='You’re in charge. Update your progress whenever you reach a milestone.'
+              hint={t('goals.manualHint')}
             />
           )}
           <InlineMessage>{error}</InlineMessage>
@@ -179,14 +179,14 @@ export default function CreateGoal() {
               disabled={busy}
               onClick={() => setOpen(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type='submit'
               className='btn btn-primary'
               disabled={busy}
             >
-              {busy ? 'Creating…' : 'Make it happen'}
+              {t(busy ? 'common.creating' : 'goals.submit')}
               <Icon
                 name='arrow'
                 size={16}

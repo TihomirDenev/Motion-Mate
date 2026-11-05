@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import EditProfileInfo from '../../components/EditProfileInfo/EditProfilePhoto/EditProfileInfo';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function RegisterAdditionalInfo() {
-  usePageTitle('Motion Mate | Make yourself at home');
+  const { t } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('titles.onboarding')}`);
   const navigate = useNavigate();
   return (
     <EditProfileInfo

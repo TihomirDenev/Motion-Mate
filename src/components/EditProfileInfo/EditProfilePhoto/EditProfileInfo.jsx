@@ -14,12 +14,14 @@ import PageHeader from '../../UI/PageHeader';
 import FormField from '../../UI/FormField';
 import Icon from '../../UI/Icon';
 import InlineMessage from '../../UI/InlineMessage';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 export default function EditProfileInfo({
   setEditProfile,
   onboarding = false,
 }) {
   const { userData } = useContext(AppContext);
+  const { t } = useTranslation();
   const [form, setForm] = useState(() => ({
     firstName: userData.firstName || '',
     lastName: userData.lastName || '',
@@ -65,21 +67,21 @@ export default function EditProfileInfo({
     <div className='profile-editor page-enter'>
       <PageHeader
         back={
-          !onboarding ? { to: '/my-profile', label: 'My profile' } : undefined
+          !onboarding
+            ? { to: '/my-profile', label: t('nav.profile') }
+            : undefined
         }
-        eyebrow={
+        eyebrow={t(
+          onboarding ? 'editProfile.onboardingEyebrow' : 'editProfile.eyebrow'
+        )}
+        title={t(
+          onboarding ? 'editProfile.onboardingTitle' : 'editProfile.title'
+        )}
+        description={t(
           onboarding
-            ? 'YOUR SPACE IS READY · STEP 02 / 02'
-            : 'MAKE THIS SPACE YOURS'
-        }
-        title={
-          onboarding ? 'Let’s get to know you.' : 'The details that make you.'
-        }
-        description={
-          onboarding
-            ? 'A few details make your wellness insights more personal. You can also add them later.'
-            : 'A little update for a more personal experience.'
-        }
+            ? 'editProfile.onboardingDescription'
+            : 'editProfile.description'
+        )}
       />
       <form onSubmit={submit}>
         <div className='profile-edit-grid'>
@@ -92,30 +94,30 @@ export default function EditProfileInfo({
                 />
               </span>
               <div>
-                <h2>A little about you</h2>
-                <p>The person behind the progress.</p>
+                <h2>{t('editProfile.aboutTitle')}</h2>
+                <p>{t('editProfile.aboutText')}</p>
               </div>
             </div>
             <div className='form-stack'>
               <div className='form-grid'>
                 <FormField
-                  label='First name'
+                  label={t('fields.firstName')}
                   autoComplete='given-name'
-                  placeholder='First name'
+                  placeholder={t('fields.firstName')}
                   value={form.firstName}
                   onChange={change('firstName')}
                 />
                 <FormField
-                  label='Last name'
+                  label={t('fields.lastName')}
                   autoComplete='family-name'
-                  placeholder='Last name'
+                  placeholder={t('fields.lastName')}
                   value={form.lastName}
                   onChange={change('lastName')}
                 />
               </div>
               {!onboarding && (
                 <FormField
-                  label='Phone number'
+                  label={t('fields.phone')}
                   type='tel'
                   inputMode='numeric'
                   required
@@ -128,22 +130,22 @@ export default function EditProfileInfo({
               )}
               <div className='form-grid'>
                 <FormField
-                  label='Age (years)'
+                  label={t('fields.age')}
                   type='number'
                   min={10}
                   max={100}
-                  placeholder='Your age'
+                  placeholder={t('editProfile.agePlaceholder')}
                   value={form.age}
                   onChange={change('age')}
                 />
                 <FormField
-                  label='Sex for calculations'
+                  label={t('fields.sex')}
                   value={form.gender}
                   onChange={change('gender')}
                 >
-                  <option value=''>Not specified</option>
-                  <option value='Female'>Female</option>
-                  <option value='Male'>Male</option>
+                  <option value=''>{t('editProfile.notSpecified')}</option>
+                  <option value='Female'>{t('gender.Female')}</option>
+                  <option value='Male'>{t('gender.Male')}</option>
                 </FormField>
               </div>
             </div>
@@ -157,45 +159,45 @@ export default function EditProfileInfo({
                 />
               </span>
               <div>
-                <h2>Your starting point</h2>
-                <p>Personalize your wellness snapshot.</p>
+                <h2>{t('editProfile.startingTitle')}</h2>
+                <p>{t('editProfile.startingText')}</p>
               </div>
             </div>
             <div className='form-stack'>
               <div className='form-grid'>
                 <FormField
-                  label='Weight (kg)'
+                  label={t('fields.weightKg')}
                   type='number'
                   step='any'
                   min={20}
                   max={500}
-                  placeholder='e.g. 70'
+                  placeholder={t('common.example', { value: 70 })}
                   value={form.weight}
                   onChange={change('weight')}
                 />
                 <FormField
-                  label='Height (cm)'
+                  label={t('fields.heightCm')}
                   type='number'
                   step='any'
                   min={50}
                   max={300}
-                  placeholder='e.g. 175'
+                  placeholder={t('common.example', { value: 175 })}
                   value={form.height}
                   onChange={change('height')}
                 />
               </div>
               <FormField
-                label='Your activity level'
+                label={t('fields.activityLevel')}
                 value={form.activityLevel}
                 onChange={change('activityLevel')}
               >
-                <option value=''>Choose your rhythm</option>
+                <option value=''>{t('editProfile.chooseRhythm')}</option>
                 {activityLevels.map((level) => (
                   <option
                     key={level.value}
                     value={level.value}
                   >
-                    {level.label}
+                    {t(`activity.${level.value}.label`)}
                   </option>
                 ))}
               </FormField>
@@ -204,10 +206,7 @@ export default function EditProfileInfo({
                   name='sparkles'
                   size={18}
                 />
-                <p>
-                  Your health details help tailor your hydration, energy, and
-                  body balance estimates.
-                </p>
+                <p>{t('editProfile.tip')}</p>
               </div>
             </div>
           </section>
@@ -220,18 +219,20 @@ export default function EditProfileInfo({
             disabled={busy}
             onClick={() => setEditProfile(false)}
           >
-            {onboarding ? 'I’ll do this later' : 'Discard changes'}
+            {t(onboarding ? 'editProfile.later' : 'editProfile.discard')}
           </button>
           <button
             className='btn btn-primary'
             type='submit'
             disabled={busy}
           >
-            {busy
-              ? 'Saving your details…'
-              : onboarding
-                ? 'Find my momentum'
-                : 'Save my changes'}
+            {t(
+              busy
+                ? 'editProfile.saving'
+                : onboarding
+                  ? 'editProfile.finishOnboarding'
+                  : 'editProfile.save'
+            )}
             <Icon
               name={onboarding ? 'arrow' : 'check'}
               size={17}

@@ -9,9 +9,11 @@ import Icon from '../UI/Icon';
 import FormField from '../UI/FormField';
 import InlineMessage from '../UI/InlineMessage';
 import Modal from '../UI/Modal';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Login() {
-  usePageTitle('Motion Mate | Welcome back');
+  const { t } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('titles.login')}`);
   const { userData } = useContext(AppContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,11 +40,13 @@ export default function Login() {
       navigate(redirect, { replace: true });
     } catch (error) {
       setError(
-        error.code === 'auth/too-many-requests'
-          ? 'Too many attempts. Give it a moment and try again.'
-          : error.code === 'auth/network-request-failed'
-            ? 'We couldn’t connect. Check your connection and try again.'
-            : 'That login doesn’t look right. Check your details and try again.'
+        t(
+          error.code === 'auth/too-many-requests'
+            ? 'login.tooManyAttempts'
+            : error.code === 'auth/network-request-failed'
+              ? 'errors.network'
+              : 'login.invalid'
+        )
       );
     } finally {
       setBusy(false);
@@ -54,13 +58,9 @@ export default function Login() {
     setResetError('');
     try {
       await sendPasswordResetEmail(auth, resetEmail.trim());
-      setResetStatus(
-        'If an account uses this email, a reset link is on its way. Check your inbox.'
-      );
+      setResetStatus(t('login.resetSent'));
     } catch {
-      setResetError(
-        'We couldn’t send the link. Check the email and try again.'
-      );
+      setResetError(t('login.resetFailed'));
     } finally {
       setBusy(false);
     }
@@ -78,12 +78,10 @@ export default function Login() {
       <aside className='auth-visual'>
         <img
           src='/images/runner.jpg'
-          alt='Runner enjoying a quiet moment outdoors'
+          alt={t('login.imageAlt')}
         />
         <div className='auth-visual-shade' />
-        <span className='auth-visual-kicker'>
-          YOUR JOURNEY IS STILL UNFOLDING.
-        </span>
+        <span className='auth-visual-kicker'>{t('login.kicker')}</span>
         <div>
           <span className='icon-tile'>
             <Icon
@@ -92,17 +90,12 @@ export default function Login() {
             />
           </span>
           <h2>
-            Pick up
+            {t('login.visualTitleLine1')}
             <br />
-            your momentum.
+            {t('login.visualTitleLine2')}
           </h2>
-          <p>
-            Big changes start with the little things you do for yourself.
-            Welcome back to your space.
-          </p>
-          <span className='auth-photo-caption'>
-            MOVE WITH INTENTION. LIVE WITH ENERGY.
-          </span>
+          <p>{t('login.visualText')}</p>
+          <span className='auth-photo-caption'>{t('login.visualCaption')}</span>
         </div>
       </aside>
       <section className='auth-form-panel'>
@@ -114,19 +107,18 @@ export default function Login() {
             name='back'
             size={16}
           />
-          Back to home
+          {t('login.backHome')}
         </Link>
-        <p className='eyebrow'>LET’S KEEP MOVING</p>
+        <p className='eyebrow'>{t('login.eyebrow')}</p>
         <h1>
-          Good to see you<span>.</span>
+          {t('login.title')}
+          <span>.</span>
         </h1>
-        <p className='auth-description'>
-          Your next good day starts right here.
-        </p>
+        <p className='auth-description'>{t('login.description')}</p>
         <div
           className='segmented-control auth-mode'
           role='group'
-          aria-label='Sign-in method'
+          aria-label={t('login.method')}
         >
           {['username', 'email'].map((value) => (
             <button
@@ -139,7 +131,7 @@ export default function Login() {
                 setError('');
               }}
             >
-              {value === 'username' ? 'Username' : 'Email address'}
+              {t(value === 'username' ? 'fields.username' : 'fields.email')}
             </button>
           ))}
         </div>
@@ -148,7 +140,7 @@ export default function Login() {
           className='form-stack'
         >
           <FormField
-            label={mode === 'username' ? 'Username' : 'Email address'}
+            label={t(mode === 'username' ? 'fields.username' : 'fields.email')}
             type={mode === 'username' ? 'text' : 'email'}
             name={mode}
             autoComplete='username'
@@ -156,18 +148,20 @@ export default function Login() {
             spellCheck={false}
             required
             placeholder={
-              mode === 'username' ? 'Your username' : 'you@example.com'
+              mode === 'username'
+                ? t('login.usernamePlaceholder')
+                : 'you@example.com'
             }
             value={identifier}
             onChange={(event) => setIdentifier(event.target.value)}
           />
           <FormField
-            label='Password'
+            label={t('fields.password')}
             type='password'
             name='password'
             autoComplete='current-password'
             required
-            placeholder='Your password'
+            placeholder={t('login.passwordPlaceholder')}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
@@ -180,7 +174,7 @@ export default function Login() {
               setResetError('');
             }}
           >
-            Forgot your password?
+            {t('login.forgot')}
           </button>
           <InlineMessage>{error}</InlineMessage>
           <button
@@ -188,7 +182,7 @@ export default function Login() {
             type='submit'
             disabled={busy}
           >
-            {busy ? 'Signing you in…' : 'Let’s get moving'}
+            {t(busy ? 'login.submitting' : 'login.submit')}
             <Icon
               name='arrow'
               size={18}
@@ -196,9 +190,9 @@ export default function Login() {
           </button>
         </form>
         <p className='auth-switch'>
-          New around here?{' '}
+          {t('login.newHere')}{' '}
           <Link to='/register'>
-            Create an account{' '}
+            {t('login.createAccount')}{' '}
             <Icon
               name='arrowUp'
               size={13}
@@ -210,21 +204,21 @@ export default function Login() {
             name='heart'
             size={14}
           />{' '}
-          A little better. Every single day.
+          {t('login.footnote')}
         </div>
       </section>
       <Modal
         open={resetOpen}
         onClose={() => setResetOpen(false)}
-        title='A fresh start'
-        description='Enter your account email and we’ll help you reset your password.'
+        title={t('login.resetTitle')}
+        description={t('login.resetDescription')}
       >
         <form
           onSubmit={reset}
           className='form-stack'
         >
           <FormField
-            label='Email address'
+            label={t('fields.email')}
             type='email'
             autoComplete='email'
             required
@@ -239,7 +233,7 @@ export default function Login() {
             disabled={busy || Boolean(resetStatus)}
             type='submit'
           >
-            {busy ? 'Sending…' : 'Send reset link'}
+            {t(busy ? 'login.resetSending' : 'login.resetSubmit')}
             <Icon
               name='mail'
               size={16}

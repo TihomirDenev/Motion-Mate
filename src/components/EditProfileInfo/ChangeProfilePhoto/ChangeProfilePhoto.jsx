@@ -10,6 +10,7 @@ import Avatar from '../../UI/Avatar';
 import Icon from '../../UI/Icon';
 import FormField from '../../UI/FormField';
 import InlineMessage from '../../UI/InlineMessage';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
   const { userData } = useContext(AppContext);
@@ -17,6 +18,7 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
   const [preview, setPreview] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
   useEffect(
     () => () => {
       if (preview) URL.revokeObjectURL(preview);
@@ -43,8 +45,7 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
     try {
       validatePhoto(file);
       const url = await uploadPhoto(file);
-      if (!url)
-        throw new Error('Your photo couldn’t be uploaded. Please try again.');
+      if (!url) throw new Error(t('photo.uploadFailed'));
       await updateUserByUsername(userData.username, { avatar: url });
       setChangeProfilePhoto(false);
     } catch (error) {
@@ -56,10 +57,10 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
   return (
     <div className='photo-editor page-enter'>
       <PageHeader
-        back={{ to: '/my-profile', label: 'My profile' }}
-        eyebrow='A FAMILIAR FACE'
-        title='Make it look like you.'
-        description='Give your Motion Mates a face to cheer on.'
+        back={{ to: '/my-profile', label: t('nav.profile') }}
+        eyebrow={t('photo.eyebrow')}
+        title={t('photo.title')}
+        description={t('photo.description')}
       />
       <form
         className='surface photo-editor-card'
@@ -71,7 +72,7 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
               user={userData}
               size='xl'
             />
-            <span>Looking good already</span>
+            <span>{t('photo.current')}</span>
           </div>
           {preview && (
             <>
@@ -83,9 +84,9 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
                 <img
                   className='new-photo-preview'
                   src={preview}
-                  alt='Preview of your new profile photo'
+                  alt={t('photo.previewAlt')}
                 />
-                <span>Your fresh look</span>
+                <span>{t('photo.new')}</span>
               </div>
             </>
           )}
@@ -97,13 +98,13 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
               size={26}
             />
           </span>
-          <h2>A little more personality</h2>
-          <p>Choose a clear photo you love. We’ll take care of the rest.</p>
+          <h2>{t('photo.uploadTitle')}</h2>
+          <p>{t('photo.uploadText')}</p>
           <FormField
-            label='Choose your photo'
+            label={t('photo.choose')}
             type='file'
             accept='image/jpeg,image/png,image/webp,image/gif'
-            hint='JPG, PNG, WebP or GIF · Up to 5 MB'
+            hint={t('photo.hint')}
             onChange={choose}
           />
         </div>
@@ -115,14 +116,14 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
             disabled={busy}
             onClick={() => setChangeProfilePhoto(false)}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             className='btn btn-primary'
             type='submit'
             disabled={!file || busy}
           >
-            {busy ? 'Uploading…' : 'Save my photo'}
+            {t(busy ? 'photo.uploading' : 'photo.save')}
             <Icon
               name='check'
               size={16}

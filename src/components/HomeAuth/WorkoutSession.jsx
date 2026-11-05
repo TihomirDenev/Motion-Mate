@@ -5,11 +5,13 @@ import { finishExercise, cancelExercise } from '../../services/workout.service';
 import { stopTimerWorkout } from '../../services/users.service';
 import Icon from '../UI/Icon';
 import InlineMessage from '../UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function WorkoutSession() {
   const { userData } = useContext(AppContext);
   const [now, setNow] = useState(() => Date.now());
   const [error, setError] = useState('');
+  const { t } = useTranslation();
   const finishing = useRef(false);
   const session = userData?.endCurrentExercise;
   const workoutEnd = userData?.workoutTimer?.timer;
@@ -57,29 +59,29 @@ export default function WorkoutSession() {
     <div
       className='session-banner'
       role='region'
-      aria-label='Active workout'
+      aria-label={t('workout.active')}
     >
       <div className='session-status'>
         <span className='status-dot' />
         <Link to='/'>
           <strong>
             {session?.title ||
-              (session ? 'Exercise in progress' : 'Workout in progress')}
+              t(session ? 'workout.exerciseInProgress' : 'workout.inProgress')}
           </strong>
-          <small>Stay with it. You’ve got this.</small>
+          <small>{t('workout.encouragement')}</small>
         </Link>
       </div>
       <span
         className='session-time'
         role='timer'
-        aria-label={`${remaining} seconds remaining`}
+        aria-label={t('workout.remaining', { seconds: remaining })}
       >
         {String(Math.floor(remaining / 60)).padStart(2, '0')}:
         {String(remaining % 60).padStart(2, '0')}
       </span>
       <button
         className='icon-button'
-        aria-label={session ? 'Stop exercise' : 'End workout'}
+        aria-label={t(session ? 'workout.stopExercise' : 'workout.end')}
         onClick={stop}
       >
         <Icon

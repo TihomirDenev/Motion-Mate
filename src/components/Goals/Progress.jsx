@@ -1,10 +1,13 @@
+import { useTranslation } from '../../i18n/useTranslation';
+
 export default function Progress({ progress = 0 }) {
+  const { t } = useTranslation();
   const value = Math.max(0, Math.min(100, Number(progress) || 0));
   return (
     <span
       className='progress-ring'
       role='progressbar'
-      aria-label='Goal progress'
+      aria-label={t('goals.progressLabel')}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={value}

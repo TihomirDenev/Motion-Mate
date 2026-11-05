@@ -1,9 +1,11 @@
 import { Link } from 'react-router';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import Icon from '../../components/UI/Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function NotFound() {
-  usePageTitle('Motion Mate | A little off track');
+  const { t } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('notFound.pageTitle')}`);
   return (
     <section className='not-found page-enter'>
       <span
@@ -15,22 +17,22 @@ export default function NotFound() {
           size={65}
         />
       </span>
-      <p className='eyebrow'>404 · A LITTLE OFF TRACK</p>
+      <p className='eyebrow'>{t('notFound.eyebrow')}</p>
       <h1>
-        Let’s find your
+        {t('notFound.titleLine1')}
         <br />
-        way back.
+        {t('notFound.titleLine2')}
       </h1>
       <p>
-        This path doesn’t lead anywhere just yet.
+        {t('notFound.textLine1')}
         <br />
-        Your next good move is waiting back home.
+        {t('notFound.textLine2')}
       </p>
       <Link
         className='btn btn-primary'
         to='/'
       >
-        Back to my momentum{' '}
+        {t('notFound.back')}{' '}
         <Icon
           name='arrow'
           size={17}

@@ -13,9 +13,11 @@ import Icon from '../UI/Icon';
 import EmptyState from '../UI/EmptyState';
 import InlineMessage from '../UI/InlineMessage';
 import LoadingState from '../UI/LoadingState';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Categories() {
-  usePageTitle('Motion Mate | Exercise library');
+  const { t, te, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('nav.exercises')}`);
   const { userData } = useContext(AppContext);
   const { data, loading, error: loadError } = useDatabaseValue('categories');
   const { exercises } = useExerciseLibrary();
@@ -26,7 +28,7 @@ export default function Categories() {
     Object.entries(entries).map(([id, value]) => ({ ...value, id, category }))
   );
   const filtered = categories.filter((category) =>
-    `${category.category} ${category.description}`
+    `${category.category} ${te('categoryNames', category.category)} ${category.description}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -53,9 +55,9 @@ export default function Categories() {
   return (
     <div className='page-enter'>
       <PageHeader
-        eyebrow='THE EXERCISE LIBRARY'
-        title='Find your next move.'
-        description='A little strength. A little balance. A whole lot of possibility.'
+        eyebrow={t('library.eyebrow')}
+        title={t('library.title')}
+        description={t('library.description')}
         actions={
           <>
             {userData.userRole === 'admin' && <CreateCategory />}
@@ -65,17 +67,17 @@ export default function Categories() {
       />
       <section className='library-banner'>
         <div>
-          <span className='pill'>MOVE YOUR WAY</span>
+          <span className='pill'>{t('library.bannerPill')}</span>
           <h2>
-            There’s a rhythm
+            {t('library.bannerTitleLine1')}
             <br />
-            with your name on it.
+            {t('library.bannerTitleLine2')}
           </h2>
-          <p>Explore your exercises and the ones your mates share.</p>
+          <p>{t('library.bannerText')}</p>
         </div>
         <img
           src='/images/yoga.jpg'
-          alt='Outdoor group yoga session'
+          alt={t('library.bannerAlt')}
         />
         <span
           className='library-banner-icon'
@@ -95,8 +97,8 @@ export default function Categories() {
           />
           <input
             type='search'
-            aria-label='Search categories'
-            placeholder='Find your kind of movement…'
+            aria-label={t('library.searchLabel')}
+            placeholder={t('library.searchPlaceholder')}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -109,15 +111,17 @@ export default function Categories() {
             name='dumbbell'
             size={16}
           />
-          My workout{' '}
+          {t('library.myWorkout')}{' '}
           <span className='count-badge'>
             {exercises.filter((exercise) => exercise.queued).length}
           </span>
         </Link>
       </div>
       <div className='section-heading'>
-        <h2>Explore categories</h2>
-        <span className='result-count'>{filtered.length} ways to move</span>
+        <h2>{t('library.categoriesTitle')}</h2>
+        <span className='result-count'>
+          {t('library.waysToMove', { count: filtered.length })}
+        </span>
       </div>
       <InlineMessage>{error || loadError}</InlineMessage>
       {loading ? (
@@ -159,12 +163,14 @@ export default function Categories() {
                     />
                   </span>
                   <div className='category-copy'>
-                    <span>{visual.label}</span>
-                    <h3>{category.category}</h3>
+                    <span>{t(`categoryTaglines.${visual.tagline}`)}</span>
+                    <h3>{te('categoryNames', category.category)}</h3>
                     <div>
                       <small>
-                        {count} {count === 1 ? 'exercise' : 'exercises'} in your
-                        circle
+                        {t('library.inCircle', {
+                          count,
+                          formatted: formatNumber(count),
+                        })}
                       </small>
                       <span className='category-arrow'>
                         <Icon
@@ -178,7 +184,9 @@ export default function Categories() {
                 {userData.userRole === 'admin' && (
                   <button
                     className='category-delete'
-                    aria-label={`Delete category ${category.category}`}
+                    aria-label={t('library.deleteCategory', {
+                      name: te('categoryNames', category.category),
+                    })}
                     disabled={busy === category.id}
                     onClick={() => remove(category)}
                   >
@@ -196,23 +204,19 @@ export default function Categories() {
         <div className='surface'>
           <EmptyState
             icon='search'
-            title={
+            title={t(search ? 'library.noResultsTitle' : 'library.emptyTitle')}
+            description={t(
               search
-                ? 'A different kind of move?'
-                : 'A fresh space for movement'
-            }
-            description={
-              search
-                ? 'Try another search to find your category.'
-                : 'Categories will appear here as your community grows.'
-            }
+                ? 'library.noResultsDescription'
+                : 'library.emptyDescription'
+            )}
           >
             {search && (
               <button
                 className='btn btn-ghost'
                 onClick={() => setSearch('')}
               >
-                Clear search
+                {t('common.clearSearch')}
               </button>
             )}
           </EmptyState>
@@ -224,9 +228,9 @@ export default function Categories() {
           size={18}
         />
         <p>
-          Your library grows with your circle.{' '}
+          {t('library.note')}{' '}
           <Link to='/all-users'>
-            Find more Motion Mates{' '}
+            {t('library.findMates')}{' '}
             <Icon
               name='arrow'
               size={13}
