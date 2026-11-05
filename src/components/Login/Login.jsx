@@ -37,9 +37,9 @@ export default function Login() {
     password: '',
   });
 
-  usePageTitle(`${APP_NAME} | Login by ${
-    usernameEmail ? 'Username' : 'Email'
-  }`);
+  usePageTitle(
+    `${APP_NAME} | Login by ${usernameEmail ? 'Username' : 'Email'}`
+  );
 
   const updateForm = (props) => (e) => {
     setForm({

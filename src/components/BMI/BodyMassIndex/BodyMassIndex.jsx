@@ -27,8 +27,7 @@ export default function BodyMassIndex() {
   const userBMI =
     userData?.weight && userData?.height
       ? (
-          userData.weight /
-          (Math.pow(userData.height, 2) / 10000).toFixed(2)
+          userData.weight / (Math.pow(userData.height, 2) / 10000).toFixed(2)
         ).toFixed(1)
       : 0;
 

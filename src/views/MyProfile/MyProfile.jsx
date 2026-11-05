@@ -55,7 +55,9 @@ export default function MyProfile() {
 
             <div className='flex flex-col place-items-end  gap-2'>
               <div className='flex place-content-end items-center'>
-                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>Friends</label>
+                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>
+                  Friends
+                </label>
                 {userData?.friends ? (
                   <div
                     title={`You have ${Object.keys(userData?.friends).length} ${
@@ -79,7 +81,9 @@ export default function MyProfile() {
               </div>
 
               <div className='flex  place-content-end items-center '>
-                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>Edit profile</label>
+                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>
+                  Edit profile
+                </label>
                 <button
                   onClick={() => setEditProfile(!editProfile)}
                   className='btn btn-primary btn-sm rounded-md'
@@ -89,7 +93,9 @@ export default function MyProfile() {
                 </button>
               </div>
               <div className='flex  place-content-end items-center'>
-                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>Change profile picture</label>
+                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>
+                  Change profile picture
+                </label>
                 <button
                   onClick={() => setChangeProfilePhoto(!changeProfilePhoto)}
                   className='btn btn-primary btn-sm rounded-md'
