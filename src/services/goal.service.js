@@ -53,7 +53,7 @@ export const createGoal = async (
 
     return goalId;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -70,7 +70,7 @@ export const getGoals = async (username) => {
 
     return result;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -79,7 +79,7 @@ export const getGoalById = async (username, goalId) => {
     const goal = await get(ref(db, `users/${username}/myGoals/${goalId}`));
     return await goal.val();
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -91,7 +91,7 @@ export const updateGoal = async (username, goalId, updates) => {
       ...updates,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -99,7 +99,7 @@ export const deleteGoal = async (username, goalId) => {
   try {
     await remove(ref(db, `users/${username}/myGoals/${goalId}`));
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -110,7 +110,7 @@ export const getGoalProgress = async (username, goalId) => {
     );
     return progress.val();
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -121,7 +121,7 @@ export const updateGoalProgress = async (username, goalId, progress) => {
       progress
     );
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -131,7 +131,7 @@ export const markAsDone = async (username, goalId) => {
       isDone: true,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -163,7 +163,7 @@ export const updateGoalCalories = async (username, goal, goalId, calories) => {
 
     await update(ref(db), updatedGoal);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -181,6 +181,6 @@ export const getGoalsByProgress = async (username) => {
     const filtered = result.filter((goal) => goal?.progress >= 100);
     return filtered;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };

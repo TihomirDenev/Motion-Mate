@@ -1,16 +1,17 @@
 import { useContext } from 'react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { AppContext } from '../../context/AppContext';
-import { APP_NAME, BASE } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { HomeAuthenticated } from './HomeAuthenticated';
 import { Carousel } from '../../components/Home/Carousel';
 import { getAllUsers } from '../../services/users.service';
 import { getExercises } from '../../services/exercise.service';
 import { getAllCategories } from '../../services/category.service';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function Home() {
-  document.querySelector('title').textContent = `${APP_NAME} | Home`;
+  usePageTitle(`${APP_NAME} | Home`);
 
   const navigate = useNavigate();
 
@@ -58,7 +59,7 @@ export default function Home() {
                   other users and exchange ideas.
                 </p>
                 <button
-                  onClick={() => navigate(`${BASE}login`)}
+                  onClick={() => navigate('/login')}
                   className='btn btn-secondary'
                 >
                   Get Started
@@ -67,7 +68,7 @@ export default function Home() {
             </div>
           </div>
           <div className='mt-10 place-self-center'>
-            <div className='stats shadow-2xl flex-1'>
+            <div className='stats stats-vertical md:stats-horizontal bg-base-100 shadow-2xl flex-1'>
               <div className='stat'>
                 <div className='stat-figure text-secondary'>
                   <svg

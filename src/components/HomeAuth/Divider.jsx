@@ -13,11 +13,9 @@ import { ExerciseCard } from '../Exercise/ExerciseCard';
 import { RemoveFromListButton } from '../Exercise/RemoveFromListButton';
 import { handleOnStart } from '../../helper/exercise-timer';
 import { FinishedGoal } from './FinishedGoal';
-import PropTypes from 'prop-types';
 import { NoActivityCard } from './NoActivityCard';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { faHeart } from '@fortawesome/free-solid-svg-icons';
-import { BASE } from '../../common/constants';
 
 export const Divider = ({ stopButton }) => {
   const { userData } = useContext(AppContext);
@@ -45,8 +43,8 @@ export const Divider = ({ stopButton }) => {
         const exercises = snapshot.val();
         const allExercises = [];
 
-        Object.entries(exercises).map(([id, exercise]) => {
-          Object.entries(exercise).map(([exerciseId, exerciseData]) => {
+        Object.values(exercises ?? {}).forEach((exercise) => {
+          Object.entries(exercise).forEach(([exerciseId, exerciseData]) => {
             allExercises.push({ id: exerciseId, ...exerciseData });
           });
         });
@@ -138,7 +136,7 @@ export const Divider = ({ stopButton }) => {
         <div className='flex flex-col place-content-center lg:flex-row'>
           <div className='flex flex-col items-center'>
             <NoActivityCard
-              onClick={() => navigate(`${BASE}exercises`)}
+              onClick={() => navigate('/exercises')}
               icon={faHeart}
               title={'No exercises in progress!'}
               content={
@@ -156,8 +154,4 @@ export const Divider = ({ stopButton }) => {
       {showSuccess && <AlertSuccess message={alertMessage} />}
     </div>
   );
-};
-
-Divider.propTypes = {
-  stopButton: PropTypes.string,
 };

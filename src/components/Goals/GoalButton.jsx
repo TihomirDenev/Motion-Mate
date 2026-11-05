@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 export default function GoalButton({
   children,
   title = '',
@@ -19,12 +18,3 @@ export default function GoalButton({
     </button>
   );
 }
-
-GoalButton.propTypes = {
-  title: PropTypes.string,
-  children: PropTypes.node,
-  wide: PropTypes.bool,
-  primary: PropTypes.bool,
-  styles: PropTypes.string,
-  onClick: PropTypes.func,
-};

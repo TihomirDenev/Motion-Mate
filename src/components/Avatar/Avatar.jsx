@@ -1,5 +1,5 @@
 import userPhoto from '../../assets/userPhoto.png';
-import PropTypes from 'prop-types';
+import { handleAvatarError } from '../../helper/avatar-fallback';
 
 export default function SizedAvatar({ user }) {
   return (
@@ -7,6 +7,7 @@ export default function SizedAvatar({ user }) {
       {user?.avatar ? (
         <img
           src={user?.avatar}
+          onError={handleAvatarError}
           title='Profile Photo'
           alt='userPhoto'
           className='w-60 h-60 rounded-2xl'
@@ -22,7 +23,3 @@ export default function SizedAvatar({ user }) {
     </figure>
   );
 }
-
-SizedAvatar.propTypes = {
-  user: PropTypes.object,
-};

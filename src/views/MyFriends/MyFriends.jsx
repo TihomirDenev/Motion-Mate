@@ -2,11 +2,12 @@ import { useContext, useEffect, useState } from 'react';
 import { getAllFriends } from '../../services/users.service';
 import { AppContext } from '../../context/AppContext';
 import SingleUserView from '../../components/SingleUser/SingleUserView';
-import { useNavigate } from 'react-router-dom';
-import { APP_NAME, BASE } from '../../common/constants';
+import { useNavigate } from 'react-router';
+import { APP_NAME } from '../../common/constants';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function MyFriends() {
-  document.querySelector('title').textContent = `${APP_NAME} | My Friends`;
+  usePageTitle(`${APP_NAME} | My Friends`);
 
   const navigate = useNavigate();
   const { userData } = useContext(AppContext);
@@ -21,7 +22,7 @@ export default function MyFriends() {
     };
 
     fetchUsers();
-  }, [refresh]);
+  }, [refresh, userData?.username]);
 
   return (
     <div>
@@ -45,7 +46,7 @@ export default function MyFriends() {
                 <button
                   type='button'
                   className='btn btn-warning btn-sm'
-                  onClick={() => navigate(`${BASE}all-users`)}
+                  onClick={() => navigate('/all-users')}
                 >
                   find friends now!
                 </button>

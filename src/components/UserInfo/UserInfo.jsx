@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import InfoBite from '../Exercise/InfoBite';
 
 export default function UserInfo({ userData }) {
@@ -57,7 +56,3 @@ export default function UserInfo({ userData }) {
     </>
   );
 }
-
-UserInfo.propTypes = {
-  userData: PropTypes.object,
-};

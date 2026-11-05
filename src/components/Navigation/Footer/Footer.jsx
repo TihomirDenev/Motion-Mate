@@ -1,20 +1,19 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 import { useContext } from 'react';
 import logo from '../../../assets/logo.png';
 import github from '../../../assets/github.png';
 import about from '../../../assets/about.png';
 import contact from '../../../assets/contact.png';
-import { BASE } from '../../../common/constants';
 import { AppContext } from '../../../context/AppContext';
 
 export const Footer = () => {
   const { user } = useContext(AppContext);
   return (
-    <footer className='footer p-4 bg-base-200 text-base-content rounded flex w-full place-content-center items-center'>
+    <footer className='footer p-4 bg-base-200 text-base-content rounded-sm flex w-full place-content-center items-center'>
       <div className='flex flex-row align-middle justify-center place-self-center w-full max-w-7xl'>
         <div>
           <aside className='flex items-center'>
-            <NavLink to={`${BASE}`}>
+            <NavLink to='/'>
               <img
                 src={logo}
                 alt='Logo'
@@ -26,14 +25,17 @@ export const Footer = () => {
             </NavLink>
           </aside>
         </div>
-        <div className='flex-grow h-10 place-content-center text-center'>
-          <p>Copyright © 2024 - All right reserved for Motion Mate</p>
+        <div className='grow h-10 place-content-center text-center'>
+          <p>
+            Copyright © 2024 - {new Date().getFullYear()} - All rights reserved
+            for Motion Mate
+          </p>
         </div>
         <div>
           <nav className='flex gap-4'>
             {user && (
               <a
-                href='https://github.com/A58-Agents-Team1/Motion.Mate'
+                href='https://github.com/TihomirDenev/Motion-Mate'
                 target='_blank'
                 rel='noopener noreferrer'
               >
@@ -47,7 +49,7 @@ export const Footer = () => {
                 />
               </a>
             )}
-            <NavLink to={`${BASE}about`}>
+            <NavLink to='/about'>
               <img
                 src={about}
                 alt='About Us Logo'
@@ -57,7 +59,7 @@ export const Footer = () => {
                 title='About Us'
               />
             </NavLink>
-            <NavLink to={`${BASE}contact-us`}>
+            <NavLink to='/contact-us'>
               <img
                 src={contact}
                 alt='Contact Us Logo'

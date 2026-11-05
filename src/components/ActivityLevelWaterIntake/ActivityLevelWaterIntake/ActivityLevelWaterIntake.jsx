@@ -5,7 +5,7 @@ import MetricWaterIntake from '../MetricWaterIntake/MetricWaterIntake';
 import ImperialWaterIntake from '../ImperialWaterIntake/ImperialWaterIntake';
 import { AppContext } from '../../../context/AppContext';
 import { alertHelper } from '../../../helper/alert-helper';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   validateFormInImperial,
   validateFormInMetric,
@@ -16,6 +16,26 @@ import {
   WATER_INTAKE_CONSTANT,
 } from '../../../common/constants';
 
+const calculateWaterIntake = (weight, activityLevel) => {
+  let activityMultiplier;
+
+  switch (activityLevel) {
+    case 'Lightly-Active':
+      activityMultiplier = ACTIVITY_MULTIPLIERS.lightly_active;
+      break;
+    case 'Moderately-Active':
+      activityMultiplier = ACTIVITY_MULTIPLIERS.moderately_active;
+      break;
+    case 'Very-Active':
+      activityMultiplier = ACTIVITY_MULTIPLIERS.very_active;
+      break;
+    default:
+      activityMultiplier = ACTIVITY_MULTIPLIERS.default;
+  }
+
+  return weight * activityMultiplier;
+};
+
 export default function ActivityLevelWaterIntake() {
   const { userData } = useContext(AppContext);
   const [alert, setAlert] = useState(false);
@@ -25,42 +45,18 @@ export default function ActivityLevelWaterIntake() {
   const [isChecked, setIsChecked] = useState(true);
   const [waterIntake, setWaterIntake] = useState(0);
   const [activityLevel, setActivityLevel] = useState('Sedentary');
-  const [userWaterIntake, setUserWaterIntake] = useState(0);
-
-  useEffect(() => {
-    if (userData?.weight && userData?.activityLevel) {
-      const intake = calculateWaterIntake(
-        userData?.weight,
-        userData?.activityLevel
-      );
-      setUserWaterIntake((intake * WATER_INTAKE_CONSTANT).toFixed(2));
-    }
-  }, []);
+  const userWaterIntake =
+    userData?.weight && userData?.activityLevel
+      ? (
+          calculateWaterIntake(userData.weight, userData.activityLevel) *
+          WATER_INTAKE_CONSTANT
+        ).toFixed(2)
+      : 0;
 
   const handleChange = () => {
     setIsChecked(!isChecked);
     setWaterIntake(0);
     setWeight('');
-  };
-
-  const calculateWaterIntake = (weight, activityLevel) => {
-    let activityMultiplier;
-
-    switch (activityLevel) {
-      case 'Lightly-Active':
-        activityMultiplier = ACTIVITY_MULTIPLIERS.lightly_active;
-        break;
-      case 'Moderately-Active':
-        activityMultiplier = ACTIVITY_MULTIPLIERS.moderately_active;
-        break;
-      case 'Very-Active':
-        activityMultiplier = ACTIVITY_MULTIPLIERS.very_active;
-        break;
-      default:
-        activityMultiplier = ACTIVITY_MULTIPLIERS.default;
-    }
-
-    return weight * activityMultiplier;
   };
 
   const calculate = () => {
@@ -139,7 +135,7 @@ export default function ActivityLevelWaterIntake() {
               <select
                 value={activityLevel}
                 onChange={(e) => setActivityLevel(e.target.value)}
-                className='border-2 border-gray-500 rounded p-2 ml-1 bg-gray-200 shadow-xl text-black w-44'
+                className='border-2 border-gray-500 rounded-sm p-2 ml-1 bg-gray-200 shadow-xl text-black w-44'
               >
                 <option value='Sedentary'>Sedentary</option>
                 <option value='Lightly-Active'>Lightly Active</option>
@@ -148,9 +144,9 @@ export default function ActivityLevelWaterIntake() {
               </select>
             </div>
             <div className='flex my-4 items-center justify-end'>
-              <div className='form-control flex flex-row items-center border-2 border-gray-500 rounded-2xl p-2 bg-blue-200 text-black h-14'>
+              <div className='flex flex-col flex flex-row items-center border-2 border-gray-500 rounded-2xl p-2 bg-blue-200 text-black h-14'>
                 <p>Imperial or Metric System</p>
-                <label className='cursor-pointer label'>
+                <label className='cursor-pointer flex items-center select-none justify-between px-1 py-2'>
                   <input
                     type='checkbox'
                     className='toggle toggle-info'

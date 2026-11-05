@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getUserAvatar } from '../../services/users.service';
-import PropTypes from 'prop-types';
+import userPhoto from '../../assets/userPhoto.png';
+import { handleAvatarError } from '../../helper/avatar-fallback';
 
 export const FriendAvatar = ({ username }) => {
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -16,12 +17,9 @@ export const FriendAvatar = ({ username }) => {
 
   return (
     <img
-      src={avatarUrl}
+      src={avatarUrl || userPhoto}
+      onError={handleAvatarError}
       alt={`${username}'s avatar`}
     />
   );
-};
-
-FriendAvatar.propTypes = {
-  username: PropTypes.string,
 };

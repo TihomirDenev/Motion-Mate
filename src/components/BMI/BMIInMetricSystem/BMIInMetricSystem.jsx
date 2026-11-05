@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import {
   HEIGHT_MAX,
   HEIGHT_MIN,
@@ -18,7 +17,7 @@ export default function BMIInMetricSystem({ form, updateForm }) {
         placeholder='Kilograms'
         value={form?.weight}
         onChange={updateForm('weight')}
-        className='border-2 border-gray-500 rounded p-2 mr-6 bg-gray-200 shadow-xl text-black w-28'
+        className='border-2 border-gray-500 rounded-sm p-2 mr-6 bg-gray-200 shadow-xl text-black w-28'
       />
       <label htmlFor='height'>Height in cm: </label>
       <input
@@ -29,13 +28,8 @@ export default function BMIInMetricSystem({ form, updateForm }) {
         placeholder='Centimeters'
         value={form?.height}
         onChange={updateForm('height')}
-        className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black w-32'
+        className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black w-32'
       />
     </div>
   );
 }
-
-BMIInMetricSystem.propTypes = {
-  form: PropTypes.object,
-  updateForm: PropTypes.func,
-};

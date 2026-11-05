@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import {
   HEIGHT_MAX_IN,
   HEIGHT_MIN_IN,
@@ -18,7 +17,7 @@ export default function BMIInImperialSystem({ form, updateForm }) {
         placeholder='Pounds'
         value={form?.weight}
         onChange={updateForm('weight')}
-        className='border-2 border-gray-500 rounded p-2 mr-6 bg-gray-200 shadow-xl text-black w-28'
+        className='border-2 border-gray-500 rounded-sm p-2 mr-6 bg-gray-200 shadow-xl text-black w-28'
       />
       <label htmlFor='height'>Height in in: </label>
       <input
@@ -29,13 +28,8 @@ export default function BMIInImperialSystem({ form, updateForm }) {
         placeholder='Inches'
         value={form?.height}
         onChange={updateForm('height')}
-        className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black w-28'
+        className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black w-28'
       />
     </div>
   );
 }
-
-BMIInImperialSystem.propTypes = {
-  form: PropTypes.object,
-  updateForm: PropTypes.func,
-};

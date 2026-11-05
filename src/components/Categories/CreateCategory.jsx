@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { createCategory } from '../../services/category.service';
-import {
-  uploadCategoryPhoto,
-  getCategoryPhoto,
-} from '../../services/users.service';
+import { uploadCategoryPhoto } from '../../services/users.service';
 import { validateCategoryForm } from '../../common/category.validations';
 import { alertHelper } from '../../helper/alert-helper';
 import AlertError from '../Alerts/AlertError/AlertError';
 import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess';
-import PropTypes from 'prop-types';
 
 const CreateCategory = ({ onCategoryCreated }) => {
   const [image, setImage] = useState(null);
@@ -36,11 +32,8 @@ const CreateCategory = ({ onCategoryCreated }) => {
 
   const submitCategory = async () => {
     try {
-      if (image) {
-        await uploadCategoryPhoto(image, category.name);
-      }
-      const catUrl = await getCategoryPhoto(category.name);
       validateCategoryForm(category.name, category.description, image);
+      const catUrl = await uploadCategoryPhoto(image);
 
       await createCategory(category.name, category.description, catUrl);
       onCategoryCreated();
@@ -78,7 +71,7 @@ const CreateCategory = ({ onCategoryCreated }) => {
         <div className='modal-box '>
           <h3 className='font-bold text-lg mb-3'>Create New Category</h3>
 
-          <label className='input input-bordered flex items-center mb-3 select-primary'>
+          <label className='input flex items-center mb-3 select-primary w-full'>
             <input
               type='text'
               className='grow'
@@ -87,7 +80,7 @@ const CreateCategory = ({ onCategoryCreated }) => {
               onChange={(e) => updateCategory(e, 'name')}
             />
           </label>
-          <label className='input input-bordered flex items-center mb-3 select-primary'>
+          <label className='input flex items-center mb-3 select-primary w-full'>
             <input
               type='text'
               className='grow'
@@ -97,7 +90,7 @@ const CreateCategory = ({ onCategoryCreated }) => {
             />
           </label>
 
-          <label className='input input-bordered flex items-center mb-3 select-primary'>
+          <label className='input flex items-center mb-3 select-primary w-full'>
             <input
               type='file'
               accept='image/*'
@@ -125,7 +118,3 @@ const CreateCategory = ({ onCategoryCreated }) => {
 };
 
 export default CreateCategory;
-
-CreateCategory.propTypes = {
-  onCategoryCreated: PropTypes.func,
-};

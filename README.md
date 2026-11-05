@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/A58-Agents-Team1/Motion.Mate/main/src/assets/logo.png" width="100" height="100">
+<img src="src/assets/logo.png" width="100" height="100">
 
 ## Motion.Mate
 
@@ -6,7 +6,7 @@ Fitness tracking application, where app offers both public and private features,
 
 **Languages:** <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" height="20"> <img src="https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white" height="20">
 
-**Frameworks/Libraries:** <img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" height="20"> <img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white" height="20"> <img src="https://media.licdn.com/dms/image/D4E12AQE1NInvgAfR3Q/article-cover_image-shrink_423_752/0/1696488544540?e=1722470400&v=beta&t=B6ngRnuqG90ia7gPvOs2Wnjk7o8NlWQe3rOVhKAq6a0" height="25"> <img src="https://img.daisyui.com/images/daisyui-logo/daisyui-logotype.svg" height="20"> <img src="https://camo.githubusercontent.com/285fdadfaf59ede5da219ccf9f8278322e8f85cfa48f5ba33df53ce2f0c72098/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f566974652d4237334246453f7374796c653d666f722d7468652d6261646765266c6f676f3d76697465266c6f676f436f6c6f723d464644363245" height='20'>
+**Frameworks/Libraries:** <img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" height="20"> <img src="https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white" height="20"> <img src="https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white" height="20"> <img src="https://img.daisyui.com/images/daisyui-logo/daisyui-logotype.svg" height="20"> <img src="https://camo.githubusercontent.com/285fdadfaf59ede5da219ccf9f8278322e8f85cfa48f5ba33df53ce2f0c72098/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f566974652d4237334246453f7374796c653d666f722d7468652d6261646765266c6f676f3d76697465266c6f676f436f6c6f723d464644363245" height='20'>
 
 **Linters:** <img src="https://img.shields.io/badge/eslint-3A33D1?style=for-the-badge&logo=eslint&logoColor=white" height="20">
 
@@ -16,7 +16,7 @@ Fitness tracking application, where app offers both public and private features,
 
 ## <img src="https://firebasestorage.googleapis.com/v0/b/dare2fit-f6eb4.appspot.com/o/assets%2FREADME-images%2Ffeatures.png?alt=media&token=e5fc5779-b3db-41c2-a576-947ca382ea5a&_gl=1*81oei1*_ga*MjExMzk5MTA5MC4xNjgzMjcwMjg1*_ga_CW55HF8NVT*MTY4NjU3Njg5Ni4xMDMuMS4xNjg2NTc3OTgzLjAuMC4w"  width="30" height="30"> Features
 
-- For first-time users we present a quick overview of our `Morion Mate` community right on the `Landing Page`:
+- For first-time users we present a quick overview of our `Motion Mate` community right on the `Landing Page`:
 
   - a **total count** of all `Motion Mate` users;
   - a **total count** of all `Motion Mate` category exercises;
@@ -54,16 +54,18 @@ Fitness tracking application, where app offers both public and private features,
 
 To install and run the project, follow these steps:
 
-1. Clone the [Motion Mate _GitHub repository_](https://github.com/A58-Agents-Team1/Motion.Mate) locally:
+**Requirements:** [Node.js](https://nodejs.org/) 24 LTS (see `.nvmrc` — run `nvm use` if you use nvm).
+
+1. Clone the [Motion Mate _GitHub repository_](https://github.com/TihomirDenev/Motion-Mate) locally:
 
 ```bash
-git clone https://github.com/A58-Agents-Team1/Motion.Mate.git
+git clone https://github.com/TihomirDenev/Motion-Mate.git
 ```
 
 2. Navigate to the project directory:
 
 ```bash
-cd Motion.Mate
+cd Motion-Mate
 ```
 
 3. Install project dependencies:
@@ -72,13 +74,36 @@ cd Motion.Mate
 npm install
 ```
 
-4. To run the project, use the following command:
+4. Create a `.env.local` file from the example and fill in your Firebase web app config (Firebase Console → Project settings → Your apps):
+
+```bash
+cp .env.example .env.local
+```
+
+5. To run the project, use the following command:
 
 ```bash
 npm run dev
 ```
 
-5. Open localhost link in browser to view web-platform.
+6. Open the localhost link in the browser to view the web platform.
+
+### Available scripts
+
+| Command           | Description                          |
+| ----------------- | ------------------------------------ |
+| `npm run dev`     | Start the dev server                 |
+| `npm run build`   | Build for production into `dist/`    |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint`    | Lint the project with ESLint         |
+
+### Deploying to Vercel
+
+1. Import the GitHub repository in [Vercel](https://vercel.com/new). The Vite preset is detected automatically (build command `npm run build`, output directory `dist`).
+2. In **Settings → Environment Variables** add all `VITE_FIREBASE_*` variables from `.env.example`.
+3. In Firebase Console → **Authentication → Settings → Authorized domains** add your Vercel domain.
+
+Client-side routing is handled by the rewrite in `vercel.json`.
 
 ## <img src="https://firebasestorage.googleapis.com/v0/b/dare2fit-f6eb4.appspot.com/o/assets%2FREADME-images%2Fdatabase.png?alt=media&token=958f4c41-6532-4e07-a31d-e437ebe00527&_gl=1*o97b6d*_ga*MjExMzk5MTA5MC4xNjgzMjcwMjg1*_ga_CW55HF8NVT*MTY4NjU3Njg5Ni4xMDMuMS4xNjg2NTc3OTQ0LjAuMC4w"  width="30" height="30"> Database Scheme (Structure)
 

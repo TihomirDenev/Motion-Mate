@@ -1,8 +1,6 @@
-import PropTypes from 'prop-types';
 import { useContext } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router';
 import { AppContext } from '../../context/AppContext.js';
-import { BASE } from '../../common/constants.js';
 
 /**
  *
@@ -17,7 +15,7 @@ export default function Authenticated({ children }) {
     return (
       <Navigate
         replace
-        to={`${BASE}login`}
+        to='/login'
         state={{ from: location }}
       />
     );
@@ -25,7 +23,3 @@ export default function Authenticated({ children }) {
 
   return <>{children}</>;
 }
-
-Authenticated.propTypes = {
-  children: PropTypes.any.isRequired,
-};

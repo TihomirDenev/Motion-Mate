@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types';
-
 const AlertSuccess = ({ message }) => {
   return (
     <div className='toast toast-end z-50'>
@@ -10,7 +8,4 @@ const AlertSuccess = ({ message }) => {
   );
 };
 
-AlertSuccess.propTypes = {
-  message: PropTypes.string.isRequired,
-};
 export default AlertSuccess;

@@ -1,10 +1,12 @@
 import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { AppContext } from '../../context/AppContext';
-import { APP_NAME, BASE } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
+import logo from '../../assets/logo.png';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function NotFound() {
-  document.querySelector('title').textContent = `${APP_NAME} | Page Not Found`;
+  usePageTitle(`${APP_NAME} | Page Not Found`);
   const { user } = useContext(AppContext);
   const navigate = useNavigate();
 
@@ -12,9 +14,8 @@ export default function NotFound() {
     <>
       <div className='flex flex-col items-center justify-center gap-4'>
         <img
-          src={
-            'https://raw.githubusercontent.com/A58-Agents-Team1/Motion.Mate/main/src/assets/logo.png'
-          }
+          src={logo}
+          alt='Motion Mate logo'
           className='w-40 h-40'
         />
         <div className='text-center leading-tight font-extrabold'>
@@ -38,7 +39,7 @@ export default function NotFound() {
               </p>
               <button
                 className='btn btn-primary mt-8'
-                onClick={() => navigate(`${BASE}/`)}
+                onClick={() => navigate('/')}
               >
                 Home
               </button>
@@ -51,7 +52,7 @@ export default function NotFound() {
               </p>
               <button
                 className='btn btn-primary mt-8'
-                onClick={() => navigate(`${BASE}login`)}
+                onClick={() => navigate('/login')}
               >
                 Login
               </button>

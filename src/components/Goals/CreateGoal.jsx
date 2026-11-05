@@ -3,7 +3,6 @@ import { createGoal } from '../../services/goal.service';
 import { AppContext } from '../../context/AppContext';
 import { validateGoalForm } from '../../common/goal.validations';
 import {
-  APP_NAME,
   GOAL_MAX_CALORIES,
   GOAL_MAX_EXERCISES,
   GOAL_MAX_PROGRESS,
@@ -87,7 +86,6 @@ export default function CreateGoal() {
       setStartDate(null);
       setEndDate(null);
 
-      document.querySelector('title').textContent = `${APP_NAME} | Goals`;
       document.getElementById('my_modal_3').close();
       alertHelper(setAlertMessage, setShowSuccess, 'Goal Created!');
     } catch (error) {
@@ -97,23 +95,17 @@ export default function CreateGoal() {
 
   const handleCloseModal = (e) => {
     e.preventDefault();
-    setForm(formClearObject),
-      setStartDate(null),
-      setEndDate(null),
-      document.getElementById('my_modal_3').close();
-    document.querySelector('title').textContent = `${APP_NAME} | Goals`;
+    setForm(formClearObject);
+    setStartDate(null);
+    setEndDate(null);
+    document.getElementById('my_modal_3').close();
   };
 
   return (
     <>
       <button
         className='btn btn-primary self-center w-1/2'
-        onClick={() => {
-          document.getElementById('my_modal_3').showModal();
-          document.querySelector(
-            'title'
-          ).textContent = `${APP_NAME} | Create Goals`;
-        }}
+        onClick={() => document.getElementById('my_modal_3').showModal()}
       >
         Create Goal
       </button>
@@ -139,15 +131,15 @@ export default function CreateGoal() {
           <h2 className='text-center text-2xl font-bold text-primary'>
             Create Goal
           </h2>
-          <label className='label flex-col self-center text-justify font-semibold text-primary'>
+          <label className='flex items-center select-none justify-between px-1 py-2 flex-col self-center text-justify font-semibold text-primary'>
             Your progress will be calculated based on the goal type you select
             below and the time frame you set.
             <span className='text-secondary'>
               You can not change the goal type after creating the goal.
             </span>
           </label>
-          <div className='form-control gap-1'>
-            <label className='input input-bordered flex items-center gap-2 shadow-xl text-primary'>
+          <div className='flex flex-col gap-1'>
+            <label className='input flex items-center gap-2 shadow-xl text-primary w-full'>
               Name
               <input
                 type='text'
@@ -157,7 +149,7 @@ export default function CreateGoal() {
                 onChange={updateForm('name')}
               />
             </label>
-            <label className='label self-center text-justify font-semibold text-primary'>
+            <label className='flex items-center select-none justify-between px-1 py-2 self-center text-justify font-semibold text-primary'>
               Select Date
             </label>
             <DatePicker
@@ -169,14 +161,14 @@ export default function CreateGoal() {
               inline
             />
 
-            <label className='label self-center text-justify font-semibold text-primary'>
+            <label className='flex items-center select-none justify-between px-1 py-2 self-center text-justify font-semibold text-primary'>
               Select your goal type
             </label>
             <div className='flex w-full'>
-              <div className='grid h-20 flex-grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
-                <div className='form-control'>
-                  <label className='label cursor-pointer gap-1'>
-                    <span className='label-text'>Exercises</span>
+              <div className='grid h-20 grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
+                <div className='flex flex-col'>
+                  <label className='flex items-center select-none justify-between px-1 py-2 cursor-pointer gap-1'>
+                    <span className='text-sm'>Exercises</span>
                     <input
                       type='radio'
                       name='radio-10'
@@ -188,10 +180,10 @@ export default function CreateGoal() {
                 </div>
               </div>
               <div className='divider divider-horizontal'>OR</div>
-              <div className='grid h-20 flex-grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
-                <div className='form-control'>
-                  <label className='label cursor-pointer gap-1'>
-                    <span className='label-text'>Manual progress</span>
+              <div className='grid h-20 grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
+                <div className='flex flex-col'>
+                  <label className='flex items-center select-none justify-between px-1 py-2 cursor-pointer gap-1'>
+                    <span className='text-sm'>Manual progress</span>
                     <input
                       type='radio'
                       name='radio-10'
@@ -203,10 +195,10 @@ export default function CreateGoal() {
                 </div>
               </div>
               <div className='divider divider-horizontal'>OR</div>
-              <div className='grid h-20 flex-grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
-                <div className='form-control'>
-                  <label className='label cursor-pointer gap-1'>
-                    <span className='label-text'>Calories</span>
+              <div className='grid h-20 grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
+                <div className='flex flex-col'>
+                  <label className='flex items-center select-none justify-between px-1 py-2 cursor-pointer gap-1'>
+                    <span className='text-sm'>Calories</span>
                     <input
                       type='radio'
                       name='radio-10'
@@ -220,7 +212,7 @@ export default function CreateGoal() {
             </div>
             <div className='mt-4 mb-3 justify-center shadow-xl'>
               {form.type === 'exercises' && (
-                <label className='input input-bordered flex items-center gap-2'>
+                <label className='input flex items-center gap-2 w-full'>
                   Exercises
                   <input
                     type='number'
@@ -235,7 +227,7 @@ export default function CreateGoal() {
                 </label>
               )}
               {form.type === 'manual' && (
-                <label className='input input-bordered flex items-center gap-2'>
+                <label className='input flex items-center gap-2 w-full'>
                   Progress {form.progress}%
                   <input
                     type='range'
@@ -250,7 +242,7 @@ export default function CreateGoal() {
                 </label>
               )}
               {form.type === 'calories' && (
-                <label className='input input-bordered flex items-center gap-2'>
+                <label className='input flex items-center gap-2 w-full'>
                   Calories
                   <input
                     type='number'

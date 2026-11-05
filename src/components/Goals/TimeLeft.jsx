@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
-import PropTypes from 'prop-types';
 import { calculateTimeLeft } from '../../helper/format-date';
 
 const TimeLeft = ({ goal }) => {
   const [timeLeft, setTimeLeft] = useState(null);
+  const to = goal?.timePeriod?.to;
+
   useEffect(() => {
-    setTimeout(() => {
-      setTimeLeft({ ...calculateTimeLeft(new Date(goal?.timePeriod?.to)) });
+    const intervalId = setInterval(() => {
+      setTimeLeft({ ...calculateTimeLeft(new Date(to)) });
     }, 1000);
-    return () => clearTimeout();
-  }, [timeLeft, goal?.timePeriod?.to]);
+    return () => clearInterval(intervalId);
+  }, [to]);
 
   return (
     <>
@@ -23,25 +24,25 @@ const TimeLeft = ({ goal }) => {
         <div className='grid grid-flow-col gap-5 text-center auto-cols-max'>
           <div className='flex flex-col'>
             <span className='countdown font-mono text-xl'>
-              <span style={{ '--value': timeLeft?.days }}></span>
+              <span style={{ '--value': timeLeft?.days, '--digits': 2 }}></span>
             </span>
             days
           </div>
           <div className='flex flex-col'>
             <span className='countdown font-mono text-xl'>
-              <span style={{ '--value': timeLeft?.hours }}></span>
+              <span style={{ '--value': timeLeft?.hours, '--digits': 2 }}></span>
             </span>
             hours
           </div>
           <div className='flex flex-col'>
             <span className='countdown font-mono text-xl'>
-              <span style={{ '--value': timeLeft?.minutes }}></span>
+              <span style={{ '--value': timeLeft?.minutes, '--digits': 2 }}></span>
             </span>
             min
           </div>
           <div className='flex flex-col'>
             <span className='countdown font-mono text-xl'>
-              <span style={{ '--value': timeLeft?.seconds }}></span>
+              <span style={{ '--value': timeLeft?.seconds, '--digits': 2 }}></span>
             </span>
             sec
           </div>
@@ -86,10 +87,6 @@ const TimeLeft = ({ goal }) => {
       )}
     </>
   );
-};
-
-TimeLeft.propTypes = {
-  goal: PropTypes.object,
 };
 
 export default TimeLeft;

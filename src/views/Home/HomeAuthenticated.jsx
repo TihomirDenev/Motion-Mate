@@ -5,9 +5,10 @@ import { onValue, ref } from 'firebase/database';
 import { db } from '../../config/firebase-config';
 import { AccountStats } from '../../components/HomeAuth/AccountStats';
 import { Divider } from '../../components/HomeAuth/Divider';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export const HomeAuthenticated = () => {
-  document.querySelector('title').textContent = `${APP_NAME} | Home`;
+  usePageTitle(`${APP_NAME} | Home`);
 
   const [timer, setTimer] = useState(null);
   const { userData } = useContext(AppContext);
@@ -30,11 +31,11 @@ export const HomeAuthenticated = () => {
         }
       }
     );
-  }, []);
+  }, [userData?.username]);
 
   useEffect(() => {
     return onValue(
-      ref(db, `users/${userData.username}/workoutTimer/timer`),
+      ref(db, `users/${userData?.username}/workoutTimer/timer`),
       (snapshot) => {
         if (snapshot?.val()) {
           setWorkoutTimer(snapshot.val());
@@ -45,7 +46,7 @@ export const HomeAuthenticated = () => {
         }
       }
     );
-  }, []);
+  }, [userData?.username]);
 
   return (
     <>
@@ -54,7 +55,6 @@ export const HomeAuthenticated = () => {
         setStopButton={setStopButton}
         workoutTimer={workoutTimer}
         startWorkout={startWorkout}
-        setTimer={setTimer}
         setStartWorkout={setStartWorkout}
         calories={calories}
       />

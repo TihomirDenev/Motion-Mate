@@ -9,7 +9,7 @@ export default function DropDownNoNotifications() {
 
       <ul
         tabIndex={0}
-        className='text-center dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80 border border-gray-400 absolute right-0'
+        className='text-center dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 rounded-box w-80 border border-gray-400 absolute right-0'
       >
         <p>
           <strong>You don`t have notifications</strong>

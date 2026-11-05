@@ -9,9 +9,11 @@ import {
 import AlertSuccess from '../../components/Alerts/AlertSuccess/AlertSuccess';
 import { alertHelper } from '../../helper/alert-helper';
 import { APP_NAME } from '../../common/constants';
+import { usePageTitle } from '../../hooks/usePageTitle';
+import { handleAvatarError } from '../../helper/avatar-fallback';
 
 export default function AdminPanel() {
-  document.querySelector('title').textContent = `${APP_NAME} | 👨🏼‍✈️👮🏼‍♂️👨🏼‍✈️`;
+  usePageTitle(`${APP_NAME} | 👨🏼‍✈️👮🏼‍♂️👨🏼‍✈️`);
 
   const { userData } = useContext(AppContext);
 
@@ -32,7 +34,7 @@ export default function AdminPanel() {
     };
 
     fetchUsers();
-  }, [refresh]);
+  }, [refresh, userData?.username]);
 
   const promoteToAdmin = async (user, role) => {
     await promoteToAdminAsync(user.username, role);
@@ -69,10 +71,11 @@ export default function AdminPanel() {
               <div className='flex items-center justify-between'>
                 <div className='flex items-center'>
                   <div className='avatar'>
-                    <div className='avatar w-16 rounded-full border-1 border-black mr-2 my-3'>
+                    <div className='avatar w-16 rounded-full border-black mr-2 my-3'>
                       {user?.avatar && (
                         <img
                           src={user?.avatar}
+                          onError={handleAvatarError}
                           title='Account'
                           alt='Account'
                         />

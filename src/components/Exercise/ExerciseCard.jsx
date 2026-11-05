@@ -1,6 +1,6 @@
 import { FriendAvatar } from './FriendAvatar';
-import PropTypes from 'prop-types';
 import InfoBite from './InfoBite';
+import { handleAvatarError } from '../../helper/avatar-fallback';
 
 export const ExerciseCard = ({ exercise, userData }) => {
   return (
@@ -13,12 +13,13 @@ export const ExerciseCard = ({ exercise, userData }) => {
             ) : (
               <img
                 src={userData.avatar}
+                onError={handleAvatarError}
                 alt='user avatar'
               />
             )}
           </div>
 
-          <div className='username !aspect-auto'>
+          <div className='username aspect-auto!'>
             <small className='block text-xs'>Created By</small>
             <strong>{exercise.createdBy}</strong>
           </div>
@@ -58,9 +59,4 @@ export const ExerciseCard = ({ exercise, userData }) => {
       </div>
     </>
   );
-};
-
-ExerciseCard.propTypes = {
-  exercise: PropTypes.object,
-  userData: PropTypes.object,
 };

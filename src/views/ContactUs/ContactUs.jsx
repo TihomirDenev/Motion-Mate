@@ -1,9 +1,10 @@
 import logo from '../../assets/logo.png';
 import userPhoto from '../../assets/userPhoto.png';
 import { APP_NAME } from '../../common/constants';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function ContactUs() {
-  document.querySelector('title').textContent = `${APP_NAME} | Contact Us`;
+  usePageTitle(`${APP_NAME} | Contact Us`);
 
   return (
     <div className='flex flex-col items-center'>
@@ -12,7 +13,7 @@ export default function ContactUs() {
         <div id='Tihomir'>
           <div className='flex flex-col gap-4 w-52 mx-4'>
             <div className='flex gap-4 items-center'>
-              <div className='skeleton w-18 h-18 rounded-full shrink-2'>
+              <div className='skeleton rounded-full'>
                 <img src={userPhoto} />
               </div>
               <div className='flex flex-col gap-4'>
@@ -20,7 +21,7 @@ export default function ContactUs() {
                 <div className='skeleton text-center h-7 w-20'>Denev</div>
               </div>
             </div>
-            <div className='skeleton h-18 w-full text-center pt-2'>
+            <div className='skeleton w-full text-center pt-2'>
               <p>Cybersecurity Expert</p>
               <p>Frontend Developer</p>
               <p>Backend Developer</p>
@@ -39,7 +40,7 @@ export default function ContactUs() {
         <div id='Radoslav'>
           <div className='flex flex-col gap-4 w-52 mx-4'>
             <div className='flex gap-4 items-center'>
-              <div className='skeleton w-18 h-18 rounded-full shrink-2'>
+              <div className='skeleton rounded-full'>
                 <img src={userPhoto} />
               </div>
               <div className='flex flex-col gap-4'>
@@ -47,7 +48,7 @@ export default function ContactUs() {
                 <div className='skeleton text-center h-7 w-20'>Marinov</div>
               </div>
             </div>
-            <div className='skeleton h-18 w-full text-center pt-2'>
+            <div className='skeleton w-full text-center pt-2'>
               <p>Cybersecurity Expert</p>
               <p>Frontend Developer</p>
               <p>Backend Developer</p>
@@ -66,7 +67,7 @@ export default function ContactUs() {
         <div id='Tanya'>
           <div className='flex flex-col gap-4 w-52 mx-4'>
             <div className='flex gap-4 items-center'>
-              <div className='skeleton w-18 h-18 rounded-full shrink-2'>
+              <div className='skeleton rounded-full'>
                 <img src={userPhoto} />
               </div>
               <div className='flex flex-col gap-4'>
@@ -74,7 +75,7 @@ export default function ContactUs() {
                 <div className='skeleton text-center h-7 w-20'>Jecheva</div>
               </div>
             </div>
-            <div className='skeleton h-18 w-full text-center pt-2'>
+            <div className='skeleton w-full text-center pt-2'>
               <p>Cybersecurity Expert</p>
               <p>Frontend Developer</p>
               <p>Backend Developer</p>

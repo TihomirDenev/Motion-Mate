@@ -3,7 +3,7 @@ import MetricScalar from '../MetricScalar/MetricScalar';
 import AlertError from '../../Alerts/AlertError/AlertError';
 import ImperialScalar from '../ImperialScalar/ImperialScalar';
 import AlertSuccess from '../../Alerts/AlertSuccess/AlertSuccess';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { AppContext } from '../../../context/AppContext';
 import { alertHelper } from '../../../helper/alert-helper';
 import {
@@ -24,6 +24,44 @@ import {
   validateFormInMetric,
 } from '../../../common/calorie.validations';
 
+const calculateTotalDailyEnergyExpenditure = (BMR, activityLevel) => {
+  let activityMultiplier;
+
+  switch (activityLevel) {
+    case 'Lightly-Active':
+      activityMultiplier = ACTIVITY_MULTIPLIERS.lightly_active;
+      break;
+    case 'Moderately-Active':
+      activityMultiplier = ACTIVITY_MULTIPLIERS.moderately_active;
+      break;
+    case 'Very-Active':
+      activityMultiplier = ACTIVITY_MULTIPLIERS.very_active;
+      break;
+    default:
+      activityMultiplier = ACTIVITY_MULTIPLIERS.default;
+  }
+
+  return Math.floor(BMR * activityMultiplier);
+};
+
+const calculateBMR = (gender, weight, height, age) => {
+  if (gender === 'Male') {
+    return (
+      BMR_MEN_CONSTANT +
+      BMR_MEN_WEIGHT_MULTIPLIER * weight +
+      BMR_MEN_HEIGHT_MULTIPLIER * height -
+      BMR_MEN_AGE_MULTIPLIER * age
+    );
+  } else if (gender === 'Female') {
+    return (
+      BMR_WOMEN_CONSTANT +
+      BMR_WOMEN_WEIGHT_MULTIPLIER * weight +
+      BMR_WOMEN_HEIGHT_MULTIPLIER * height -
+      BMR_WOMEN_AGE_MULTIPLIER * age
+    );
+  }
+};
+
 export default function CalorieCalculator() {
   const { userData } = useContext(AppContext);
   const [alert, setAlert] = useState(false);
@@ -31,7 +69,6 @@ export default function CalorieCalculator() {
   const [message, setMessage] = useState(null);
   const [success, setSuccess] = useState(false);
   const [isChecked, setIsChecked] = useState(true);
-  const [userCalorie, setUserCalorie] = useState(0);
   const [form, setForm] = useState({
     weight: '',
     height: '',
@@ -39,28 +76,22 @@ export default function CalorieCalculator() {
     gender: 'Male',
     activityLevel: 'Sedentary',
   });
-
-  useEffect(() => {
-    if (
-      userData?.weight &&
-      userData?.height &&
-      userData?.age &&
-      userData?.gender &&
-      userData?.activityLevel
-    ) {
-      const BMR = calculateBMR(
-        userData?.gender,
-        userData?.weight,
-        userData?.height,
-        userData?.age
-      );
-      const TDEE = calculateTotalDailyEnergyExpenditure(
-        BMR,
-        form.activityLevel
-      );
-      setUserCalorie(TDEE);
-    }
-  }, []);
+  const userCalorie =
+    userData?.weight &&
+    userData?.height &&
+    userData?.age &&
+    userData?.gender &&
+    userData?.activityLevel
+      ? calculateTotalDailyEnergyExpenditure(
+          calculateBMR(
+            userData.gender,
+            userData.weight,
+            userData.height,
+            userData.age
+          ),
+          userData.activityLevel
+        )
+      : 0;
 
   const handleChange = () => {
     setIsChecked(!isChecked);
@@ -76,44 +107,6 @@ export default function CalorieCalculator() {
 
   const updateForm = (key) => (e) => {
     setForm({ ...form, [key]: e.target.value });
-  };
-
-  const calculateTotalDailyEnergyExpenditure = (BMR, activityLevel) => {
-    let activityMultiplier;
-
-    switch (activityLevel) {
-      case 'Lightly-Active':
-        activityMultiplier = ACTIVITY_MULTIPLIERS.lightly_active;
-        break;
-      case 'Moderately-Active':
-        activityMultiplier = ACTIVITY_MULTIPLIERS.moderately_active;
-        break;
-      case 'Very-Active':
-        activityMultiplier = ACTIVITY_MULTIPLIERS.very_active;
-        break;
-      default:
-        activityMultiplier = ACTIVITY_MULTIPLIERS.default;
-    }
-
-    return Math.floor(BMR * activityMultiplier);
-  };
-
-  const calculateBMR = (gender, weight, height, age) => {
-    if (gender === 'Male') {
-      return (
-        BMR_MEN_CONSTANT +
-        BMR_MEN_WEIGHT_MULTIPLIER * weight +
-        BMR_MEN_HEIGHT_MULTIPLIER * height -
-        BMR_MEN_AGE_MULTIPLIER * age
-      );
-    } else if (gender === 'Female') {
-      return (
-        BMR_WOMEN_CONSTANT +
-        BMR_WOMEN_WEIGHT_MULTIPLIER * weight +
-        BMR_WOMEN_HEIGHT_MULTIPLIER * height -
-        BMR_WOMEN_AGE_MULTIPLIER * age
-      );
-    }
   };
 
   const calculate = () => {
@@ -204,9 +197,9 @@ export default function CalorieCalculator() {
             )}
           </div>
           <div className='flex my-4 items-center justify-end'>
-            <div className='form-control flex flex-row items-center border-2 border-gray-500 rounded-2xl p-2 bg-blue-200 text-black h-14'>
+            <div className='flex flex-col flex flex-row items-center border-2 border-gray-500 rounded-2xl p-2 bg-blue-200 text-black h-14'>
               <p>Imperial or Metric System</p>
-              <label className='cursor-pointer label'>
+              <label className='cursor-pointer flex items-center select-none justify-between px-1 py-2'>
                 <input
                   type='checkbox'
                   className='toggle toggle-info'

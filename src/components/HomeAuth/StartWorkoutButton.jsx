@@ -5,7 +5,6 @@ import {
 } from '../../services/users.service';
 import { AppContext } from '../../context/AppContext';
 import { workoutTimer } from '../../helper/workout-timer';
-import PropTypes from 'prop-types';
 
 export const StartWorkoutButton = ({ startWorkout }) => {
   const { userData } = useContext(AppContext);
@@ -55,7 +54,7 @@ export const StartWorkoutButton = ({ startWorkout }) => {
         <div className='modal-box skeleton'>
           <h3 className='font-bold text-lg mb-4'>Set workout timer</h3>
           <div className='flex flex-col gap-3'>
-            <label className='input input-bordered flex items-center gap-2'>
+            <label className='input flex items-center gap-2 w-full'>
               Hours:
               <input
                 onChange={(e) => updateContent(e.target.value, 'hours')}
@@ -66,7 +65,7 @@ export const StartWorkoutButton = ({ startWorkout }) => {
               />
             </label>
 
-            <label className='input input-bordered flex items-center gap-2'>
+            <label className='input flex items-center gap-2 w-full'>
               Minutes:
               <input
                 onChange={(e) => updateContent(e.target.value, 'minutes')}
@@ -77,7 +76,7 @@ export const StartWorkoutButton = ({ startWorkout }) => {
               />
             </label>
 
-            <label className='input input-bordered flex items-center gap-2'>
+            <label className='input flex items-center gap-2 w-full'>
               Seconds:
               <input
                 onChange={(e) => updateContent(e.target.value, 'seconds')}
@@ -108,8 +107,4 @@ export const StartWorkoutButton = ({ startWorkout }) => {
       </dialog>
     </div>
   );
-};
-
-StartWorkoutButton.propTypes = {
-  startWorkout: PropTypes.bool,
 };

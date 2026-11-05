@@ -1,7 +1,9 @@
-import PropTypes from 'prop-types';
 import { useContext, useState } from 'react';
 import { AppContext } from '../../../context/AppContext';
-import { uploadPhoto } from '../../../services/users.service';
+import {
+  updateUserByUsername,
+  uploadPhoto,
+} from '../../../services/users.service';
 import { FriendAvatar } from '../../Exercise/FriendAvatar';
 
 export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
@@ -13,7 +15,11 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
       setImageUpload(null);
       return alert('Error: Please select an image');
     }
-    await uploadPhoto(imageUpload, userData?.username);
+    const url = await uploadPhoto(imageUpload);
+    if (!url) {
+      return alert('Error: Photo upload failed. Please try again.');
+    }
+    await updateUserByUsername(userData?.username, { avatar: url });
 
     setImageUpload(null);
     setChangeProfilePhoto(false);
@@ -28,7 +34,7 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
         </p>
         <p>Upload or change your profile photo here.</p>
       </div>
-      <div className='border-2 border-gray-500 bg-base-300 rounded p-4 shadow-lg flex flex-col items-center'>
+      <div className='border-2 border-gray-500 bg-base-300 rounded-sm p-4 shadow-lg flex flex-col items-center'>
         <div className='flex items-center'>
           <div className='avatar'>
             <div className='w-64 mr-12 rounded-full border-2 border-primary'>
@@ -60,7 +66,7 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
             name='profilePhoto'
             id='profilePhoto'
             onChange={(e) => setImageUpload(e.target.files[0])}
-            className='file-input file-input-bordered file-input-primary w-full max-w-xs mr-2'
+            className='file-input file-input-primary w-full max-w-xs mr-2'
           />
           <button
             className='btn btn-primary mr-2'
@@ -79,7 +85,3 @@ export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
     </div>
   );
 }
-
-ChangeProfilePhoto.propTypes = {
-  setChangeProfilePhoto: PropTypes.func.isRequired,
-};

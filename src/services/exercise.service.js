@@ -31,7 +31,7 @@ export const createExercises = async (
     const result = await push(ref(db, `exercises/${categoryName}`), exercise);
     return result.key;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -40,7 +40,7 @@ export const getExercises = async () => {
     const snapshot = await get(ref(db, `exercises`));
     return Object.values(snapshot.val());
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -49,7 +49,7 @@ export const deleteExercise = async (categoryName, exerciseId) => {
     const postRef = ref(db, `exercises/${categoryName}/${exerciseId}`);
     await remove(postRef);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -59,7 +59,7 @@ export const addExerciseInProgress = async (categoryName, exerciseId) => {
       inProgress: true,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -69,7 +69,7 @@ export const removeExerciseInProgress = async (categoryName, exerciseId) => {
       inProgress: false,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -80,6 +80,6 @@ export const editExercise = async (categoryName, exerciseId, data) => {
       data
     );
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };

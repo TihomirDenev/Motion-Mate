@@ -7,14 +7,15 @@ import { CreateExercise } from '../Exercise/CreateExercise';
 import CreateCategory from './CreateCategory';
 import { DeleteIcon } from './DeleteIcon';
 import { alertHelper } from '../../helper/alert-helper';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import AlertError from '../Alerts/AlertError/AlertError';
 import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess';
-import { APP_NAME, BASE } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { AppContext } from '../../context/AppContext';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 const Categories = () => {
-  document.querySelector('title').textContent = `${APP_NAME} | Exercises`;
+  usePageTitle(`${APP_NAME} | Exercises`);
 
   const navigate = useNavigate();
   const { userData } = useContext(AppContext);
@@ -25,21 +26,17 @@ const Categories = () => {
   const [allCategories, setAllCategories] = useState([]);
 
   const navigateToExercise = (category) => {
-    navigate(`${BASE}exercises/${category?.category}`);
+    navigate(`/exercises/${category?.category}`);
   };
 
-  const fetchCategories = async () => {
-    try {
-      const snapshot = await getAllCategories();
-      setAllCategories(snapshot);
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  };
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const fetchCategories = () => setReloadKey((key) => key + 1);
 
   const handleDelete = async (category) => {
     try {
       await deleteCategory(category.category, category.id);
+      fetchCategories();
       alertHelper(
         setAlertMessage,
         setShowSuccess,
@@ -51,8 +48,10 @@ const Categories = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, [allCategories]);
+    getAllCategories()
+      .then(setAllCategories)
+      .catch((error) => console.error('Error fetching categories:', error));
+  }, [reloadKey]);
 
   return (
     <div className='flex flex-col'>

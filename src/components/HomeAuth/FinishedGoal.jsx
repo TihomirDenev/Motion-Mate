@@ -10,9 +10,8 @@ import { AppContext } from '../../context/AppContext';
 import { onValue, ref } from 'firebase/database';
 import { db } from '../../config/firebase-config';
 import InfoBite from '../Exercise/InfoBite';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { NoActivityCard } from './NoActivityCard';
-import { BASE } from '../../common/constants';
 
 export const FinishedGoal = () => {
   const navigate = useNavigate();
@@ -39,14 +38,14 @@ export const FinishedGoal = () => {
               setGoals(result);
             }
           } catch (error) {
-            throw new Error(error.message);
+            throw new Error(error.message, { cause: error });
           }
         } else {
           setGoals(null);
         }
       }
     );
-  }, []);
+  }, [userData?.username]);
 
   const removeGoalAsync = async (userData, goal) => {
     await deleteGoal(userData?.username, goal.id);
@@ -116,7 +115,7 @@ export const FinishedGoal = () => {
       ) : (
         <>
           <NoActivityCard
-            onClick={() => navigate(`${BASE}goals`)}
+            onClick={() => navigate('/goals')}
             icon={faRankingStar}
             title={'No finished goals!'}
             content={
