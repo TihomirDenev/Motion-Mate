@@ -10,6 +10,7 @@ import Icon from '../../UI/Icon';
 import Avatar from '../../UI/Avatar';
 import EmptyState from '../../UI/EmptyState';
 import InlineMessage from '../../UI/InlineMessage';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 export default function Notifications() {
   const { userData } = useContext(AppContext);
@@ -17,6 +18,7 @@ export default function Notifications() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
+  const { t } = useTranslation();
   const requests = Object.keys(userData?.requests || {});
   const requestKey = requests.join(',');
 
@@ -55,7 +57,11 @@ export default function Notifications() {
     <>
       <button
         className='icon-button notification-button'
-        aria-label={`Notifications${requests.length ? `, ${requests.length} friend requests` : ''}`}
+        aria-label={
+          requests.length
+            ? t('notifications.labelWithCount', { count: requests.length })
+            : t('notifications.label')
+        }
         onClick={() => setOpen(true)}
       >
         <Icon
@@ -67,8 +73,8 @@ export default function Notifications() {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title='Your notifications'
-        description='A little connection goes a long way.'
+        title={t('notifications.title')}
+        description={t('notifications.description')}
       >
         <InlineMessage>{error}</InlineMessage>
         {requests.length ? (
@@ -83,13 +89,15 @@ export default function Notifications() {
                   <Avatar user={user} />
                   <div>
                     <strong>{user.firstName || user.username}</strong>
-                    <p>Wants to be your Motion Mate</p>
+                    <p>{t('notifications.wantsToConnect')}</p>
                   </div>
                   <div className='notification-actions'>
                     <button
                       disabled={busy === user.username}
                       className='icon-button accept-button'
-                      aria-label={`Accept ${user.username}`}
+                      aria-label={t('notifications.accept', {
+                        name: user.username,
+                      })}
                       onClick={() => respond(user.username, true)}
                     >
                       <Icon name='check' />
@@ -97,7 +105,9 @@ export default function Notifications() {
                     <button
                       disabled={busy === user.username}
                       className='icon-button danger-icon'
-                      aria-label={`Decline ${user.username}`}
+                      aria-label={t('notifications.decline', {
+                        name: user.username,
+                      })}
                       onClick={() => respond(user.username, false)}
                     >
                       <Icon name='close' />
@@ -109,8 +119,8 @@ export default function Notifications() {
         ) : (
           <EmptyState
             icon='bell'
-            title='You’re all caught up'
-            description='Friend requests will appear here. Your next workout buddy could be one hello away.'
+            title={t('notifications.emptyTitle')}
+            description={t('notifications.emptyDescription')}
           />
         )}
       </Modal>

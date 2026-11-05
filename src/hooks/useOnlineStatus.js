@@ -10,5 +10,9 @@ const subscribe = (notify) => {
 };
 
 export function useOnlineStatus() {
-  return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true
+  );
 }

@@ -6,10 +6,12 @@ import { NavBar } from '../../components/Navigation/NavBar/NavBar';
 import WorkoutSession from '../../components/HomeAuth/WorkoutSession';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export const Layout = ({ children }) => {
   const { userData } = useContext(AppContext);
   const online = useOnlineStatus();
+  const { t } = useTranslation();
   const { pathname } = useLocation();
   const previousPath = useRef(pathname);
   const mainRef = useRef(null);
@@ -27,7 +29,7 @@ export const Layout = ({ children }) => {
         className='skip-link'
         href='#main-content'
       >
-        Skip to content
+        {t('layout.skipToContent')}
       </a>
       <NavBar />
       <div className='app-body'>
@@ -37,7 +39,9 @@ export const Layout = ({ children }) => {
           className='page-content'
           tabIndex={-1}
         >
-          {!online && <InlineMessage type='info'>You’re offline. Reconnect to load fresh data and save changes.</InlineMessage>}
+          {!online && (
+            <InlineMessage type='info'>{t('layout.offline')}</InlineMessage>
+          )}
           {userData && <WorkoutSession />}
           {children}
         </main>

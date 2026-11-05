@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
 import Icon from './Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function PhotoViewer({ open, onClose, src, caption }) {
   const dialogRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -20,7 +22,7 @@ export default function PhotoViewer({ open, onClose, src, caption }) {
     <dialog
       ref={dialogRef}
       className='photo-viewer'
-      aria-label={`${caption}'s photo`}
+      aria-label={t('common.photoOf', { name: caption })}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -33,7 +35,7 @@ export default function PhotoViewer({ open, onClose, src, caption }) {
         <figure>
           <img
             src={src}
-            alt={`${caption}'s profile photo`}
+            alt={t('common.profilePhotoOf', { name: caption })}
           />
           <figcaption>{caption}</figcaption>
         </figure>
@@ -41,7 +43,7 @@ export default function PhotoViewer({ open, onClose, src, caption }) {
       <button
         type='button'
         className='icon-button photo-viewer-close'
-        aria-label='Close photo'
+        aria-label={t('common.closePhoto')}
         onClick={onClose}
       >
         <Icon name='close' />

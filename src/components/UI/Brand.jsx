@@ -1,11 +1,13 @@
 import { Link } from 'react-router';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Brand({ compact = false }) {
+  const { t } = useTranslation();
   return (
     <Link
       to='/'
       className='brand'
-      aria-label='Motion Mate home'
+      aria-label={t('common.brandHome')}
     >
       <span
         className='brand-mark'
