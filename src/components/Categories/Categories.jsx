@@ -14,6 +14,7 @@ import EmptyState from '../UI/EmptyState';
 import InlineMessage from '../UI/InlineMessage';
 import LoadingState from '../UI/LoadingState';
 import { useTranslation } from '../../i18n/useTranslation';
+import { optimizedImage } from '../../helper/category-visuals';
 
 export default function Categories() {
   const { t, te, formatNumber } = useTranslation();
@@ -32,14 +33,6 @@ export default function Categories() {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
-  const curated = [
-    'Ab workout',
-    'Jog',
-    'Legs Workout',
-    'Muscle Gain',
-    'Weight loss exercises',
-    'Yoga',
-  ];
   const remove = async (category) => {
     setBusy(category.id);
     setError('');
@@ -76,7 +69,7 @@ export default function Categories() {
           <p>{t('library.bannerText')}</p>
         </div>
         <img
-          src='/images/yoga.jpg'
+          src='/images/barbell.jpg'
           alt={t('library.bannerAlt')}
         />
         <span
@@ -142,11 +135,7 @@ export default function Categories() {
                   to={`/exercises/${encodeURIComponent(category.category)}`}
                 >
                   <img
-                    src={
-                      curated.includes(category.category)
-                        ? visual.image
-                        : category.imageUrl || visual.image
-                    }
+                    src={optimizedImage(category.imageUrl) || visual.image}
                     alt=''
                     loading='lazy'
                     onError={(event) => {

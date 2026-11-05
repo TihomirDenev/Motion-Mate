@@ -95,7 +95,7 @@ export const HomeAuthenticated = () => {
       />
       <section className='dashboard-hero'>
         <img
-          src='/images/runner.jpg'
+          src='/images/training.jpg'
           alt={t('overview.heroAlt')}
           fetchPriority='high'
         />

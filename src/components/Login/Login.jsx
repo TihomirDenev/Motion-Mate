@@ -77,7 +77,7 @@ export default function Login() {
     <div className='auth-layout page-enter'>
       <aside className='auth-visual'>
         <img
-          src='/images/runner.jpg'
+          src='/images/strength.jpg'
           alt={t('login.imageAlt')}
         />
         <div className='auth-visual-shade' />

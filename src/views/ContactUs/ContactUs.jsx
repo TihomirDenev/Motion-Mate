@@ -66,6 +66,7 @@ export default function ContactUs() {
             ...member,
             firstName: t(`contact.team.${member.key}.firstName`),
             lastName: t(`contact.team.${member.key}.lastName`),
+            avatar: `https://github.com/${member.github}.png?size=240`,
           };
           return (
             <article
@@ -81,6 +82,7 @@ export default function ContactUs() {
               <Avatar
                 user={person}
                 size='lg'
+                zoomable
               />
               <h2>
                 {person.firstName} <br />

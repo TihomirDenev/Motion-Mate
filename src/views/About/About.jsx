@@ -34,7 +34,7 @@ export default function About() {
         </div>
         <div className='about-photo'>
           <img
-            src='/images/yoga.jpg'
+            src='/images/dumbbells.jpg'
             alt={t('about.imageAlt')}
           />
           <span>{t('about.imageCaption')}</span>

@@ -53,3 +53,10 @@ export function getCategoryVisual(category = '') {
     }
   );
 }
+
+export function optimizedImage(url) {
+  if (!url) return '';
+  return url.includes('res.cloudinary.com/') && url.includes('/upload/')
+    ? url.replace('/upload/', '/upload/f_auto,q_auto,c_fill,w_720,h_900/')
+    : url;
+}

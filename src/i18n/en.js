@@ -230,7 +230,7 @@ export default {
     description:
       'A fresh chance to feel a little stronger. Let’s make it count.',
     nextChapter: 'Your next chapter',
-    heroAlt: 'Outdoor runner ready for her next session',
+    heroAlt: 'Two people training with battle ropes and push-ups in a gym',
     heroPill: 'YOUR ONLY COMPETITION IS YOU',
     heroTitleLine1: 'Small steps.',
     heroTitleLine2: 'Stronger you.',
@@ -299,7 +299,7 @@ export default {
     resetSent:
       'If an account uses this email, a reset link is on its way. Check your inbox.',
     resetFailed: 'We couldn’t send the link. Check the email and try again.',
-    imageAlt: 'Runner enjoying a quiet moment outdoors',
+    imageAlt: 'Athlete gripping a barbell before a deadlift',
     kicker: 'YOUR JOURNEY IS STILL UNFOLDING.',
     visualTitleLine1: 'Pick up',
     visualTitleLine2: 'your momentum.',
@@ -509,7 +509,7 @@ export default {
     bannerTitleLine1: 'There’s a rhythm',
     bannerTitleLine2: 'with your name on it.',
     bannerText: 'Explore your exercises and the ones your mates share.',
-    bannerAlt: 'Outdoor group yoga session',
+    bannerAlt: 'Barbell resting on a sunlit gym floor',
     searchLabel: 'Search categories',
     searchPlaceholder: 'Find your kind of movement…',
     myWorkout: 'My workout',
@@ -794,7 +794,7 @@ export default {
       'We believe a healthier life isn’t built in one big leap. It’s built in the small things — a morning stretch, one more rep, a friend who says, “You’ve got this.”',
     paragraph2:
       'Motion Mate is a space for those small things. Your goals, your workouts, your kind of progress. All moving with you.',
-    imageAlt: 'Friends finding balance in an outdoor yoga session',
+    imageAlt: 'Woman training with dumbbells in a gym',
     imageCaption: 'YOUR PACE. YOUR PEOPLE. YOUR POTENTIAL.',
     valuesEyebrow: 'WHAT WE’RE HERE FOR',
     valuesLine1: 'A stronger you.',
