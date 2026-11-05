@@ -1,180 +1,239 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
+import { Link } from 'react-router';
 import { AppContext } from '../../context/AppContext';
+import { useDatabaseValue } from '../../hooks/useDatabaseValue';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import {
   blockUserAsync,
   deleteUserAsync,
-  getAllUsers,
   promoteToAdminAsync,
 } from '../../services/users.service';
-import AlertSuccess from '../../components/Alerts/AlertSuccess/AlertSuccess';
-import { alertHelper } from '../../helper/alert-helper';
-import { APP_NAME } from '../../common/constants';
-import { usePageTitle } from '../../hooks/usePageTitle';
-import { handleAvatarError } from '../../helper/avatar-fallback';
+import PageHeader from '../../components/UI/PageHeader';
+import Icon from '../../components/UI/Icon';
+import Avatar from '../../components/UI/Avatar';
+import LoadingState from '../../components/UI/LoadingState';
+import EmptyState from '../../components/UI/EmptyState';
+import InlineMessage from '../../components/UI/InlineMessage';
+import Modal from '../../components/UI/Modal';
 
 export default function AdminPanel() {
-  usePageTitle(`${APP_NAME} | 👨🏼‍✈️👮🏼‍♂️👨🏼‍✈️`);
-
+  usePageTitle('Motion Mate | Administration');
   const { userData } = useContext(AppContext);
-
-  const [allUsers, setAllUsers] = useState([]);
-  const [message, setMessage] = useState(null);
-  const [refresh, setRefresh] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const snapshot = await getAllUsers();
-      const users = Object.values(snapshot.val());
-      const filteredData = users.filter(
-        (user) => user.username !== userData?.username
+  const {
+    data,
+    loading,
+    error: loadError,
+  } = useDatabaseValue(userData.userRole === 'admin' ? 'users' : null);
+  const [search, setSearch] = useState('');
+  const [busy, setBusy] = useState('');
+  const [error, setError] = useState('');
+  const [selected, setSelected] = useState(null);
+  const [message, setMessage] = useState('');
+  const allUsers = Object.values(data || {});
+  const users = allUsers.filter(
+    (user) =>
+      user.username !== userData.username &&
+      `${user.username} ${user.firstName || ''} ${user.lastName || ''}`
+        .toLowerCase()
+        .includes(search.toLowerCase())
+  );
+  const act = async (user, action) => {
+    setBusy(user.username);
+    setError('');
+    setMessage('');
+    try {
+      if (action === 'role')
+        await promoteToAdminAsync(
+          user.username,
+          user.userRole === 'admin' ? 'user' : 'admin'
+        );
+      if (action === 'block')
+        await blockUserAsync(user.username, !user.isBlocked);
+      if (action === 'delete') {
+        await deleteUserAsync(user.username);
+        setSelected(null);
+      }
+      setMessage(
+        action === 'delete'
+          ? 'Community profile removed.'
+          : 'Community access updated.'
       );
-      setAllUsers(filteredData);
-    };
-
-    fetchUsers();
-  }, [refresh, userData?.username]);
-
-  const promoteToAdmin = async (user, role) => {
-    await promoteToAdminAsync(user.username, role);
-    setRefresh((prev) => !prev);
-  };
-
-  const toggleUserBlock = async (user) => {
-    await blockUserAsync(user.username, !user.isBlocked);
-    setRefresh((prev) => !prev);
-  };
-
-  const confirmDelete = async () => {
-    if (userToDelete) {
-      await deleteUserAsync(userToDelete.username);
-      alertHelper(setMessage, setSuccess, 'User delete successfully!');
-      setRefresh((prev) => !prev);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setBusy('');
     }
   };
-
-  const cancelDelete = () => {
-    setUserToDelete(null);
-  };
-
   return (
-    <div>
-      <div className='flex justify-center my-2'>
-        <h1 className='font-bold text-2xl mb-3'>Administrator Control Panel</h1>
-      </div>
-      <div>
-        {allUsers.length !== 0 ? (
-          allUsers.map((user) => (
-            <div key={user.username}>
-              <hr className='w-full border-t-2 border-gray-300' />
-              <div className='flex items-center justify-between'>
-                <div className='flex items-center'>
-                  <div className='avatar'>
-                    <div className='avatar w-16 rounded-full border-black mr-2 my-3'>
-                      {user?.avatar && (
-                        <img
-                          src={user?.avatar}
-                          onError={handleAvatarError}
-                          title='Account'
-                          alt='Account'
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {user?.firstName && user?.lastName ? (
-                    <h2 className='text-md font-bold mx-2'>
-                      {`${user?.firstName} ${user?.lastName}`}
-                    </h2>
-                  ) : (
-                    <h2 className='text-md font-bold mx-2'>{user?.username}</h2>
-                  )}
-                </div>
-                <div>
-                  {user?.userRole === 'user' ? (
-                    <button
-                      className='btn btn-success mx-2'
-                      onClick={() => promoteToAdmin(user, 'admin')}
-                    >
-                      Make Admin
-                    </button>
-                  ) : (
-                    <button
-                      className='btn btn-error mx-2'
-                      onClick={() => promoteToAdmin(user, 'user')}
-                    >
-                      Remove Admin
-                    </button>
-                  )}
-                  {user?.isBlocked === false ? (
-                    <button
-                      className='btn btn-warning mx-2'
-                      onClick={() => toggleUserBlock(user)}
-                    >
-                      Block User
-                    </button>
-                  ) : (
-                    <button
-                      className='btn btn-warning mx-2'
-                      onClick={() => toggleUserBlock(user)}
-                    >
-                      Unblock User
-                    </button>
-                  )}
-                  <button
-                    className='btn btn-error mx-2'
-                    onClick={() => setUserToDelete(user)}
-                  >
-                    Delete Account
-                  </button>
-                </div>
-              </div>
-              {userToDelete?.username === user.username && (
-                <div
-                  role='alert'
-                  className='alert mb-3'
-                >
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    className='stroke-info shrink-0 w-6 h-6'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth='2'
-                      d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-                    ></path>
-                  </svg>
-                  <span>
-                    Are you sure you want to delete the account of{' '}
-                    {userToDelete?.username}?
-                  </span>
-                  <div>
-                    <button
-                      className='btn btn-sm btn-primary mx-2 '
-                      onClick={confirmDelete}
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      className='btn btn-sm btn-error'
-                      onClick={cancelDelete}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
+    <div className='page-enter'>
+      <PageHeader
+        eyebrow='LOOK AFTER YOUR COMMUNITY'
+        title='A space in good hands.'
+        description='Manage community profiles, access, and the people who help keep things moving.'
+      />
+      <div className='admin-summary'>
+        {[
+          {
+            label: 'Community members',
+            value: allUsers.length,
+            icon: 'users',
+            tone: 'mint',
+          },
+          {
+            label: 'Administrators',
+            value: allUsers.filter((user) => user.userRole === 'admin').length,
+            icon: 'shield',
+            tone: 'lavender',
+          },
+          {
+            label: 'Paused accounts',
+            value: allUsers.filter((user) => user.isBlocked).length,
+            icon: 'user',
+            tone: 'peach',
+          },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className='surface'
+          >
+            <span className={`icon-tile tone-${item.tone}`}>
+              <Icon
+                name={item.icon}
+                size={22}
+              />
+            </span>
+            <div>
+              <strong>{item.value}</strong>
+              <p>{item.label}</p>
             </div>
-          ))
-        ) : (
-          <h1 className='text-center'>No users found!</h1>
-        )}
+          </div>
+        ))}
       </div>
-      {success && <AlertSuccess message={message} />}
+      <div className='toolbar section-space'>
+        <label className='search-field'>
+          <Icon
+            name='search'
+            size={18}
+          />
+          <input
+            type='search'
+            aria-label='Search community members'
+            placeholder='Find a community member…'
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </label>
+        <span className='result-count'>{users.length} profiles</span>
+      </div>
+      <InlineMessage>{error || loadError}</InlineMessage>
+      <InlineMessage type='success'>{message}</InlineMessage>
+      {loading ? (
+        <LoadingState />
+      ) : users.length ? (
+        <div className='admin-user-list surface'>
+          {users.map((user) => (
+            <article
+              className='admin-user-row'
+              key={user.username}
+            >
+              <Link
+                className='admin-user-identity'
+                to={`/users/${encodeURIComponent(user.username)}`}
+              >
+                <Avatar user={user} />
+                <div>
+                  <h2>
+                    {[user.firstName, user.lastName]
+                      .filter(Boolean)
+                      .join(' ') || user.username}
+                  </h2>
+                  <p>@{user.username}</p>
+                </div>
+              </Link>
+              <div className='admin-user-status'>
+                <span
+                  className={`pill ${user.isBlocked ? 'pill-peach' : 'pill-neutral'}`}
+                >
+                  {user.isBlocked ? 'Paused' : 'Active'}
+                </span>
+                {user.userRole === 'admin' && (
+                  <span className='pill pill-lavender'>Admin</span>
+                )}
+              </div>
+              <div className='admin-user-actions'>
+                <button
+                  className='btn btn-ghost btn-sm'
+                  disabled={busy === user.username}
+                  onClick={() => act(user, 'role')}
+                >
+                  <Icon
+                    name='shield'
+                    size={14}
+                  />
+                  {user.userRole === 'admin' ? 'Make member' : 'Make admin'}
+                </button>
+                <button
+                  className='btn btn-ghost btn-sm'
+                  disabled={busy === user.username}
+                  onClick={() => act(user, 'block')}
+                >
+                  {user.isBlocked ? 'Restore access' : 'Pause access'}
+                </button>
+                <button
+                  className='icon-button danger-button'
+                  disabled={busy === user.username}
+                  onClick={() => {
+                    setError('');
+                    setSelected(user);
+                  }}
+                  aria-label={`Remove profile ${user.username}`}
+                >
+                  <Icon
+                    name='trash'
+                    size={16}
+                  />
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className='surface'>
+          <EmptyState
+            icon='search'
+            title='No matching profiles'
+            description='Try a different name or username.'
+          />
+        </div>
+      )}
+      <Modal
+        open={Boolean(selected)}
+        onClose={() => !busy && setSelected(null)}
+        title='Remove this community profile?'
+        description={
+          selected
+            ? `${selected.username}’s profile and its saved data will be removed from Motion Mate. This doesn’t delete their Firebase sign-in account.`
+            : ''
+        }
+      >
+        <InlineMessage>{error}</InlineMessage>
+        <div className='dialog-actions'>
+          <button
+            className='btn btn-ghost'
+            disabled={Boolean(busy)}
+            onClick={() => setSelected(null)}
+          >
+            Cancel
+          </button>
+          <button
+            className='btn btn-error'
+            disabled={Boolean(busy)}
+            onClick={() => act(selected, 'delete')}
+          >
+            {busy ? 'Removing…' : 'Remove profile'}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

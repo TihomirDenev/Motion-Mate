@@ -71,7 +71,11 @@ export const getFilterUserBySearchTerm = async (searchBy, search) => {
 
     snapshot.forEach((acc) => {
       const user = acc.val();
-      if (user[searchBy].toLowerCase().includes(search.toLowerCase())) {
+      if (
+        String(user[searchBy] || '')
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      ) {
         users.push(user);
       }
     });
@@ -128,7 +132,7 @@ export const deleteUserAsync = async (username) => {
     const userRef = ref(db, `users/${username}`);
     await remove(userRef);
   } catch (error) {
-    console.error('Error deleting user:', error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -136,7 +140,7 @@ export const promoteToAdminAsync = async (username, role) => {
   try {
     await update(ref(db, `users/${username}`), { userRole: role });
   } catch (error) {
-    console.error('Error promoting user to admin:', error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -144,7 +148,7 @@ export const blockUserAsync = async (username, isBlocked) => {
   try {
     await update(ref(db, `users/${username}`), { isBlocked: isBlocked });
   } catch (error) {
-    console.error('Error blocking user:', error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -156,6 +160,7 @@ export const addFriendService = async (username, friendUsername) => {
     updateData[`users/${username}/requests/${friendUsername}`] = null;
     updateData[`users/${username}/myRequests/${friendUsername}`] = null;
     updateData[`users/${friendUsername}/myRequests/${username}`] = null;
+    updateData[`users/${friendUsername}/requests/${username}`] = null;
     await update(ref(db), updateData);
   } catch (error) {
     throw new Error(error.message, { cause: error });

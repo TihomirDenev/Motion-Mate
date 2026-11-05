@@ -1,87 +1,135 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../../context/AppContext';
 import {
   updateUserByUsername,
   uploadPhoto,
 } from '../../../services/users.service';
-import { FriendAvatar } from '../../Exercise/FriendAvatar';
+import { validatePhoto } from '../../../common/user.validations';
+import PageHeader from '../../UI/PageHeader';
+import Avatar from '../../UI/Avatar';
+import Icon from '../../UI/Icon';
+import FormField from '../../UI/FormField';
+import InlineMessage from '../../UI/InlineMessage';
 
 export default function ChangeProfilePhoto({ setChangeProfilePhoto }) {
   const { userData } = useContext(AppContext);
-  const [imageUpload, setImageUpload] = useState(null);
-
-  const uploadNewProfilePhoto = async () => {
-    if (!imageUpload) {
-      setImageUpload(null);
-      return alert('Error: Please select an image');
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview]
+  );
+  const choose = (event) => {
+    const image = event.target.files?.[0];
+    if (!image) return;
+    setError('');
+    try {
+      validatePhoto(image);
+      setFile(image);
+      setPreview(URL.createObjectURL(image));
+    } catch (error) {
+      setError(error.message);
+      event.target.value = '';
     }
-    const url = await uploadPhoto(imageUpload);
-    if (!url) {
-      return alert('Error: Photo upload failed. Please try again.');
-    }
-    await updateUserByUsername(userData?.username, { avatar: url });
-
-    setImageUpload(null);
-    setChangeProfilePhoto(false);
   };
-
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setBusy(true);
+    try {
+      validatePhoto(file);
+      const url = await uploadPhoto(file);
+      if (!url)
+        throw new Error('Your photo couldn’t be uploaded. Please try again.');
+      await updateUserByUsername(userData.username, { avatar: url });
+      setChangeProfilePhoto(false);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
-    <div className='flex flex-col text-center'>
-      <div className='text-xl mb-4'>
-        <p>
-          Greetings, {userData?.username}! Ready to give your profile a
-          makeover?
-        </p>
-        <p>Upload or change your profile photo here.</p>
-      </div>
-      <div className='border-2 border-gray-500 bg-base-300 rounded-sm p-4 shadow-lg flex flex-col items-center'>
-        <div className='flex items-center'>
-          <div className='avatar'>
-            <div className='w-64 mr-12 rounded-full border-2 border-primary'>
-              <FriendAvatar username={userData?.username} />
-            </div>
+    <div className='photo-editor page-enter'>
+      <PageHeader
+        back={{ to: '/my-profile', label: 'My profile' }}
+        eyebrow='A FAMILIAR FACE'
+        title='Make it look like you.'
+        description='Give your Motion Mates a face to cheer on.'
+      />
+      <form
+        className='surface photo-editor-card'
+        onSubmit={submit}
+      >
+        <div className='photo-preview-row'>
+          <div>
+            <Avatar
+              user={userData}
+              size='xl'
+            />
+            <span>Looking good already</span>
           </div>
-
-          <div className='text-center'>
-            {imageUpload !== null && (
+          {preview && (
+            <>
+              <Icon
+                name='arrow'
+                size={24}
+              />
               <div>
-                <h2 className='font-bold underline'>New Profile Photo: </h2>
-
-                <div className='avatar'>
-                  <div className='w-64 max-w-full rounded-full mt-2 border-2 border-primary'>
-                    <img
-                      src={URL.createObjectURL(imageUpload)}
-                      alt='Profile Photo'
-                    />
-                  </div>
-                </div>
+                <img
+                  className='new-photo-preview'
+                  src={preview}
+                  alt='Preview of your new profile photo'
+                />
+                <span>Your fresh look</span>
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
-        <div className='mt-5 flex flex-row'>
-          <input
+        <div className='photo-upload-area'>
+          <span className='icon-tile tone-mint'>
+            <Icon
+              name='camera'
+              size={26}
+            />
+          </span>
+          <h2>A little more personality</h2>
+          <p>Choose a clear photo you love. We’ll take care of the rest.</p>
+          <FormField
+            label='Choose your photo'
             type='file'
-            accept='image/*'
-            name='profilePhoto'
-            id='profilePhoto'
-            onChange={(e) => setImageUpload(e.target.files[0])}
-            className='file-input file-input-primary w-full max-w-xs mr-2'
+            accept='image/jpeg,image/png,image/webp,image/gif'
+            hint='JPG, PNG, WebP or GIF · Up to 5 MB'
+            onChange={choose}
           />
+        </div>
+        <InlineMessage>{error}</InlineMessage>
+        <div className='dialog-actions'>
           <button
-            className='btn btn-primary mr-2'
-            onClick={() => uploadNewProfilePhoto()}
-          >
-            Save Changes
-          </button>
-          <button
-            className='btn btn-error'
+            className='btn btn-ghost'
+            type='button'
+            disabled={busy}
             onClick={() => setChangeProfilePhoto(false)}
           >
-            Discard Changes
+            Cancel
+          </button>
+          <button
+            className='btn btn-primary'
+            type='submit'
+            disabled={!file || busy}
+          >
+            {busy ? 'Uploading…' : 'Save my photo'}
+            <Icon
+              name='check'
+              size={16}
+            />
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
