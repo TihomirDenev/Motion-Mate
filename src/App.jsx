@@ -11,20 +11,20 @@ const Home = lazy(() => import('./views/Home/Home'));
 const About = lazy(() => import('./views/About/About'));
 const Login = lazy(() => import('./components/Login/Login'));
 const Register = lazy(() => import('./views/Register/Register'));
-const RegisterAdditionalInfo = lazy(() =>
-  import('./views/RegisterAdditionalInfo/RegisterAdditionalInfo')
+const RegisterAdditionalInfo = lazy(
+  () => import('./views/RegisterAdditionalInfo/RegisterAdditionalInfo')
 );
 const NotFound = lazy(() => import('./views/NotFound/NotFound'));
 const ContactUs = lazy(() => import('./views/ContactUs/ContactUs'));
-const WellnessHealthTools = lazy(() =>
-  import('./views/WellnessAndHealthTools/WellnessAndHealthTools')
+const WellnessHealthTools = lazy(
+  () => import('./views/WellnessAndHealthTools/WellnessAndHealthTools')
 );
 const Goals = lazy(() => import('./views/Goals/Goals'));
 const DetailedGoal = lazy(() => import('./components/Goals/DetailedGoal'));
 const AllUsers = lazy(() => import('./views/AllUsers/AllUsers'));
 const MyFriends = lazy(() => import('./views/MyFriends/MyFriends'));
-const FullProfileView = lazy(() =>
-  import('./views/FullProfileView/FullProfileView')
+const FullProfileView = lazy(
+  () => import('./views/FullProfileView/FullProfileView')
 );
 const MyProfile = lazy(() => import('./views/MyProfile/MyProfile'));
 const Exercises = lazy(() =>

@@ -90,12 +90,14 @@ npm run dev
 
 ### Available scripts
 
-| Command           | Description                          |
-| ----------------- | ------------------------------------ |
-| `npm run dev`     | Start the dev server                 |
-| `npm run build`   | Build for production into `dist/`    |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint`    | Lint the project with ESLint         |
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Start the dev server                     |
+| `npm run build`        | Build for production into `dist/`        |
+| `npm run preview`      | Preview the production build locally     |
+| `npm run lint`         | Lint the project with ESLint             |
+| `npm run format`       | Format the code with Prettier            |
+| `npm run format:check` | Check the formatting without changing it |
 
 ### Deploying to Vercel
 

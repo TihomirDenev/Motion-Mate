@@ -51,7 +51,11 @@ const Notifications = ({ requests }) => {
       {requestsCount > 0 ? (
         <div>
           <div className='relative flex mr-2'>
-            <img src={bellIcon} alt='bell' className='w-12' />
+            <img
+              src={bellIcon}
+              alt='bell'
+              className='w-12'
+            />
             <span className='absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center'>
               {requestsCount}
             </span>
@@ -63,7 +67,10 @@ const Notifications = ({ requests }) => {
           >
             {users?.map((user) => {
               return (
-                <li key={user?.username} className='p-2'>
+                <li
+                  key={user?.username}
+                  className='p-2'
+                >
                   <div className='flex flex-row items-center justify-between'>
                     <div className='flex items-center'>
                       <img
@@ -82,7 +89,11 @@ const Notifications = ({ requests }) => {
                         className=' btn-primary ml-6'
                         onClick={() => handleAddFriend(user?.username)}
                       >
-                        <img src={accept} alt='accept' className='w-8' />
+                        <img
+                          src={accept}
+                          alt='accept'
+                          className='w-8'
+                        />
                       </button>
                       <button
                         className=' btn-primary ml-4'
@@ -90,7 +101,11 @@ const Notifications = ({ requests }) => {
                           handleRemoveFriendRequest(user?.username)
                         }
                       >
-                        <img src={decline} alt='decline' className='w-7' />
+                        <img
+                          src={decline}
+                          alt='decline'
+                          className='w-7'
+                        />
                       </button>
                     </div>
                   </div>

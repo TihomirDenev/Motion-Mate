@@ -4,7 +4,11 @@ export default function DropDownNoNotifications() {
   return (
     <div>
       <div className='relative flex mr-2'>
-        <img src={bellIcon} alt='bell' className='w-12' />
+        <img
+          src={bellIcon}
+          alt='bell'
+          className='w-12'
+        />
       </div>
 
       <ul

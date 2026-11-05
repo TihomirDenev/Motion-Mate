@@ -30,19 +30,25 @@ const TimeLeft = ({ goal }) => {
           </div>
           <div className='flex flex-col'>
             <span className='countdown font-mono text-xl'>
-              <span style={{ '--value': timeLeft?.hours, '--digits': 2 }}></span>
+              <span
+                style={{ '--value': timeLeft?.hours, '--digits': 2 }}
+              ></span>
             </span>
             hours
           </div>
           <div className='flex flex-col'>
             <span className='countdown font-mono text-xl'>
-              <span style={{ '--value': timeLeft?.minutes, '--digits': 2 }}></span>
+              <span
+                style={{ '--value': timeLeft?.minutes, '--digits': 2 }}
+              ></span>
             </span>
             min
           </div>
           <div className='flex flex-col'>
             <span className='countdown font-mono text-xl'>
-              <span style={{ '--value': timeLeft?.seconds, '--digits': 2 }}></span>
+              <span
+                style={{ '--value': timeLeft?.seconds, '--digits': 2 }}
+              ></span>
             </span>
             sec
           </div>

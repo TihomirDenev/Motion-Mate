@@ -4,9 +4,8 @@ import BodyMassIndex from '../../components/BMI/BodyMassIndex/BodyMassIndex';
 import CalorieCalculator from '../../components/CalorieCalculator/CalorieCalculator/CalorieCalculator';
 
 export default function WellnessHealthTools() {
-  document.querySelector(
-    'title'
-  ).textContent = `${APP_NAME} | Wellness & Health Tools`;
+  document.querySelector('title').textContent =
+    `${APP_NAME} | Wellness & Health Tools`;
   return (
     <div>
       <ActivityLevelWaterIntake />

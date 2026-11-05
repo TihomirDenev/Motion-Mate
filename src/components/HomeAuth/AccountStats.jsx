@@ -58,9 +58,7 @@ export const AccountStats = ({
             (goal) =>
               goal?.timePeriod?.from <= today && goal?.timePeriod?.to >= today
           )
-          .map((goal) =>
-            updateGoalCalories(username, goal, goal?.id, calories)
-          )
+          .map((goal) => updateGoalCalories(username, goal, goal?.id, calories))
       );
     };
 

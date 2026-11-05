@@ -30,9 +30,7 @@ const DetailedGoal = () => {
   const innerTableDiv = 'flex place-content-between w-full gap-2';
   const paragraph = 'text-lg text-secondary';
 
-  usePageTitle(`${APP_NAME} | ${
-    goal?.name || 'Detailed Goal'
-  }`);
+  usePageTitle(`${APP_NAME} | ${goal?.name || 'Detailed Goal'}`);
 
   const handleProgressChange = async (e) => {
     e.preventDefault();
