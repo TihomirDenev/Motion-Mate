@@ -1,3 +1,4 @@
+import { translate } from '../i18n/i18n';
 import {
   CATEGORY_MAX_DESCRIPTION_LENGTH,
   CATEGORY_MAX_TITLE_LENGTH,
@@ -10,15 +11,25 @@ export const validateCategoryForm = (name, description, url) => {
     name.length < CATEGORY_MIN_TITLE_LENGTH ||
     name.length > CATEGORY_MAX_TITLE_LENGTH
   ) {
-    throw new Error('Title must be between 5 and 20 characters');
+    throw new Error(
+      translate('errors.categoryNameLength', {
+        min: CATEGORY_MIN_TITLE_LENGTH,
+        max: CATEGORY_MAX_TITLE_LENGTH,
+      })
+    );
   }
   if (
     description.length < CATEGORY_MIN_DESCRIPTION_LENGTH ||
     description.length > CATEGORY_MAX_DESCRIPTION_LENGTH
   ) {
-    throw new Error('description must be between 1 and 40 characters');
+    throw new Error(
+      translate('errors.categoryDescriptionLength', {
+        min: CATEGORY_MIN_DESCRIPTION_LENGTH,
+        max: CATEGORY_MAX_DESCRIPTION_LENGTH,
+      })
+    );
   }
   if (!url) {
-    throw new Error('please upload a photo');
+    throw new Error(translate('errors.photoRequired'));
   }
 };

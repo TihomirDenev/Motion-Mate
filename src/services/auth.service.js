@@ -1,3 +1,4 @@
+import { translate } from '../i18n/i18n';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -26,7 +27,7 @@ export const loginUserByUsername = async (username, password) => {
   try {
     const user = await getUserByUsername(username);
     if (!user.exists()) {
-      throw new Error('No user found with this username');
+      throw new Error(translate('errors.usernameMissing'));
     }
     const { email } = user.val();
     return signInWithEmailAndPassword(auth, email, password);

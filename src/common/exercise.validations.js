@@ -1,3 +1,4 @@
+import { translate } from '../i18n/i18n';
 import {
   EXERCISE_MAX_CONTENT_LENGTH,
   EXERCISE_MAX_TITLE_LENGTH,
@@ -16,41 +17,61 @@ export const validateExerciseForm = (
   category
 ) => {
   if (!title) {
-    throw new Error('title is required');
+    throw new Error(translate('errors.exerciseTitleRequired'));
   }
   if (title.length < EXERCISE_MIN_TITLE_LENGTH) {
-    throw new Error('title is too short');
+    throw new Error(
+      translate('errors.exerciseTitleLength', {
+        min: EXERCISE_MIN_TITLE_LENGTH,
+        max: EXERCISE_MAX_TITLE_LENGTH,
+      })
+    );
   }
   if (title.length > EXERCISE_MAX_TITLE_LENGTH) {
-    throw new Error('title is too long');
+    throw new Error(
+      translate('errors.exerciseTitleLength', {
+        min: EXERCISE_MIN_TITLE_LENGTH,
+        max: EXERCISE_MAX_TITLE_LENGTH,
+      })
+    );
   }
   if (content.length < EXERCISE_MIN_CONTENT_LENGTH) {
-    throw new Error('content is too short');
+    throw new Error(
+      translate('errors.exerciseContentLength', {
+        min: EXERCISE_MIN_CONTENT_LENGTH,
+        max: EXERCISE_MAX_CONTENT_LENGTH,
+      })
+    );
   }
   if (content.length > EXERCISE_MAX_CONTENT_LENGTH) {
-    throw new Error('content is too long');
+    throw new Error(
+      translate('errors.exerciseContentLength', {
+        min: EXERCISE_MIN_CONTENT_LENGTH,
+        max: EXERCISE_MAX_CONTENT_LENGTH,
+      })
+    );
   }
   if (
     ![hours, minutes, seconds, calories].every((value) =>
       Number.isFinite(Number(value))
     )
   )
-    throw new Error('Enter valid numbers for duration and calories.');
+    throw new Error(translate('errors.exerciseNumbers'));
   if (hours > 23 || minutes > 59 || seconds > 59)
-    throw new Error('Use up to 23 hours, 59 minutes, and 59 seconds.');
+    throw new Error(translate('errors.exerciseDurationMax'));
   if (hours < 0 || minutes < 0 || seconds < 0) {
-    throw new Error('duration cannot be negative!');
+    throw new Error(translate('errors.exerciseDurationNegative'));
   }
   if (Number(hours) + Number(minutes) + Number(seconds) === 0) {
-    throw new Error('missing time duration for exercise');
+    throw new Error(translate('errors.exerciseDurationMissing'));
   }
   if (Number(calories) <= 0 || Number(calories) > 10000) {
-    throw new Error('please add calories');
+    throw new Error(translate('errors.exerciseCalories'));
   }
   if (!level) {
-    throw new Error('please select a level');
+    throw new Error(translate('errors.exerciseLevel'));
   }
   if (!category) {
-    throw new Error('please select a category');
+    throw new Error(translate('errors.exerciseCategory'));
   }
 };

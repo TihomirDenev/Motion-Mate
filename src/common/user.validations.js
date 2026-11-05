@@ -1,3 +1,4 @@
+import { translate } from '../i18n/i18n';
 import { getAllUsers, getUserByUsername } from '../services/users.service';
 import {
   AGE_MAX,
@@ -22,48 +23,51 @@ export const validateRequiredFieldsReg = (form) => {
     form.password === '' ||
     form.phoneNumber === ''
   ) {
-    throw new Error('Please fill all required fields.');
+    throw new Error(translate('errors.requiredFields'));
   }
 };
 
 export const validateUserNameRegAsync = async (username) => {
   if (!/^[a-zA-Z0-9_-]+$/.test(username))
-    throw new Error(
-      'Use letters, numbers, underscores, or hyphens for your username.'
-    );
+    throw new Error(translate('errors.usernameCharacters'));
   if (
     username.length < MIN_USERNAME_LENGTH ||
     username.length > MAX_USERNAME_LENGTH
   ) {
     throw new Error(
-      `User Name name must be between ${MIN_USERNAME_LENGTH} and ${MAX_USERNAME_LENGTH} characters long!`
+      translate('errors.usernameLength', {
+        min: MIN_USERNAME_LENGTH,
+        max: MAX_USERNAME_LENGTH,
+      })
     );
   }
   const userObject = await getUserByUsername(username);
   const userData = userObject.val();
   if (userData?.username) {
-    throw new Error('User with this username already exists!');
+    throw new Error(translate('errors.usernameTaken'));
   }
 };
 
 export const validateEmailRegAsync = async (email) => {
   if (!email.includes('@') || !email.includes('.')) {
-    throw new Error('Please enter a valid email address.');
+    throw new Error(translate('errors.emailInvalid'));
   }
   const snapshot = await getAllUsers();
   const allUsers = Object.values(snapshot.val() || {});
   const userEmail = allUsers.find((user) => user.email === email);
   if (userEmail) {
-    throw new Error('User with this email already exists!');
+    throw new Error(translate('errors.emailTaken'));
   }
 };
 
 export const validatePhoneNumberAsync = async (phoneNumber) => {
   if (phoneNumber.length !== PHONE_NUMBER_LENGTH) {
-    throw new Error(`Phone number must be ${PHONE_NUMBER_LENGTH} digits long!`);
+    throw new Error(
+      translate('errors.phoneLength', { length: PHONE_NUMBER_LENGTH })
+    );
   }
   if (!/^\d+$/.test(phoneNumber)) {
-    throw new Error('Phone number must contain only digits!');
+    throw new Error(translate('errors.phoneDigits'));
   }
   const snapshot = await getAllUsers();
   const allUsers = Object.values(snapshot.val() || {});
@@ -71,7 +75,7 @@ export const validatePhoneNumberAsync = async (phoneNumber) => {
     (user) => user.phoneNumber === phoneNumber
   );
   if (userPhoneNumber) {
-    throw new Error('User with this phone number already exists!');
+    throw new Error(translate('errors.phoneTaken'));
   }
 };
 
@@ -81,26 +85,29 @@ export const validatePassword = (password) => {
     password.length > MAX_PASSWORD_LENGTH
   ) {
     throw new Error(
-      `Password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters long!`
+      translate('errors.passwordLength', {
+        min: MIN_PASSWORD_LENGTH,
+        max: MAX_PASSWORD_LENGTH,
+      })
     );
   }
 };
 
 export const validatePhoto = (photo) => {
   if (!photo) {
-    throw new Error('Please upload a photo.');
+    throw new Error(translate('errors.photoRequired'));
   }
   if (
     !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(photo.type)
   )
-    throw new Error('Choose a JPG, PNG, WebP, or GIF image.');
+    throw new Error(translate('errors.photoType'));
   if (photo.size > 5 * 1024 * 1024)
-    throw new Error('Choose an image smaller than 5 MB.');
+    throw new Error(translate('errors.photoSize'));
 };
 
 export const validateRequiredFieldsLogUsername = (form) => {
   if (form.username === '' || form.password === '') {
-    throw new Error('Please fill in all fields.');
+    throw new Error(translate('errors.allFields'));
   }
 };
 
@@ -110,31 +117,34 @@ export const validateUserNameLogAsync = async (username) => {
     username.length > MAX_USERNAME_LENGTH
   ) {
     throw new Error(
-      `User Name name must be between ${MIN_USERNAME_LENGTH} and ${MAX_USERNAME_LENGTH} characters long!`
+      translate('errors.usernameLength', {
+        min: MIN_USERNAME_LENGTH,
+        max: MAX_USERNAME_LENGTH,
+      })
     );
   }
   const userObject = await getUserByUsername(username);
   const userData = userObject.val();
   if (!userData?.username) {
-    throw new Error('User with this username does not exist!');
+    throw new Error(translate('errors.usernameMissing'));
   }
 };
 
 export const validateRequiredFieldsLogEmail = (form) => {
   if (form.email === '' || form.password === '') {
-    throw new Error('Please fill in all fields.');
+    throw new Error(translate('errors.allFields'));
   }
 };
 
 export const validateEmailLogAsync = async (email) => {
   if (!email.includes('@') || !email.includes('.')) {
-    throw new Error('Please enter a valid email address.');
+    throw new Error(translate('errors.emailInvalid'));
   }
   const snapshot = await getAllUsers();
   const allUsers = Object.values(snapshot.val() || {});
   const userEmail = allUsers.find((user) => user.email === email);
   if (!userEmail) {
-    throw new Error('User with this email does not exist!');
+    throw new Error(translate('errors.emailMissing'));
   }
 };
 
@@ -145,11 +155,14 @@ export const validateFirstName = (firstName) => {
     firstName.length > MAX_NAME_LENGTH
   ) {
     throw new Error(
-      `First name must be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH} characters long!`
+      translate('errors.firstNameLength', {
+        min: MIN_NAME_LENGTH,
+        max: MAX_NAME_LENGTH,
+      })
     );
   }
   if (!alphabeticRegex.test(firstName)) {
-    throw new Error('First name must contain only alphabetic characters!');
+    throw new Error(translate('errors.firstNameLetters'));
   }
 };
 
@@ -157,24 +170,29 @@ export const validateLastName = (lastName) => {
   const alphabeticRegex = /^[\p{L}]+(?:[ '-][\p{L}]+)*$/u;
   if (lastName.length < MIN_NAME_LENGTH || lastName.length > MAX_NAME_LENGTH) {
     throw new Error(
-      `Last name must be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH} characters long!`
+      translate('errors.lastNameLength', {
+        min: MIN_NAME_LENGTH,
+        max: MAX_NAME_LENGTH,
+      })
     );
   }
   if (!alphabeticRegex.test(lastName)) {
-    throw new Error('Last name must contain only alphabetic characters!');
+    throw new Error(translate('errors.lastNameLetters'));
   }
 };
 
 export const validateAge = (age) => {
   if (age < AGE_MIN || age > AGE_MAX) {
-    throw new Error(`Age must be between ${AGE_MIN} and ${AGE_MAX}.`);
+    throw new Error(
+      translate('errors.ageRange', { min: AGE_MIN, max: AGE_MAX })
+    );
   }
 };
 
 export const validateWeight = (weight) => {
   if (weight < WEIGHT_MIN || weight > WEIGHT_MAX) {
     throw new Error(
-      `Weight must be between ${WEIGHT_MIN} kg and ${WEIGHT_MAX} kg.`
+      translate('errors.weightRange', { min: WEIGHT_MIN, max: WEIGHT_MAX })
     );
   }
 };
@@ -182,7 +200,7 @@ export const validateWeight = (weight) => {
 export const validateHeight = (height) => {
   if (height < HEIGHT_MIN || height > HEIGHT_MAX) {
     throw new Error(
-      `Height must be between ${HEIGHT_MIN} cm and ${HEIGHT_MAX} cm.`
+      translate('errors.heightRange', { min: HEIGHT_MIN, max: HEIGHT_MAX })
     );
   }
 };
@@ -196,6 +214,6 @@ export const validateFieldsForAdditionalInfo = (form) => {
     form.height === '' &&
     form.activityLevel === ''
   ) {
-    throw new Error('Please fill in at least one of the fields!');
+    throw new Error(translate('errors.oneField'));
   }
 };
