@@ -1,146 +1,234 @@
-import { useContext } from 'react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router';
 import { AppContext } from '../../context/AppContext';
-import { APP_NAME } from '../../common/constants';
 import { HomeAuthenticated } from './HomeAuthenticated';
-import { Carousel } from '../../components/Home/Carousel';
 import { getAllUsers } from '../../services/users.service';
 import { getExercises } from '../../services/exercise.service';
 import { getAllCategories } from '../../services/category.service';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import Icon from '../../components/UI/Icon';
+import Authenticated from '../../hoc/Authenticated/Authenticated';
 
 export default function Home() {
-  usePageTitle(`${APP_NAME} | Home`);
-
-  const navigate = useNavigate();
-
   const { userData } = useContext(AppContext);
-
-  const [allUsers, setAllUsers] = useState([]);
-  const [allExercises, setAllExercises] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
-
+  usePageTitle(
+    userData
+      ? 'Motion Mate | Your overview'
+      : 'Motion Mate | Your daily momentum'
+  );
+  const [counts, setCounts] = useState(null);
   useEffect(() => {
-    const func = async () => {
-      const result = await getAllUsers();
-      const exercises = await getExercises();
-      const exercisesLength = exercises.reduce((acc, category) => {
-        acc += Object.values(category).length;
-        return acc;
-      }, 0);
-
-      const users = result.val();
-      const categories = await getAllCategories();
-      setAllCategories(categories.length);
-      setAllUsers(Object.keys(users).length);
-      setAllExercises(exercisesLength);
+    if (userData) return;
+    let ignore = false;
+    Promise.all([getAllUsers(), getExercises(), getAllCategories()])
+      .then(([users, exercises, categories]) => {
+        if (!ignore)
+          setCounts({
+            users: Object.keys(users.val() || {}).length,
+            exercises: exercises.reduce(
+              (sum, group) => sum + Object.keys(group).length,
+              0
+            ),
+            categories: categories.length,
+          });
+      })
+      .catch(() => {
+        /* The introduction stays available if community totals cannot load. */
+      });
+    return () => {
+      ignore = true;
     };
-    func();
-  }, []);
+  }, [userData]);
 
+  if (userData) return <Authenticated><HomeAuthenticated /></Authenticated>;
   return (
-    <div>
-      {userData?.username ? (
-        <HomeAuthenticated />
-      ) : (
-        <div className='flex flex-col '>
-          <div className=' bg-base-200 shadow-2xl'>
-            <div className='hero-content flex-col lg:flex-row'>
-              <Carousel />
-              <div>
-                <h1 className='text-5xl font-bold'>
-                  Ready to join the lifestyle?
-                </h1>
-                <p className='py-6'>
-                  Find the right category that fits you. Challenge yourself with
-                  exercises with difficulty for beginners or lovers. Here you
-                  can find all type of exercises for all parts of the body, find
-                  other users and exchange ideas.
-                </p>
-                <button
-                  onClick={() => navigate('/login')}
-                  className='btn btn-secondary'
-                >
-                  Get Started
-                </button>
-              </div>
-            </div>
+    <div className='landing page-enter'>
+      <section className='landing-hero'>
+        <div className='landing-copy'>
+          <span className='landing-badge'>
+            <span className='status-dot' /> A LITTLE MOVEMENT. A LOT OF
+            POSSIBILITY.
+          </span>
+          <h1>
+            Find your pace.
+            <br />
+            Feel your <span>potential.</span>
+          </h1>
+          <p>
+            A stronger body. A clearer mind. A little more you. Build a routine
+            you love, track your progress, and move forward together.
+          </p>
+          <div className='landing-actions'>
+            <Link
+              className='btn btn-primary'
+              to='/register'
+            >
+              Find your momentum{' '}
+              <Icon
+                name='arrow'
+                size={18}
+              />
+            </Link>
+            <Link
+              className='text-button'
+              to='/about'
+            >
+              Meet Motion Mate{' '}
+              <Icon
+                name='arrowUp'
+                size={16}
+              />
+            </Link>
           </div>
-          <div className='mt-10 place-self-center'>
-            <div className='stats stats-vertical md:stats-horizontal bg-base-100 shadow-2xl flex-1'>
-              <div className='stat'>
-                <div className='stat-figure text-secondary'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    className='inline-block w-8 h-8 stroke-current'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth='2'
-                      d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-                    ></path>
-                  </svg>
-                </div>
-                <div className='stat-title'>Category exercises</div>
-                <div className='stat-value text-secondary'>
-                  {allCategories || 0}
-                </div>
-                <div className='stat-desc'>Create your own personal </div>
-              </div>
-
-              <div className='stat'>
-                <div className='stat-figure text-secondary'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    className='inline-block w-8 h-8 stroke-current'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth='2'
-                      d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4'
-                    ></path>
-                  </svg>
-                </div>
-                <div className='stat-title'>All Users</div>
-                <div className='stat-value text-secondary'>{allUsers || 0}</div>
-                <div className='stat-desc'>
-                  ↗︎ What are you waiting for - join us!
-                </div>
-              </div>
-
-              <div className='stat'>
-                <div className='stat-figure text-secondary'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    className='inline-block w-8 h-8 stroke-current'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth='2'
-                      d='M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'
-                    ></path>
-                  </svg>
-                </div>
-                <div className='stat-title'>Exercises available</div>
-                <div className='stat-value text-secondary mb-1'>
-                  {allExercises || 0}
-                </div>
-                <div className='stat-desc'>Be active</div>
-              </div>
+          <div className='landing-community'>
+            <div
+              className='initials-stack'
+              aria-hidden='true'
+            >
+              <span>TD</span>
+              <span>TJ</span>
+              <span>RM</span>
+            </div>
+            <div>
+              <strong>Better, together.</strong>
+              <small>
+                {counts
+                  ? `${counts.users} people finding their rhythm`
+                  : 'Find your people. Find your rhythm.'}
+              </small>
             </div>
           </div>
         </div>
-      )}
+        <div className='landing-visual'>
+          <img
+            src='/images/runner.jpg'
+            alt='Runner taking a moment outdoors before her next workout'
+            fetchPriority='high'
+          />
+          <div className='landing-image-shade' />
+          <span className='image-kicker'>YOUR JOURNEY. YOUR PACE.</span>
+          <div className='image-caption'>
+            Every move
+            <br />
+            is a fresh start<span>.</span>
+          </div>
+          <div className='floating-note'>
+            <span className='icon-tile'>
+              <Icon
+                name='activity'
+                size={23}
+              />
+            </span>
+            <div>
+              <strong>Small steps. Real change.</strong>
+              <small>Show up for yourself today.</small>
+            </div>
+            <Icon
+              name='arrowUp'
+              size={18}
+            />
+          </div>
+          <div
+            className='visual-orbit'
+            aria-hidden='true'
+          />
+        </div>
+      </section>
+      <div className='landing-stats'>
+        <div>
+          <strong>{counts?.categories ?? '—'}</strong>
+          <span>ways to move</span>
+        </div>
+        <div>
+          <strong>{counts?.exercises ?? '—'}</strong>
+          <span>exercises to make your own</span>
+        </div>
+        <div>
+          <strong>{counts?.users ?? '—'}</strong>
+          <span>Motion Mates & counting</span>
+        </div>
+      </div>
+      <section className='landing-features'>
+        <div className='landing-section-heading'>
+          <p className='eyebrow'>MORE THAN A WORKOUT APP</p>
+          <h2>
+            Everything you need.
+            <br />
+            All moving with you.
+          </h2>
+          <p>
+            Less overthinking. More doing. Make space for a healthier everyday.
+          </p>
+        </div>
+        <div className='card-grid'>
+          {[
+            {
+              icon: 'dumbbell',
+              title: 'Move your way',
+              text: 'Build your exercise library, set your timer, and find a routine that feels like you.',
+              tone: 'mint',
+              number: '01',
+            },
+            {
+              icon: 'target',
+              title: 'Make progress personal',
+              text: 'Turn “one day” into day one. Set meaningful goals and celebrate every step forward.',
+              tone: 'lavender',
+              number: '02',
+            },
+            {
+              icon: 'heart',
+              title: 'Look after the whole you',
+              text: 'Get to know your body with simple tools for hydration, daily calories, and BMI.',
+              tone: 'peach',
+              number: '03',
+            },
+          ].map((feature) => (
+            <article
+              className={`feature-card tone-${feature.tone}`}
+              key={feature.title}
+            >
+              <div>
+                <span className='icon-tile'>
+                  <Icon
+                    name={feature.icon}
+                    size={24}
+                  />
+                </span>
+                <small>{feature.number}</small>
+              </div>
+              <h3>{feature.title}</h3>
+              <p>{feature.text}</p>
+              <Link
+                to='/register'
+                aria-label={`Get started: ${feature.title}`}
+              >
+                <Icon name='arrowUp' />
+              </Link>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className='landing-cta'>
+        <div>
+          <p className='eyebrow'>YOUR NEXT CHAPTER</p>
+          <h2>
+            Good things start
+            <br />
+            with a little motion.
+          </h2>
+        </div>
+        <Link
+          className='btn btn-lime'
+          to='/register'
+        >
+          Let’s get moving <Icon name='arrow' />
+        </Link>
+        <div
+          className='cta-rings'
+          aria-hidden='true'
+        />
+      </section>
     </div>
   );
 }
