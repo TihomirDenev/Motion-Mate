@@ -13,6 +13,7 @@ import LoadingState from '../../components/UI/LoadingState';
 import EmptyState from '../../components/UI/EmptyState';
 import InlineMessage from '../../components/UI/InlineMessage';
 import { useTranslation } from '../../i18n/useTranslation';
+import { exerciseSearchText } from '../../helper/exercise-text';
 
 export const Exercises = () => {
   const { category } = useParams();
@@ -30,9 +31,7 @@ export const Exercises = () => {
   const filtered = categoryExercises.filter(
     (exercise) =>
       (level === 'All' || exercise.level === level) &&
-      `${exercise.title} ${exercise.content}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      exerciseSearchText(exercise).includes(search.trim().toLowerCase())
   );
   const visual = getCategoryVisual(category);
   const act = async (exercise, action) => {
@@ -117,8 +116,10 @@ export const Exercises = () => {
                     {te('levels', exercise.level)}
                   </span>
                 </div>
-                <h2>{exercise.title}</h2>
-                <p className='exercise-description'>{exercise.content}</p>
+                <h2>{exercise.display.title}</h2>
+                <p className='exercise-description'>
+                  {exercise.display.content}
+                </p>
                 <div className='exercise-metrics'>
                   <span>
                     <Icon
@@ -175,7 +176,7 @@ export const Exercises = () => {
                         className='icon-button danger-button'
                         disabled={busy === exercise.id || running}
                         aria-label={t('exercises.delete', {
-                          title: exercise.title,
+                          title: exercise.display.title,
                         })}
                         onClick={() => act(exercise, 'delete')}
                       >

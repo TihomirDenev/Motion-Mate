@@ -36,6 +36,7 @@ export async function beginExercise(username, exercise) {
         timeLeft: Date.now() + duration * 1000,
         exerciseId: exercise.id,
         title: exercise.title,
+        translations: exercise.translations || null,
         calories: Number(exercise.calories) || 0,
         countOnComplete: true,
       };

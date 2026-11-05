@@ -9,17 +9,19 @@ import Modal from '../UI/Modal';
 import FormField from '../UI/FormField';
 import InlineMessage from '../UI/InlineMessage';
 import { useTranslation } from '../../i18n/useTranslation';
+import { exerciseText } from '../../helper/exercise-text';
 
 export const CreateExercise = ({ defaultCategory = '', exercise }) => {
   const { userData } = useContext(AppContext);
   const [open, setOpen] = useState(false);
-  const { t, te } = useTranslation();
+  const { t, te, language } = useTranslation();
+  const translated = Boolean(exercise?.translations?.[language]);
   const { data, error: loadError } = useDatabaseValue(
     open ? 'categories' : null
   );
   const initial = () => ({
-    title: exercise?.title || '',
-    content: exercise?.content || '',
+    title: exerciseText(exercise, language).title,
+    content: exerciseText(exercise, language).content,
     hours: exercise?.duration?.hours || 0,
     minutes: exercise?.duration?.minutes || 0,
     seconds: exercise?.duration?.seconds || 0,
@@ -58,8 +60,12 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
       );
       if (exercise)
         await editExercise(exercise.categoryName, exercise.id, {
-          title: form.title.trim(),
-          content: form.content.trim(),
+          ...(translated
+            ? {
+                [`translations/${language}/title`]: form.title.trim(),
+                [`translations/${language}/content`]: form.content.trim(),
+              }
+            : { title: form.title.trim(), content: form.content.trim() }),
           duration: { hours, minutes, seconds },
           calories,
           level: form.level,
@@ -92,7 +98,11 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
         type='button'
         className={exercise ? 'icon-button' : 'btn btn-primary'}
         aria-label={
-          exercise ? t('exercise.edit', { title: exercise.title }) : undefined
+          exercise
+            ? t('exercise.edit', {
+                title: exerciseText(exercise, language).title,
+              })
+            : undefined
         }
         onClick={show}
       >

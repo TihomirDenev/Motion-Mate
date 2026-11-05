@@ -11,7 +11,7 @@ export default function WorkoutSession() {
   const { userData } = useContext(AppContext);
   const [now, setNow] = useState(() => Date.now());
   const [error, setError] = useState('');
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const finishing = useRef(false);
   const session = userData?.endCurrentExercise;
   const workoutEnd = userData?.workoutTimer?.timer;
@@ -65,7 +65,8 @@ export default function WorkoutSession() {
         <span className='status-dot' />
         <Link to='/'>
           <strong>
-            {session?.title ||
+            {session?.translations?.[language]?.title ||
+              session?.title ||
               t(session ? 'workout.exerciseInProgress' : 'workout.inProgress')}
           </strong>
           <small>{t('workout.encouragement')}</small>

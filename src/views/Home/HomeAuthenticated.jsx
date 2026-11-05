@@ -205,7 +205,7 @@ export const HomeAuthenticated = () => {
                         {String(index + 1).padStart(2, '0')}
                       </div>
                       <div className='workout-row-copy'>
-                        <h3>{exercise.title}</h3>
+                        <h3>{exercise.display.title}</h3>
                         <div>
                           <span>
                             <Icon
@@ -234,7 +234,7 @@ export const HomeAuthenticated = () => {
                       <button
                         className='icon-button workout-play'
                         aria-label={t('overview.startExercise', {
-                          title: exercise.title,
+                          title: exercise.display.title,
                         })}
                         disabled={
                           Boolean(userData.endCurrentExercise) ||
@@ -250,7 +250,7 @@ export const HomeAuthenticated = () => {
                       <button
                         className='workout-remove'
                         aria-label={t('overview.removeExercise', {
-                          title: exercise.title,
+                          title: exercise.display.title,
                         })}
                         disabled={busy === exercise.id}
                         onClick={() => act(exercise, 'remove')}
