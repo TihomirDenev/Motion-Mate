@@ -1,11 +1,13 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './config/firebase-config';
+import { equalTo, onValue, orderByChild, query, ref } from 'firebase/database';
+import { auth, db } from './config/firebase-config';
 import { Layout } from './hoc/Layout/Layout';
 import { AppContext } from './context/AppContext';
-import { getUserData } from './services/users.service';
 import Authenticated from './hoc/Authenticated/Authenticated';
+import LoadingState from './components/UI/LoadingState';
+import InlineMessage from './components/UI/InlineMessage';
 
 const Home = lazy(() => import('./views/Home/Home'));
 const About = lazy(() => import('./views/About/About'));
@@ -36,6 +38,7 @@ const Categories = lazy(() => import('./components/Categories/Categories'));
 const AdminPanel = lazy(() => import('./views/AdminPanel/AdminPanel'));
 
 const protectedRoutes = [
+  { path: '/register-additional-info', element: <RegisterAdditionalInfo /> },
   { path: '/wellness-health-tools', element: <WellnessHealthTools /> },
   { path: '/goals', element: <Goals /> },
   { path: '/goals/:id', element: <DetailedGoal /> },
@@ -48,11 +51,7 @@ const protectedRoutes = [
   { path: '/admin-panel', element: <AdminPanel /> },
 ];
 
-const PageLoader = () => (
-  <div className='flex justify-center py-20'>
-    <span className='loading loading-spinner loading-lg text-primary'></span>
-  </div>
-);
+const PageLoader = () => <LoadingState />;
 
 function App() {
   const [appState, setAppState] = useState({
@@ -60,37 +59,45 @@ function App() {
     userData: null,
   });
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
-    return onAuthStateChanged(auth, (user) => {
-      setAppState((prev) =>
-        prev.user?.uid === user?.uid
-          ? prev
-          : { ...prev, user, userData: user ? prev.userData : null }
-      );
-      setIsAuthReady(true);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!appState.user) return;
-
-    getUserData(appState.user.uid)
-      .then((snapshot) => {
-        if (snapshot.val()) {
-          const userData = Object.values(snapshot.val())[0];
-          setAppState((prev) => ({ ...prev, userData }));
+    let unsubscribeProfile;
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      unsubscribeProfile?.();
+      setAuthError('');
+      if (!user) {
+        setAppState({ user: null, userData: null });
+        setIsAuthReady(true);
+        return;
+      }
+      unsubscribeProfile = onValue(
+        query(ref(db, 'users'), orderByChild('uid'), equalTo(user.uid)),
+        (snapshot) => {
+          setAppState({
+            user,
+            userData: Object.values(snapshot.val() || {})[0] || null,
+          });
+          setIsAuthReady(true);
+        },
+        (error) => {
+          setAuthError(error.message);
+          setIsAuthReady(true);
         }
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-      });
-  }, [appState.user]);
+      );
+    });
+    return () => {
+      unsubscribeAuth();
+      unsubscribeProfile?.();
+    };
+  }, []);
 
   return (
     <AppContext.Provider value={{ ...appState, setAppState }}>
       <Layout>
-        {isAuthReady ? (
+        {authError ? (
+          <InlineMessage>{authError}</InlineMessage>
+        ) : isAuthReady ? (
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route
@@ -108,10 +115,6 @@ function App() {
               <Route
                 path='/register'
                 element={<Register />}
-              />
-              <Route
-                path='/register-additional-info'
-                element={<RegisterAdditionalInfo />}
               />
               <Route
                 path='/contact-us'
