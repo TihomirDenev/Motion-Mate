@@ -1,58 +1,56 @@
+import { Link } from 'react-router';
 import Goal from './Goal';
+import EmptyState from '../UI/EmptyState';
+import Icon from '../UI/Icon';
 
-const GoalsTable = ({ goals, myGoals = false }) => {
-  return (
-    <div className='flex flex-col w-full gap-2 overflow-x-auto'>
-      {goals?.length > 0 ? (
-        <table className='table'>
-          {/* head */}
-          <thead>
-            <tr>
-              <th>Goals</th>
-              <th>Name</th>
-              <th>Time left</th>
-              <th>Type</th>
-              <th>Progress</th>
-            </tr>
-          </thead>
-          {/* row */}
-          <tbody>
-            {goals.map((goal, idx) => (
-              <tr
-                key={goal?.id}
-                className={`${idx % 2 === 0 && 'bg-base-200 '}`}
-              >
-                <Goal
-                  id={goal?.id}
-                  owner={goal?.owner}
-                  name={goal?.name}
-                  from={goal?.timePeriod?.from}
-                  type={goal?.type}
-                  to={goal?.timePeriod?.to}
-                  progress={goal?.progress}
-                />
-              </tr>
-            ))}
-          </tbody>
-          {/* foot */}
-          <tfoot>
-            <tr>
-              <th>Goals</th>
-              <th>Name</th>
-              <th>Time left</th>
-              <th>Type</th>
-              <th>Progress</th>
-            </tr>
-          </tfoot>
-        </table>
-      ) : (
-        <div className='mx-auto my-2'>
-          <h2 className='flex justify-center mb-2 text-lg'>No Goals found.</h2>
-          {myGoals && <p>Create the first goal with the button above.</p>}
-        </div>
-      )}
+export default function GoalsTable({
+  goals,
+  myGoals = false,
+  filtered = false,
+}) {
+  return goals?.length ? (
+    <div className='goals-grid'>
+      {goals.map((goal) => (
+        <Goal
+          key={`${goal.owner}-${goal.id}`}
+          {...goal}
+          from={goal.timePeriod?.from}
+          to={goal.timePeriod?.to}
+        />
+      ))}
+    </div>
+  ) : (
+    <div className='surface'>
+      <EmptyState
+        icon={myGoals ? 'target' : 'users'}
+        title={
+          filtered
+            ? 'A fresh space for progress'
+            : myGoals
+              ? 'Every great journey starts with a goal'
+              : 'Grow together'
+        }
+        description={
+          filtered
+            ? 'Your goals will appear here as you move through your journey.'
+            : myGoals
+              ? 'Choose something that matters to you and create your first goal with the button above.'
+              : 'Connect with Motion Mates to share a little motivation and see their goals.'
+        }
+      >
+        {!myGoals && (
+          <Link
+            className='text-button'
+            to='/all-users'
+          >
+            Find your people{' '}
+            <Icon
+              name='arrow'
+              size={16}
+            />
+          </Link>
+        )}
+      </EmptyState>
     </div>
   );
-};
-
-export default GoalsTable;
+}

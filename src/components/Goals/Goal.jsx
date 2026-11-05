@@ -1,109 +1,118 @@
-import { useContext, useEffect, useState } from 'react';
-import { getUserByUsername } from '../../services/users.service';
-import GoalButton from './GoalButton';
+import { useContext, useState } from 'react';
+import { Link } from 'react-router';
 import { AppContext } from '../../context/AppContext';
-import { useNavigate } from 'react-router';
-import AlertError from '../Alerts/AlertError/AlertError';
-import { alertHelper } from '../../helper/alert-helper';
-import TimeLeft from './TimeLeft';
-import Progress from './Progress';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrashCan } from '@fortawesome/free-regular-svg-icons';
-import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess';
 import { deleteGoal } from '../../services/goal.service';
-import { handleAvatarError } from '../../helper/avatar-fallback';
+import { getGoalStatus } from '../../helper/goal-status';
+import { shortFormatDate } from '../../helper/format-date';
+import Icon from '../UI/Icon';
+import InlineMessage from '../UI/InlineMessage';
+import Progress from './Progress';
 
-export default function Goal({ id, owner, name, from, to, progress, type }) {
-  const navigate = useNavigate();
+export default function Goal({
+  id,
+  owner,
+  name,
+  from,
+  to,
+  progress = 0,
+  type,
+}) {
   const { userData } = useContext(AppContext);
-  const [showError, setShowError] = useState(false);
-  const [showDeleted, setShowDeleted] = useState(false);
-  const [showMessage, setShowMessage] = useState('');
-  const [ownerObj, setOwnerObj] = useState({
-    avatar: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-  });
-
-  const handleDetailsClick = () => {
-    navigate(`/goals/${id}`);
-  };
-
-  const handleDeleteClick = async (user) => {
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [now] = useState(() => Date.now());
+  const status = getGoalStatus({ progress, timePeriod: { from, to } }, now);
+  const own = owner === userData.username;
+  const remove = async () => {
+    setBusy(true);
     try {
-      await deleteGoal(user, id);
-      alertHelper(setShowMessage, setShowDeleted, 'Goal deleted successfully!');
+      await deleteGoal(owner, id);
     } catch (error) {
-      alertHelper(setShowMessage, setShowError, error.message);
+      setError(error.message);
+      setBusy(false);
     }
   };
-
-  useEffect(() => {
-    const goalOwner = async () => {
-      try {
-        const res = await getUserByUsername(owner);
-        setOwnerObj(res.val());
-      } catch (error) {
-        alertHelper(setShowMessage, setShowError, error.message);
-      }
-    };
-
-    goalOwner();
-  }, [owner]);
-
   return (
-    <>
-      <th>
-        <div className={'flex items-center gap-3'}>
-          <div className='avatar'>
-            <div className='mask mask-squircle w-12 h-12'>
-              <img
-                src={ownerObj?.avatar}
-                onError={handleAvatarError}
-                alt={`Avatar of ${ownerObj?.firstName} ${ownerObj?.lastName}`}
-              />
-            </div>
-          </div>
-          <div>
-            <div className='font-bold'>
-              {ownerObj?.firstName} {ownerObj?.lastName}
-            </div>
-            <div className='text-sm opacity-50'>{ownerObj?.email}</div>
-          </div>
-        </div>
-      </th>
-      <td>{name}</td>
-      <td>
-        <TimeLeft goal={{ name, owner, progress, timePeriod: { from, to } }} />
-      </td>
-      <td className='first-letter:uppercase'>{type}</td>
-      {type && (
-        <td>
-          <Progress progress={progress} />
-        </td>
-      )}
-      <td className='flex items-center h-28'>
-        {userData?.username === owner && (
-          <GoalButton
-            primary={false}
-            title={'Details'}
-            styles='btn-primary mx-2'
-            onClick={handleDetailsClick}
+    <article className='goal-card surface'>
+      <div className='goal-card-top'>
+        <span
+          className={`icon-tile ${status === 'Completed' ? 'tone-mint' : 'tone-lavender'}`}
+        >
+          <Icon
+            name={
+              status === 'Completed'
+                ? 'trophy'
+                : type === 'calories'
+                  ? 'flame'
+                  : type === 'exercises'
+                    ? 'dumbbell'
+                    : 'target'
+            }
+            size={22}
           />
-        )}
-        {(userData?.username === owner || userData?.userRole === 'admin') && (
-          <GoalButton
-            primary={false}
-            styles='btn-warning '
-            onClick={() => handleDeleteClick(owner)}
+        </span>
+        <span
+          className={`pill ${status === 'Archived' ? 'pill-neutral' : status === 'Upcoming' ? 'pill-lavender' : ''}`}
+        >
+          {status}
+        </span>
+        {(own || userData.userRole === 'admin') && (
+          <button
+            className='icon-button goal-delete'
+            disabled={busy}
+            onClick={remove}
+            aria-label={`Delete goal ${name}`}
           >
-            <FontAwesomeIcon icon={faTrashCan} />
-          </GoalButton>
+            <Icon
+              name='trash'
+              size={15}
+            />
+          </button>
         )}
-        {showDeleted && <AlertSuccess message={showMessage} />}
-        {showError && <AlertError message={showMessage} />}
-      </td>
-    </>
+      </div>
+      <div className='goal-card-main'>
+        <div>
+          <span className='goal-kind'>
+            {type === 'manual'
+              ? 'PERSONAL MILESTONE'
+              : type === 'calories'
+                ? 'ENERGY GOAL'
+                : 'MOVEMENT GOAL'}
+          </span>
+          <h3>{name}</h3>
+          <p>{own ? 'Your personal journey' : `A goal by ${owner}`}</p>
+        </div>
+        <Progress progress={progress} />
+      </div>
+      <div
+        className='goal-progress-track'
+        aria-hidden='true'
+      >
+        <span
+          style={{
+            width: `${Math.min(100, Math.max(0, Number(progress) || 0))}%`,
+          }}
+        />
+      </div>
+      <div className='goal-card-footer'>
+        <span>
+          <Icon
+            name='calendar'
+            size={13}
+          />
+          {shortFormatDate(to)}
+        </span>
+        <Link
+          to={`/goals/${id}${own ? '' : `?owner=${encodeURIComponent(owner)}`}`}
+        >
+          View progress{' '}
+          <Icon
+            name='arrow'
+            size={14}
+          />
+        </Link>
+      </div>
+      <InlineMessage>{error}</InlineMessage>
+    </article>
   );
 }

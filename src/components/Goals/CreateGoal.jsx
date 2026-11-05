@@ -1,289 +1,200 @@
 import { useContext, useState } from 'react';
-import { createGoal } from '../../services/goal.service';
 import { AppContext } from '../../context/AppContext';
+import { createGoal } from '../../services/goal.service';
 import { validateGoalForm } from '../../common/goal.validations';
-import {
-  GOAL_MAX_CALORIES,
-  GOAL_MAX_EXERCISES,
-  GOAL_MAX_PROGRESS,
-  GOAL_MIN_CALORIES,
-  GOAL_MIN_EXERCISES,
-  GOAL_MIN_PROGRESS,
-} from '../../common/constants';
-import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess';
-import AlertError from '../Alerts/AlertError/AlertError';
-import { alertHelper } from '../../helper/alert-helper';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { localDateValue } from '../../helper/goal-status';
+import Modal from '../UI/Modal';
+import Icon from '../UI/Icon';
+import FormField from '../UI/FormField';
+import InlineMessage from '../UI/InlineMessage';
+
+const initialForm = () => {
+  const end = new Date();
+  end.setDate(end.getDate() + 7);
+  return {
+    name: '',
+    from: localDateValue(),
+    to: localDateValue(end),
+    type: 'exercises',
+    exercises: 5,
+    calories: 500,
+    progress: 0,
+  };
+};
 
 export default function CreateGoal() {
   const { userData } = useContext(AppContext);
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setAlertMessage] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(null);
-  const onChange = (dates) => {
-    const [start, end] = dates;
-    setStartDate(start);
-    setEndDate(end);
-    setForm({
-      ...form,
-      from: start,
-      to: end,
-    });
-  };
-
-  const [form, setForm] = useState({
-    name: '',
-    from: '',
-    to: '',
-    type: 'manual',
-    exercises: GOAL_MIN_EXERCISES,
-    calories: GOAL_MIN_CALORIES,
-    progress: GOAL_MIN_PROGRESS,
-  });
-
-  const formClearObject = {
-    name: '',
-    from: '',
-    to: '',
-    type: 'manual',
-    exercises: GOAL_MIN_EXERCISES,
-    calories: GOAL_MIN_CALORIES,
-    progress: GOAL_MIN_PROGRESS,
-  };
-
-  const updateForm = (props) => (e) => {
-    setForm((form) => ({
-      ...form,
-      [props]: e.target.value,
-    }));
-  };
-
-  const handleCreateGoal = async (e) => {
-    e.preventDefault();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const change = (key) => (event) =>
+    setForm((value) => ({ ...value, [key]: event.target.value }));
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setBusy(true);
     try {
-      validateGoalForm(
-        form.name,
-        userData?.username,
-        new Date(form.from).getTime(),
-        new Date(form.to).getTime()
-      );
-
+      const from = new Date(`${form.from}T00:00:00`).getTime(),
+        to = new Date(`${form.to}T23:59:59`).getTime();
+      validateGoalForm(form.name.trim(), userData.username, from, to);
+      if (form.type === 'exercises' && Number(form.exercises) < 1)
+        throw new Error('Aim for at least one exercise.');
+      if (form.type === 'calories' && Number(form.calories) < 1)
+        throw new Error('Set a calorie target greater than zero.');
       await createGoal(
-        form.name,
+        form.name.trim(),
         userData.username,
-        new Date(form.from).getTime(),
-        new Date(form.to).getTime(),
+        from,
+        to,
         form.type,
-        Number(form.exercises),
-        Number(form.progress),
-        Number(form.calories)
+        form.type === 'exercises' ? Number(form.exercises) : 0,
+        form.type === 'manual' ? Number(form.progress) : 0,
+        form.type === 'calories' ? Number(form.calories) : 0
       );
-      setForm(formClearObject);
-      setStartDate(null);
-      setEndDate(null);
-
-      document.getElementById('my_modal_3').close();
-      alertHelper(setAlertMessage, setShowSuccess, 'Goal Created!');
+      setForm(initialForm());
+      setOpen(false);
     } catch (error) {
-      alertHelper(setAlertMessage, setShowError, error.message);
+      setError(error.message);
+    } finally {
+      setBusy(false);
     }
   };
-
-  const handleCloseModal = (e) => {
-    e.preventDefault();
-    setForm(formClearObject);
-    setStartDate(null);
-    setEndDate(null);
-    document.getElementById('my_modal_3').close();
-  };
-
   return (
     <>
       <button
-        className='btn btn-primary self-center w-1/2'
-        onClick={() => document.getElementById('my_modal_3').showModal()}
+        className='btn btn-primary'
+        onClick={() => {
+          setError('');
+          setOpen(true);
+        }}
       >
-        Create Goal
+        <Icon
+          name='plus'
+          size={17}
+        />
+        Create a goal
       </button>
-      <dialog
-        id='my_modal_3'
-        className='modal'
+      <Modal
+        open={open}
+        onClose={() => !busy && setOpen(false)}
+        title='Give your progress a purpose'
+        description='One intention. A few small steps. Something worth showing up for.'
       >
-        <div className='modal-box'>
-          <div
-            method='dialog'
-            className='flex place-content-end relative right-0 top-0 w-full h-7'
-          >
-            <button
-              type='button'
-              className='btn btn-sm btn-circle btn-outline'
-              onClick={(e) => {
-                handleCloseModal(e);
-              }}
-            >
-              ✕
-            </button>
-          </div>
-          <h2 className='text-center text-2xl font-bold text-primary'>
-            Create Goal
-          </h2>
-          <label className='flex items-center select-none justify-between px-1 py-2 flex-col self-center text-justify font-semibold text-primary'>
-            Your progress will be calculated based on the goal type you select
-            below and the time frame you set.
-            <span className='text-secondary'>
-              You can not change the goal type after creating the goal.
-            </span>
-          </label>
-          <div className='flex flex-col gap-1'>
-            <label className='input flex items-center gap-2 shadow-xl text-primary w-full'>
-              Name
-              <input
-                type='text'
-                className='grow'
-                placeholder='Goal Name'
-                value={form.name}
-                onChange={updateForm('name')}
-              />
-            </label>
-            <label className='flex items-center select-none justify-between px-1 py-2 self-center text-justify font-semibold text-primary'>
-              Select Date
-            </label>
-            <DatePicker
-              selected={startDate}
-              onChange={onChange}
-              startDate={startDate}
-              endDate={endDate}
-              selectsRange
-              inline
+        <form
+          onSubmit={submit}
+          className='form-stack'
+        >
+          <FormField
+            label='Name your goal'
+            required
+            minLength={3}
+            maxLength={30}
+            placeholder='e.g. A stronger kind of week'
+            value={form.name}
+            onChange={change('name')}
+          />
+          <fieldset>
+            <legend className='field-legend'>
+              How would you like to track it?
+            </legend>
+            <div className='goal-type-options'>
+              {[
+                { value: 'exercises', icon: 'dumbbell', label: 'Exercises' },
+                { value: 'calories', icon: 'flame', label: 'Calories' },
+                { value: 'manual', icon: 'target', label: 'My progress' },
+              ].map((item) => (
+                <button
+                  type='button'
+                  key={item.value}
+                  aria-pressed={form.type === item.value}
+                  onClick={() =>
+                    setForm((value) => ({ ...value, type: item.value }))
+                  }
+                >
+                  <Icon
+                    name={item.icon}
+                    size={22}
+                  />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <div className='form-grid'>
+            <FormField
+              label='Start date'
+              type='date'
+              required
+              value={form.from}
+              onChange={change('from')}
             />
-
-            <label className='flex items-center select-none justify-between px-1 py-2 self-center text-justify font-semibold text-primary'>
-              Select your goal type
-            </label>
-            <div className='flex w-full'>
-              <div className='grid h-20 grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
-                <div className='flex flex-col'>
-                  <label className='flex items-center select-none justify-between px-1 py-2 cursor-pointer gap-1'>
-                    <span className='text-sm'>Exercises</span>
-                    <input
-                      type='radio'
-                      name='radio-10'
-                      className='radio checked:bg-blue-500'
-                      onChange={() => setForm({ ...form, type: 'exercises' })}
-                      checked={form.type === 'exercises' ? true : false}
-                    />
-                  </label>
-                </div>
-              </div>
-              <div className='divider divider-horizontal'>OR</div>
-              <div className='grid h-20 grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
-                <div className='flex flex-col'>
-                  <label className='flex items-center select-none justify-between px-1 py-2 cursor-pointer gap-1'>
-                    <span className='text-sm'>Manual progress</span>
-                    <input
-                      type='radio'
-                      name='radio-10'
-                      className='radio checked:bg-blue-500'
-                      onChange={() => setForm({ ...form, type: 'manual' })}
-                      checked={form.type === 'manual' ? true : false}
-                    />
-                  </label>
-                </div>
-              </div>
-              <div className='divider divider-horizontal'>OR</div>
-              <div className='grid h-20 grow card bg-base-300 rounded-box place-items-center shadow-2xl'>
-                <div className='flex flex-col'>
-                  <label className='flex items-center select-none justify-between px-1 py-2 cursor-pointer gap-1'>
-                    <span className='text-sm'>Calories</span>
-                    <input
-                      type='radio'
-                      name='radio-10'
-                      className='radio checked:bg-blue-500'
-                      onChange={() => setForm({ ...form, type: 'calories' })}
-                      checked={form.type === 'calories' ? true : false}
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div className='mt-4 mb-3 justify-center shadow-xl'>
-              {form.type === 'exercises' && (
-                <label className='input flex items-center gap-2 w-full'>
-                  Exercises
-                  <input
-                    type='number'
-                    className='grow'
-                    placeholder='Exercises'
-                    value={form.exercises}
-                    min={GOAL_MIN_EXERCISES}
-                    max={GOAL_MAX_EXERCISES}
-                    onChange={updateForm('exercises')}
-                    checked={form.type === 'exercises' ? true : false}
-                  />
-                </label>
-              )}
-              {form.type === 'manual' && (
-                <label className='input flex items-center gap-2 w-full'>
-                  Progress {form.progress}%
-                  <input
-                    type='range'
-                    className='grow'
-                    placeholder='Progress'
-                    min={GOAL_MIN_PROGRESS}
-                    max={GOAL_MAX_PROGRESS}
-                    value={form.progress}
-                    onChange={updateForm('progress')}
-                    checked={form.type === 'manual' ? true : false}
-                  />
-                </label>
-              )}
-              {form.type === 'calories' && (
-                <label className='input flex items-center gap-2 w-full'>
-                  Calories
-                  <input
-                    type='number'
-                    className='grow'
-                    placeholder='Calories'
-                    min={GOAL_MIN_CALORIES}
-                    max={GOAL_MAX_CALORIES}
-                    value={form.calories}
-                    onChange={updateForm('calories')}
-                    checked={form.type === 'calories' ? true : false}
-                  />
-                </label>
-              )}
-            </div>
+            <FormField
+              label='Finish date'
+              type='date'
+              required
+              min={form.from}
+              value={form.to}
+              onChange={change('to')}
+            />
           </div>
-          <div
-            method='dialog'
-            className='flex gap-2 place-content-end relative right-0 top-0 w-full h-7'
-          >
+          {form.type === 'exercises' ? (
+            <FormField
+              label='Exercise target'
+              type='number'
+              required
+              min={1}
+              max={100}
+              value={form.exercises}
+              onChange={change('exercises')}
+              hint='Completed exercise timers automatically count towards this goal.'
+            />
+          ) : form.type === 'calories' ? (
+            <FormField
+              label='Calories to burn (kcal)'
+              type='number'
+              required
+              min={1}
+              max={10000}
+              value={form.calories}
+              onChange={change('calories')}
+              hint='Calories from completed exercises will move you towards your target.'
+            />
+          ) : (
+            <FormField
+              label={`Starting progress · ${form.progress}%`}
+              type='range'
+              min={0}
+              max={100}
+              value={form.progress}
+              onChange={change('progress')}
+              hint='You’re in charge. Update your progress whenever you reach a milestone.'
+            />
+          )}
+          <InlineMessage>{error}</InlineMessage>
+          <div className='dialog-actions'>
             <button
               type='button'
-              className='btn btn-sm btn-primary'
-              onClick={handleCreateGoal}
-            >
-              Create
-            </button>
-            |
-            <button
-              type='button'
-              className='btn btn-sm btn-warning'
-              onClick={(e) => {
-                handleCloseModal(e);
-              }}
+              className='btn btn-ghost'
+              disabled={busy}
+              onClick={() => setOpen(false)}
             >
               Cancel
             </button>
+            <button
+              type='submit'
+              className='btn btn-primary'
+              disabled={busy}
+            >
+              {busy ? 'Creating…' : 'Make it happen'}
+              <Icon
+                name='arrow'
+                size={16}
+              />
+            </button>
           </div>
-        </div>
-        {showError && <AlertError message={`${errorMessage}!`} />}
-      </dialog>
-      {showSuccess && <AlertSuccess message='Goal Created!' />}
+        </form>
+      </Modal>
     </>
   );
 }
