@@ -1,4 +1,5 @@
-import { db, storage } from '../config/firebase-config';
+import { db } from '../config/firebase-config';
+import { uploadImage } from './cloudinary.service';
 import {
   equalTo,
   get,
@@ -9,17 +10,12 @@ import {
   set,
   update,
 } from 'firebase/database';
-import {
-  getDownloadURL,
-  ref as refStorage,
-  uploadBytes,
-} from 'firebase/storage';
 
 export const getUserByUsername = async (username) => {
   try {
     return get(ref(db, `users/${username}`));
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -28,7 +24,7 @@ export const getAllUsers = async () => {
     const result = await get(ref(db, 'users'));
     return result;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -46,7 +42,7 @@ export const getAllFriends = async (username) => {
 
     return friendsList;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -64,7 +60,7 @@ export const getAllUsersDataRequests = async (username) => {
 
     return requestsList;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -81,7 +77,7 @@ export const getFilterUserBySearchTerm = async (searchBy, search) => {
     });
     return users;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -123,7 +119,7 @@ export const createUser = (
       },
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -140,7 +136,7 @@ export const promoteToAdminAsync = async (username, role) => {
   try {
     await update(ref(db, `users/${username}`), { userRole: role });
   } catch (error) {
-    console.log('Error promoting user to admin:', error.message);
+    console.error('Error promoting user to admin:', error.message);
   }
 };
 
@@ -148,7 +144,7 @@ export const blockUserAsync = async (username, isBlocked) => {
   try {
     await update(ref(db, `users/${username}`), { isBlocked: isBlocked });
   } catch (error) {
-    console.log('Error blocking user:', error.message);
+    console.error('Error blocking user:', error.message);
   }
 };
 
@@ -160,9 +156,9 @@ export const addFriendService = async (username, friendUsername) => {
     updateData[`users/${username}/requests/${friendUsername}`] = null;
     updateData[`users/${username}/myRequests/${friendUsername}`] = null;
     updateData[`users/${friendUsername}/myRequests/${username}`] = null;
-    update(ref(db), updateData);
+    await update(ref(db), updateData);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -174,9 +170,9 @@ export const removeFriendRequestService = async (username, friendUsername) => {
     updateData[`users/${username}/myRequests/${friendUsername}`] = null;
     updateData[`users/${friendUsername}/myRequests/${username}`] = null;
 
-    update(ref(db), updateData);
+    await update(ref(db), updateData);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -186,9 +182,9 @@ export const sendRequestService = async (username, friendUsername) => {
     updateData[`users/${friendUsername}/requests/${username}`] = true;
     updateData[`users/${username}/myRequests/${friendUsername}`] = true;
 
-    update(ref(db), updateData);
+    await update(ref(db), updateData);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -200,9 +196,9 @@ export const removeFriendService = async (username, friendUsername) => {
     updateData[`users/${username}/myRequests/${friendUsername}`] = null;
     updateData[`users/${friendUsername}/myRequests/${username}`] = null;
 
-    update(ref(db), updateData);
+    await update(ref(db), updateData);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -213,7 +209,7 @@ export const checkFriendStatusService = async (username, friendUsername) => {
     const snapshot = await get(friendsRef);
     return snapshot.exists();
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -224,7 +220,7 @@ export const checkFriendRequestService = async (username, friendUsername) => {
     const snapshot = await get(requestsRef);
     return snapshot.exists();
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -234,7 +230,7 @@ export const addUserExercise = async (username, exerciseId) => {
       exercises: exerciseId,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -242,7 +238,7 @@ export const getUserData = (uid) => {
   try {
     return get(query(ref(db, 'users'), orderByChild('uid'), equalTo(uid)));
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -250,53 +246,24 @@ export const updateUserByUsername = async (username, data) => {
   try {
     return await update(ref(db, `users/${username}`), data);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
-export const uploadPhoto = async (image, username) => {
+export const uploadPhoto = async (image) => {
   try {
-    const imageRef = refStorage(storage, `images/${username}`);
-    const url = await getUploadedPhoto(username);
-    updateUserByUsername(username, { avatar: url });
-    return await uploadBytes(imageRef, image);
-  } catch (e) {
-    if (e) {
-      console.log(e.message);
-    }
+    return await uploadImage(image, 'avatars');
+  } catch (error) {
+    console.error('Error uploading photo:', error.message);
+    return null;
   }
 };
 
-export const getUploadedPhoto = async (username) => {
+export const uploadCategoryPhoto = async (image) => {
   try {
-    const imageRef = refStorage(storage, `images/${username}`);
-    const url = await getDownloadURL(imageRef);
-    return url;
-  } catch (e) {
-    if (e.message === 'storage/object-not-found') {
-      return null;
-    }
-  }
-};
-
-export const uploadCategoryPhoto = async (image, category) => {
-  try {
-    const imageRef = refStorage(storage, `categories/${category}`);
-    await uploadBytes(imageRef, image);
-    const url = await getDownloadURL(imageRef);
-    return url;
-  } catch (e) {
-    throw new Error(e.message);
-  }
-};
-
-export const getCategoryPhoto = async (category) => {
-  try {
-    const imageRef = refStorage(storage, `categories/${category}`);
-    const url = await getDownloadURL(imageRef);
-    return url;
-  } catch (e) {
-    throw new Error(e.message);
+    return await uploadImage(image, 'categories');
+  } catch (error) {
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -309,7 +276,7 @@ export const getFriends = async (username) => {
       return Object.keys(friendsData);
     }
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -318,7 +285,7 @@ export const getUserAvatar = async (username) => {
     const result = await get(ref(db, `users/${username}/avatar`));
     return result.val();
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -340,7 +307,7 @@ export const startExercise = async (username, time, exerciseId, calories) => {
       doneExercises: Number(newScores.val().doneExercises) + 1,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -348,7 +315,7 @@ export const endExercise = async (username) => {
   try {
     await update(ref(db, `users/${username}`), { endCurrentExercise: null });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -362,7 +329,7 @@ export const whenTimerEnds = async (username) => {
       doneExercises: currentScores.val().doneExercises,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -372,7 +339,7 @@ export const StartTimerWorkout = async (username, timer) => {
       timer: timer,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -390,7 +357,7 @@ export const stopTimerRemoveCalories = async (username, calories) => {
       doneExercises: doneExercises - 1,
     });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -398,7 +365,7 @@ export const stopTimerWorkout = async (username) => {
   try {
     await update(ref(db, `users/${username}`), { workoutTimer: null });
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
