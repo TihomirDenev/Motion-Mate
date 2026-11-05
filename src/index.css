@@ -12,6 +12,16 @@
   src: url('/fonts/dm-sans-latin.woff2') format('woff2');
 }
 
+/* DM Sans has no Cyrillic glyphs, so Bulgarian text uses Manrope inside the same family. */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
 @plugin 'daisyui/theme' {
   name: 'fantasy';
   default: true;
@@ -228,6 +238,35 @@
 }
 .btn-full {
   width: 100%;
+}
+.language-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  transition:
+    background 160ms,
+    transform 160ms;
+}
+.language-button:hover {
+  background: var(--mint);
+  color: var(--color-primary);
+}
+.language-button:active {
+  transform: scale(0.92);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
 }
 .icon-button {
   display: inline-flex;
@@ -5409,6 +5448,11 @@
   .topbar-actions .theme-button {
     border-color: transparent;
     background: transparent;
+  }
+  .language-button {
+    min-width: 34px;
+    height: 34px;
+    font-size: 10px;
   }
   .topbar-actions .avatar-sm {
     height: 29px;
