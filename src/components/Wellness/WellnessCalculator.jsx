@@ -13,45 +13,17 @@ import {
 import FormField from '../UI/FormField';
 import Icon from '../UI/Icon';
 import InlineMessage from '../UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
-const content = {
-  water: {
-    title: 'Find your daily flow',
-    description:
-      'A little hydration goes a long way. Find a starting point for your day.',
-    icon: 'drop',
-    tone: 'blue',
-    empty: 'A little refreshment, made personal.',
-    detail:
-      'Start with regular sips through the day. Your needs change with the weather, movement, and how you feel.',
-    button: 'Find my hydration target',
-  },
-  bmi: {
-    title: 'Get to know your balance',
-    description:
-      'One simple measure to help you understand your body a little better.',
-    icon: 'scale',
-    tone: 'lavender',
-    empty: 'A fresh perspective on your balance.',
-    detail:
-      'BMI is a broad screening measure. It doesn’t distinguish muscle from fat or describe your overall fitness.',
-    button: 'Calculate my BMI',
-  },
-  calories: {
-    title: 'Fuel your everyday',
-    description:
-      'Find an estimate of the energy that keeps you moving at your current weight.',
-    icon: 'flame',
-    tone: 'peach',
-    empty: 'Energy for everything that makes you, you.',
-    detail:
-      'Calculated with the revised Harris–Benedict equation and your activity level. A starting estimate, rather than a fixed daily target.',
-    button: 'Find my daily energy',
-  },
+const visuals = {
+  water: { icon: 'drop', tone: 'blue' },
+  bmi: { icon: 'scale', tone: 'lavender' },
+  calories: { icon: 'flame', tone: 'peach' },
 };
 
 export default function WellnessCalculator({ tool }) {
   const { userData } = useContext(AppContext);
+  const { t, formatNumber } = useTranslation();
   const getProfileForm = () => ({
     weight: userData.weight || '',
     height: userData.height || '',
@@ -66,7 +38,8 @@ export default function WellnessCalculator({ tool }) {
   );
   const [error, setError] = useState('');
   const resultRef = useRef(null);
-  const copy = content[tool];
+  const copy = visuals[tool];
+  const text = (key) => t(`wellness.${tool}.${key}`);
   const change = (key) => (event) => {
     setForm((value) => ({ ...value, [key]: event.target.value }));
     setResult(null);
@@ -133,16 +106,16 @@ export default function WellnessCalculator({ tool }) {
             />
           </span>
           <div>
-            <h2>{copy.title}</h2>
-            <p>{copy.description}</p>
+            <h2>{text('title')}</h2>
+            <p>{text('description')}</p>
           </div>
         </div>
         <div className='calculator-unit-row'>
-          <span>Your measurements</span>
+          <span>{t('wellness.measurements')}</span>
           <div
             className='segmented-control'
             role='group'
-            aria-label='Measurement system'
+            aria-label={t('wellness.system')}
           >
             {['metric', 'imperial'].map((value) => (
               <button
@@ -151,7 +124,7 @@ export default function WellnessCalculator({ tool }) {
                 aria-pressed={units === value}
                 onClick={() => switchUnits(value)}
               >
-                {value === 'metric' ? 'Metric' : 'Imperial'}
+                {t(`wellness.${value}`)}
               </button>
             ))}
           </div>
@@ -162,7 +135,9 @@ export default function WellnessCalculator({ tool }) {
         >
           <div className='form-grid'>
             <FormField
-              label={`Weight (${units === 'metric' ? 'kg' : 'lb'})`}
+              label={t(
+                units === 'metric' ? 'fields.weightKg' : 'fields.weightLb'
+              )}
               type='number'
               inputMode='decimal'
               required
@@ -173,7 +148,9 @@ export default function WellnessCalculator({ tool }) {
             />
             {tool !== 'water' && (
               <FormField
-                label={`Height (${units === 'metric' ? 'cm' : 'in'})`}
+                label={t(
+                  units === 'metric' ? 'fields.heightCm' : 'fields.heightIn'
+                )}
                 type='number'
                 inputMode='decimal'
                 required
@@ -185,7 +162,7 @@ export default function WellnessCalculator({ tool }) {
             )}
             {tool === 'water' && (
               <FormField
-                label='Activity level'
+                label={t('fields.activityLevel')}
                 value={form.activityLevel}
                 onChange={change('activityLevel')}
               >
@@ -194,7 +171,7 @@ export default function WellnessCalculator({ tool }) {
                     key={level.value}
                     value={level.value}
                   >
-                    {level.label}
+                    {t(`activity.${level.value}.label`)}
                   </option>
                 ))}
               </FormField>
@@ -204,29 +181,29 @@ export default function WellnessCalculator({ tool }) {
             <>
               <div className='form-grid'>
                 <FormField
-                  label='Age (years)'
+                  label={t('fields.age')}
                   type='number'
                   inputMode='numeric'
                   required
-                  min={10}
+                  min={18}
                   max={100}
                   placeholder='30'
                   value={form.age}
                   onChange={change('age')}
                 />
                 <FormField
-                  label='Sex used by the formula'
+                  label={t('fields.sexFormula')}
                   value={form.gender}
                   required
                   onChange={change('gender')}
                 >
-                  <option value=''>Choose</option>
-                  <option value='Female'>Female</option>
-                  <option value='Male'>Male</option>
+                  <option value=''>{t('common.choose')}</option>
+                  <option value='Female'>{t('gender.Female')}</option>
+                  <option value='Male'>{t('gender.Male')}</option>
                 </FormField>
               </div>
               <FormField
-                label='Activity level'
+                label={t('fields.activityLevel')}
                 value={form.activityLevel}
                 onChange={change('activityLevel')}
               >
@@ -235,7 +212,7 @@ export default function WellnessCalculator({ tool }) {
                     key={level.value}
                     value={level.value}
                   >
-                    {level.label}
+                    {t(`activity.${level.value}.label`)}
                   </option>
                 ))}
               </FormField>
@@ -246,7 +223,7 @@ export default function WellnessCalculator({ tool }) {
             className='btn btn-primary btn-full'
             type='submit'
           >
-            {copy.button}
+            {text('button')}
             <Icon
               name='arrow'
               size={17}
@@ -266,12 +243,15 @@ export default function WellnessCalculator({ tool }) {
               name='refresh'
               size={13}
             />
-            Use my profile details
+            {t('wellness.useProfile')}
           </button>
         </form>
       </div>
-      <div ref={resultRef} className={`calculator-result tone-${copy.tone}`}>
-        <span className='eyebrow'>A LITTLE INSIGHT, JUST FOR YOU</span>
+      <div
+        ref={resultRef}
+        className={`calculator-result tone-${copy.tone}`}
+      >
+        <span className='eyebrow'>{t('wellness.resultEyebrow')}</span>
         <div
           className='result-illustration'
           aria-hidden='true'
@@ -289,21 +269,21 @@ export default function WellnessCalculator({ tool }) {
             className='result-output'
           >
             <strong>
-              {result.value.toLocaleString('en-US', {
-                maximumFractionDigits: 2,
-              })}
+              {formatNumber(result.value, { maximumFractionDigits: 2 })}
             </strong>
-            <span>{result.unit}</span>
-            <p>{result.label}</p>
+            <span>{t(result.unitKey)}</span>
+            <p>{t(result.labelKey)}</p>
             {tool === 'water' && (
               <small>
-                About {Math.ceil(result.metricValue / 0.25)} glasses of 250 ml
+                {t('wellness.glasses', {
+                  count: Math.ceil(result.metricValue / 0.25),
+                })}
               </small>
             )}
             {tool === 'bmi' && (
               <div
                 className='bmi-scale'
-                aria-label='BMI reference scale'
+                aria-label={t('wellness.bmiScale')}
               >
                 <span />
                 <span />
@@ -319,11 +299,11 @@ export default function WellnessCalculator({ tool }) {
           </div>
         ) : (
           <div className='result-empty'>
-            <h3>{copy.empty}</h3>
-            <p>Enter your details to see your personal estimate.</p>
+            <h3>{text('empty')}</h3>
+            <p>{t('wellness.emptyHint')}</p>
           </div>
         )}
-        <p className='result-detail'>{copy.detail}</p>
+        <p className='result-detail'>{text('detail')}</p>
       </div>
     </section>
   );

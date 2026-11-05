@@ -15,9 +15,11 @@ import LoadingState from '../../components/UI/LoadingState';
 import EmptyState from '../../components/UI/EmptyState';
 import InlineMessage from '../../components/UI/InlineMessage';
 import Modal from '../../components/UI/Modal';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function AdminPanel() {
-  usePageTitle('Motion Mate | Administration');
+  const { t, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('nav.admin')}`);
   const { userData } = useContext(AppContext);
   const {
     data,
@@ -53,11 +55,7 @@ export default function AdminPanel() {
         await deleteUserAsync(user.username);
         setSelected(null);
       }
-      setMessage(
-        action === 'delete'
-          ? 'Community profile removed.'
-          : 'Community access updated.'
-      );
+      setMessage(t(action === 'delete' ? 'admin.removed' : 'admin.updated'));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -67,26 +65,26 @@ export default function AdminPanel() {
   return (
     <div className='page-enter'>
       <PageHeader
-        eyebrow='LOOK AFTER YOUR COMMUNITY'
-        title='A space in good hands.'
-        description='Manage community profiles, access, and the people who help keep things moving.'
+        eyebrow={t('admin.eyebrow')}
+        title={t('admin.title')}
+        description={t('admin.description')}
       />
       <div className='admin-summary'>
         {[
           {
-            label: 'Community members',
+            label: t('admin.members'),
             value: allUsers.length,
             icon: 'users',
             tone: 'mint',
           },
           {
-            label: 'Administrators',
+            label: t('admin.admins'),
             value: allUsers.filter((user) => user.userRole === 'admin').length,
             icon: 'shield',
             tone: 'lavender',
           },
           {
-            label: 'Paused accounts',
+            label: t('admin.paused'),
             value: allUsers.filter((user) => user.isBlocked).length,
             icon: 'user',
             tone: 'peach',
@@ -103,7 +101,7 @@ export default function AdminPanel() {
               />
             </span>
             <div>
-              <strong>{item.value}</strong>
+              <strong>{formatNumber(item.value)}</strong>
               <p>{item.label}</p>
             </div>
           </div>
@@ -117,13 +115,15 @@ export default function AdminPanel() {
           />
           <input
             type='search'
-            aria-label='Search community members'
-            placeholder='Find a community member…'
+            aria-label={t('admin.searchLabel')}
+            placeholder={t('admin.searchPlaceholder')}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
         </label>
-        <span className='result-count'>{users.length} profiles</span>
+        <span className='result-count'>
+          {t('admin.profiles', { count: users.length })}
+        </span>
       </div>
       <InlineMessage>{error || loadError}</InlineMessage>
       <InlineMessage type='success'>{message}</InlineMessage>
@@ -154,10 +154,12 @@ export default function AdminPanel() {
                 <span
                   className={`pill ${user.isBlocked ? 'pill-peach' : 'pill-neutral'}`}
                 >
-                  {user.isBlocked ? 'Paused' : 'Active'}
+                  {t(
+                    user.isBlocked ? 'admin.statusPaused' : 'admin.statusActive'
+                  )}
                 </span>
                 {user.userRole === 'admin' && (
-                  <span className='pill pill-lavender'>Admin</span>
+                  <span className='pill pill-lavender'>{t('admin.badge')}</span>
                 )}
               </div>
               <div className='admin-user-actions'>
@@ -170,14 +172,18 @@ export default function AdminPanel() {
                     name='shield'
                     size={14}
                   />
-                  {user.userRole === 'admin' ? 'Make member' : 'Make admin'}
+                  {t(
+                    user.userRole === 'admin'
+                      ? 'admin.makeMember'
+                      : 'admin.makeAdmin'
+                  )}
                 </button>
                 <button
                   className='btn btn-ghost btn-sm'
                   disabled={busy === user.username}
                   onClick={() => act(user, 'block')}
                 >
-                  {user.isBlocked ? 'Restore access' : 'Pause access'}
+                  {t(user.isBlocked ? 'admin.restore' : 'admin.pause')}
                 </button>
                 <button
                   className='icon-button danger-button'
@@ -186,7 +192,7 @@ export default function AdminPanel() {
                     setError('');
                     setSelected(user);
                   }}
-                  aria-label={`Remove profile ${user.username}`}
+                  aria-label={t('admin.removeLabel', { name: user.username })}
                 >
                   <Icon
                     name='trash'
@@ -201,18 +207,18 @@ export default function AdminPanel() {
         <div className='surface'>
           <EmptyState
             icon='search'
-            title='No matching profiles'
-            description='Try a different name or username.'
+            title={t('admin.emptyTitle')}
+            description={t('admin.emptyDescription')}
           />
         </div>
       )}
       <Modal
         open={Boolean(selected)}
         onClose={() => !busy && setSelected(null)}
-        title='Remove this community profile?'
+        title={t('admin.removeTitle')}
         description={
           selected
-            ? `${selected.username}’s profile and its saved data will be removed from Motion Mate. This doesn’t delete their Firebase sign-in account.`
+            ? t('admin.removeDescription', { name: selected.username })
             : ''
         }
       >
@@ -223,14 +229,14 @@ export default function AdminPanel() {
             disabled={Boolean(busy)}
             onClick={() => setSelected(null)}
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             className='btn btn-error'
             disabled={Boolean(busy)}
             onClick={() => act(selected, 'delete')}
           >
-            {busy ? 'Removing…' : 'Remove profile'}
+            {t(busy ? 'admin.removing' : 'admin.removeConfirm')}
           </button>
         </div>
       </Modal>

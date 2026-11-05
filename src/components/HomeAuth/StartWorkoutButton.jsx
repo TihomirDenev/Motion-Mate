@@ -8,6 +8,7 @@ import Modal from '../UI/Modal';
 import Icon from '../UI/Icon';
 import FormField from '../UI/FormField';
 import InlineMessage from '../UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export const StartWorkoutButton = () => {
   const { userData } = useContext(AppContext);
@@ -15,11 +16,12 @@ export const StartWorkoutButton = () => {
   const [minutes, setMinutes] = useState(30);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
   const running = Boolean(userData?.workoutTimer?.timer);
   const submit = async (event) => {
     event.preventDefault();
     if (!Number.isFinite(Number(minutes)) || minutes < 1 || minutes > 180) {
-      setError('Choose a workout between 1 and 180 minutes.');
+      setError(t('workout.durationError'));
       return;
     }
     setBusy(true);
@@ -58,7 +60,7 @@ export const StartWorkoutButton = () => {
           name={running ? 'stop' : 'play'}
           size={16}
         />
-        {running ? 'End workout' : 'Start a workout'}
+        {t(running ? 'workout.end' : 'workout.start')}
         <Icon
           name='arrow'
           size={16}
@@ -67,8 +69,8 @@ export const StartWorkoutButton = () => {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title='Make time for you'
-        description='Set a session timer, then start individual exercises from your workout list.'
+        title={t('workout.modalTitle')}
+        description={t('workout.modalDescription')}
       >
         <form
           onSubmit={submit}
@@ -83,12 +85,12 @@ export const StartWorkoutButton = () => {
                 onClick={() => setMinutes(value)}
               >
                 <strong>{value}</strong>
-                <span>min</span>
+                <span>{t('common.min')}</span>
               </button>
             ))}
           </div>
           <FormField
-            label='Or choose your duration (minutes)'
+            label={t('workout.customDuration')}
             type='number'
             min='1'
             max='180'
@@ -106,7 +108,7 @@ export const StartWorkoutButton = () => {
               name='play'
               size={16}
             />
-            {busy ? 'Getting ready…' : 'Let’s do this'}
+            {t(busy ? 'workout.preparing' : 'workout.go')}
           </button>
         </form>
       </Modal>

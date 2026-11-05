@@ -1,7 +1,8 @@
-export default function LoadingState({
-  label = 'Getting things ready…',
-  cards = 3,
-}) {
+import { useTranslation } from '../../i18n/useTranslation';
+
+export default function LoadingState({ label, cards = 3 }) {
+  const { t } = useTranslation();
+  label ||= t('common.loading');
   return (
     <div
       className='loading-state'

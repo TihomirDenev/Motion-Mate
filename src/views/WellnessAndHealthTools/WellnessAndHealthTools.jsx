@@ -6,33 +6,22 @@ import { activityLevels, profileWellness } from '../../helper/wellness';
 import WellnessCalculator from '../../components/Wellness/WellnessCalculator';
 import PageHeader from '../../components/UI/PageHeader';
 import Icon from '../../components/UI/Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 const tools = [
-  {
-    value: 'water',
-    label: 'Hydration',
-    icon: 'drop',
-    tone: 'blue',
-    unit: 'L / day',
-  },
-  {
-    value: 'bmi',
-    label: 'Body balance',
-    icon: 'scale',
-    tone: 'lavender',
-    unit: 'BMI',
-  },
+  { value: 'water', icon: 'drop', tone: 'blue', unit: 'wellness.litersShort' },
+  { value: 'bmi', icon: 'scale', tone: 'lavender', unit: 'common.bmi' },
   {
     value: 'calories',
-    label: 'Daily energy',
     icon: 'flame',
     tone: 'peach',
-    unit: 'kcal / day',
+    unit: 'wellness.kcalPerDay',
   },
 ];
 
 export default function WellnessHealthTools() {
-  usePageTitle('Motion Mate | Wellness');
+  const { t, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('titles.wellness')}`);
   const { userData } = useContext(AppContext);
   const [params, setParams] = useSearchParams();
   const selected = tools.some((tool) => tool.value === params.get('tool'))
@@ -41,9 +30,9 @@ export default function WellnessHealthTools() {
   return (
     <div className='wellness-page page-enter'>
       <PageHeader
-        eyebrow='LOOK AFTER THE WHOLE YOU'
-        title='Feel good. From within.'
-        description='A little understanding. A little care. A healthier kind of everyday.'
+        eyebrow={t('wellness.eyebrow')}
+        title={t('wellness.title')}
+        description={t('wellness.description')}
         actions={
           <Link
             className='btn btn-ghost'
@@ -53,7 +42,7 @@ export default function WellnessHealthTools() {
               name='user'
               size={16}
             />
-            Your health profile
+            {t('wellness.healthProfile')}
           </Link>
         }
       />
@@ -74,10 +63,12 @@ export default function WellnessHealthTools() {
                 />
               </span>
               <div>
-                <span>{tool.label}</span>
+                <span>{t(`wellness.tools.${tool.value}`)}</span>
                 <strong>
-                  {result ? result.value.toLocaleString() : '—'}{' '}
-                  <small>{tool.unit}</small>
+                  {result
+                    ? formatNumber(result.value, { maximumFractionDigits: 2 })
+                    : '—'}{' '}
+                  <small>{t(tool.unit)}</small>
                 </strong>
               </div>
               <Icon
@@ -93,15 +84,12 @@ export default function WellnessHealthTools() {
           name='sparkles'
           size={15}
         />
-        <p>
-          Your snapshot is based on your profile. Explore the calculators below
-          for a more personal look.
-        </p>
+        <p>{t('wellness.context')}</p>
       </div>
       <div
         className='wellness-tabs'
         role='group'
-        aria-label='Choose a wellness calculator'
+        aria-label={t('wellness.chooseTool')}
       >
         {tools.map((tool) => (
           <button
@@ -113,7 +101,7 @@ export default function WellnessHealthTools() {
               name={tool.icon}
               size={17}
             />
-            {tool.label}
+            {t(`wellness.tools.${tool.value}`)}
           </button>
         ))}
       </div>
@@ -130,8 +118,8 @@ export default function WellnessHealthTools() {
             />
           </span>
           <div>
-            <strong>Find your activity level</strong>
-            <span>A quick guide to your kind of everyday.</span>
+            <strong>{t('wellness.guideTitle')}</strong>
+            <span>{t('wellness.guideText')}</span>
           </div>
           <Icon
             name='down'
@@ -142,8 +130,8 @@ export default function WellnessHealthTools() {
           {activityLevels.map((level, index) => (
             <div key={level.value}>
               <span>0{index + 1}</span>
-              <h3>{level.label}</h3>
-              <p>{level.description}</p>
+              <h3>{t(`activity.${level.value}.label`)}</h3>
+              <p>{t(`activity.${level.value}.description`)}</p>
             </div>
           ))}
         </div>
@@ -153,10 +141,7 @@ export default function WellnessHealthTools() {
           name='leaf'
           size={20}
         />
-        <p>
-          Wellness is more than a number. These tools offer a starting point —
-          listen to your body, and make room for what feels good.
-        </p>
+        <p>{t('wellness.bottomNote')}</p>
       </div>
     </div>
   );

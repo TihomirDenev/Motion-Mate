@@ -4,13 +4,16 @@ import { BrowserRouter } from 'react-router';
 import App from './App.jsx';
 import ErrorBoundary from './components/UI/ErrorBoundary';
 import './index.css';
+import LanguageProvider from './i18n/LanguageProvider';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
+      <LanguageProvider>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </LanguageProvider>
     </BrowserRouter>
   </StrictMode>
 );

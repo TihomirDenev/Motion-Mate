@@ -7,23 +7,15 @@ import Icon from '../../UI/Icon';
 import Avatar from '../../UI/Avatar';
 import Modal from '../../UI/Modal';
 import Notifications from '../Notifications/Notifications';
+import LanguageSwitcher from '../../UI/LanguageSwitcher';
+import { useTranslation } from '../../../i18n/useTranslation';
 
 const navigation = [
-  { to: '/', label: 'Overview', mobile: 'Today', icon: 'home', end: true },
-  {
-    to: '/exercises',
-    label: 'Exercise library',
-    mobile: 'Train',
-    icon: 'dumbbell',
-  },
-  { to: '/goals', label: 'My goals', mobile: 'Goals', icon: 'target' },
-  {
-    to: '/wellness-health-tools',
-    label: 'Wellness tools',
-    mobile: 'Wellness',
-    icon: 'heart',
-  },
-  { to: '/all-users', label: 'Community', mobile: 'Mates', icon: 'users' },
+  { to: '/', key: 'overview', icon: 'home', end: true },
+  { to: '/exercises', key: 'exercises', icon: 'dumbbell' },
+  { to: '/goals', key: 'goals', icon: 'target' },
+  { to: '/wellness-health-tools', key: 'wellness', icon: 'heart' },
+  { to: '/all-users', key: 'community', icon: 'users' },
 ];
 
 export const NavBar = () => {
@@ -33,6 +25,7 @@ export const NavBar = () => {
     document.documentElement.dataset.theme === 'sunset' ? 'sunset' : 'fantasy'
   );
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const signedIn = Boolean(userData);
 
   useEffect(() => {
@@ -59,10 +52,10 @@ export const NavBar = () => {
       {signedIn && (
         <aside className='sidebar'>
           <Brand />
-          <p className='sidebar-label'>YOUR DAILY MOMENTUM</p>
+          <p className='sidebar-label'>{t('nav.sidebarLabel')}</p>
           <nav
             className='side-navigation'
-            aria-label='Main navigation'
+            aria-label={t('nav.main')}
           >
             {navigation.map((item) => (
               <NavLink
@@ -71,7 +64,7 @@ export const NavBar = () => {
                 end={item.end}
               >
                 <Icon name={item.icon} />
-                <span>{item.label}</span>
+                <span>{t(`nav.${item.key}`)}</span>
                 <Icon
                   name='chevron'
                   size={14}
@@ -85,13 +78,13 @@ export const NavBar = () => {
               <Icon name='sparkles' />
             </span>
             <h3>
-              A little better.
+              {t('nav.motivationLine1')}
               <br />
-              Every single day.
+              {t('nav.motivationLine2')}
             </h3>
-            <p>Your next chapter starts with one small move.</p>
+            <p>{t('nav.motivationText')}</p>
             <Link to='/goals'>
-              Make it happen{' '}
+              {t('nav.motivationLink')}{' '}
               <Icon
                 name='arrow'
                 size={16}
@@ -104,25 +97,25 @@ export const NavBar = () => {
           </div>
           <nav
             className='side-navigation secondary-navigation'
-            aria-label='Account navigation'
+            aria-label={t('nav.account')}
           >
             <NavLink to='/my-profile'>
               <Icon name='user' />
-              <span>My profile</span>
+              <span>{t('nav.profile')}</span>
             </NavLink>
             <NavLink to='/my-friends'>
               <Icon name='users' />
-              <span>My friends</span>
+              <span>{t('nav.friends')}</span>
             </NavLink>
             {userData.userRole === 'admin' && (
               <NavLink to='/admin-panel'>
                 <Icon name='shield' />
-                <span>Administration</span>
+                <span>{t('nav.admin')}</span>
               </NavLink>
             )}
             <NavLink to='/contact-us'>
               <Icon name='info' />
-              <span>Help & support</span>
+              <span>{t('nav.help')}</span>
             </NavLink>
           </nav>
           <div className='sidebar-account'>
@@ -130,13 +123,13 @@ export const NavBar = () => {
               <Avatar user={userData} />
               <span>
                 <strong>{userData.firstName || userData.username}</strong>
-                <small>Keep moving forward</small>
+                <small>{t('nav.keepMoving')}</small>
               </span>
             </Link>
             <button
               className='icon-button'
               onClick={logout}
-              aria-label='Log out'
+              aria-label={t('nav.logout')}
             >
               <Icon
                 name='logout'
@@ -155,22 +148,25 @@ export const NavBar = () => {
           </div>
           {signedIn && (
             <div className='desktop-greeting'>
-              <span className='status-dot' /> YOUR SPACE TO MOVE
+              <span className='status-dot' /> {t('nav.greeting')}
             </div>
           )}
           {!signedIn && (
             <nav
               className='public-navigation'
-              aria-label='Main navigation'
+              aria-label={t('nav.main')}
             >
-              <NavLink to='/about'>Our story</NavLink>
-              <NavLink to='/contact-us'>Get in touch</NavLink>
+              <NavLink to='/about'>{t('nav.story')}</NavLink>
+              <NavLink to='/contact-us'>{t('nav.contact')}</NavLink>
             </nav>
           )}
           <div className='topbar-actions'>
+            <LanguageSwitcher />
             <button
               className='icon-button theme-button'
-              aria-label={`Switch to ${theme === 'sunset' ? 'light' : 'dark'} theme`}
+              aria-label={t(
+                theme === 'sunset' ? 'nav.lightTheme' : 'nav.darkTheme'
+              )}
               onClick={() =>
                 setTheme(theme === 'sunset' ? 'fantasy' : 'sunset')
               }
@@ -186,7 +182,7 @@ export const NavBar = () => {
                 <Link
                   className='profile-link'
                   to='/my-profile'
-                  aria-label='My profile'
+                  aria-label={t('nav.profile')}
                 >
                   <Avatar
                     user={userData}
@@ -200,7 +196,7 @@ export const NavBar = () => {
                   className='btn btn-primary public-login'
                   to='/login'
                 >
-                  Log in{' '}
+                  {t('nav.login')}{' '}
                   <Icon
                     name='arrow'
                     size={16}
@@ -208,7 +204,7 @@ export const NavBar = () => {
                 </Link>
                 <button
                   className='icon-button mobile-menu-button'
-                  aria-label='Open menu'
+                  aria-label={t('nav.openMenu')}
                   onClick={() => setMenuOpen(true)}
                 >
                   <Icon name='menu' />
@@ -221,7 +217,7 @@ export const NavBar = () => {
       {signedIn && (
         <nav
           className='bottom-navigation'
-          aria-label='Mobile navigation'
+          aria-label={t('nav.mobile')}
         >
           {navigation.map((item) => (
             <NavLink
@@ -235,7 +231,7 @@ export const NavBar = () => {
                   size={21}
                 />
               </span>
-              <small>{item.mobile}</small>
+              <small>{t(`nav.mobileLabels.${item.key}`)}</small>
             </NavLink>
           ))}
         </nav>
@@ -243,17 +239,17 @@ export const NavBar = () => {
       <Modal
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
-        title='Let’s move.'
+        title={t('nav.menuTitle')}
       >
         <nav
           className='mobile-menu-links'
-          aria-label='More navigation'
+          aria-label={t('nav.more')}
         >
           {[
-            { to: '/', label: 'Home' },
-            { to: '/about', label: 'Our story' },
-            { to: '/contact-us', label: 'Get in touch' },
-            { to: '/register', label: 'Create an account' },
+            { to: '/', label: t('nav.home') },
+            { to: '/about', label: t('nav.story') },
+            { to: '/contact-us', label: t('nav.contact') },
+            { to: '/register', label: t('nav.register') },
           ].map((item) => (
             <Link
               key={item.to}

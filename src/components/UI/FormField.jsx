@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import Icon from './Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function FormField({
   label,
@@ -11,6 +12,7 @@ export default function FormField({
 }) {
   const id = useId();
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation();
   return (
     <div className={`form-field ${className}`}>
       <label htmlFor={id}>
@@ -50,7 +52,9 @@ export default function FormField({
             type='button'
             className='icon-button'
             onClick={() => setVisible((value) => !value)}
-            aria-label={visible ? 'Hide password' : 'Show password'}
+            aria-label={t(
+              visible ? 'common.hidePassword' : 'common.showPassword'
+            )}
             aria-pressed={visible}
           >
             <Icon

@@ -2,25 +2,23 @@ import { usePageTitle } from '../../hooks/usePageTitle';
 import PageHeader from '../../components/UI/PageHeader';
 import Icon from '../../components/UI/Icon';
 import Avatar from '../../components/UI/Avatar';
+import { useTranslation } from '../../i18n/useTranslation';
 
 const team = [
   {
-    firstName: 'Tihomir',
-    lastName: 'Denev',
+    key: 'tihomir',
     email: 'Tihomir@motion-mate.bg',
     github: 'TihomirDenev',
     tone: 'mint',
   },
   {
-    firstName: 'Radoslav',
-    lastName: 'Marinov',
+    key: 'radoslav',
     email: 'Radoslav@motion-mate.bg',
     github: 'Radoslav-Marinovv',
     tone: 'lavender',
   },
   {
-    firstName: 'Tanya',
-    lastName: 'Zhecheva',
+    key: 'tanya',
     email: 'Tanya@motion-mate.bg',
     github: 'TanyaZhecheva',
     tone: 'peach',
@@ -28,13 +26,14 @@ const team = [
 ];
 
 export default function ContactUs() {
-  usePageTitle('Motion Mate | We’re here for you');
+  const { t } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('contact.pageTitle')}`);
   return (
     <div className='contact-page page-enter'>
       <PageHeader
-        eyebrow='A LITTLE CONVERSATION GOES A LONG WAY'
-        title='We’re in your corner.'
-        description='A question, an idea, or a little feedback? We’d love to hear what’s on your mind.'
+        eyebrow={t('contact.eyebrow')}
+        title={t('contact.title')}
+        description={t('contact.description')}
       />
       <section className='contact-intro'>
         <span className='icon-tile'>
@@ -45,13 +44,11 @@ export default function ContactUs() {
         </span>
         <div>
           <h2>
-            Real people.
-            <br />A shared love for movement.
+            {t('contact.introLine1')}
+            <br />
+            {t('contact.introLine2')}
           </h2>
-          <p>
-            Meet the team behind Motion Mate. We’re here to help make your
-            journey a little smoother.
-          </p>
+          <p>{t('contact.introText')}</p>
         </div>
         <span
           className='contact-sparkle'
@@ -64,101 +61,93 @@ export default function ContactUs() {
         </span>
       </section>
       <div className='team-grid'>
-        {team.map((person) => (
-          <article
-            className='team-card surface'
-            key={person.firstName}
-          >
-            <div className={`team-cover tone-${person.tone}`}>
-              <Icon
-                name='activity'
-                size={47}
+        {team.map((member) => {
+          const person = {
+            ...member,
+            firstName: t(`contact.team.${member.key}.firstName`),
+            lastName: t(`contact.team.${member.key}.lastName`),
+            avatar: `https://github.com/${member.github}.png?size=240`,
+          };
+          return (
+            <article
+              className='team-card surface'
+              key={person.key}
+            >
+              <div className={`team-cover tone-${person.tone}`}>
+                <Icon
+                  name='activity'
+                  size={47}
+                />
+              </div>
+              <Avatar
+                user={person}
+                size='lg'
+                zoomable
               />
-            </div>
-            <Avatar
-              user={person}
-              size='lg'
-            />
-            <h2>
-              {person.firstName}{' '}
-              <br />
-              {person.lastName}
-            </h2>
-            <p>Motion Mate co-creator</p>
-            <div className='team-actions'>
-              <a
-                className='btn btn-primary'
-                href={`mailto:${person.email}`}
-              >
-                <Icon
-                  name='mail'
-                  size={16}
-                />
-                Say hello
-              </a>
-              <a
-                className='icon-button'
-                href={`https://github.com/${person.github}`}
-                target='_blank'
-                rel='noreferrer'
-                aria-label={`${person.firstName} on GitHub`}
-              >
-                <Icon
-                  name='arrowUp'
-                  size={17}
-                />
-              </a>
-            </div>
-          </article>
-        ))}
+              <h2>
+                {person.firstName} <br />
+                {person.lastName}
+              </h2>
+              <p>{t('contact.role')}</p>
+              <div className='team-actions'>
+                <a
+                  className='btn btn-primary'
+                  href={`mailto:${person.email}`}
+                >
+                  <Icon
+                    name='mail'
+                    size={16}
+                  />
+                  {t('contact.sayHello')}
+                </a>
+                <a
+                  className='icon-button'
+                  href={`https://github.com/${person.github}`}
+                  target='_blank'
+                  rel='noreferrer'
+                  aria-label={t('contact.github', { name: person.firstName })}
+                >
+                  <Icon
+                    name='arrowUp'
+                    size={17}
+                  />
+                </a>
+              </div>
+            </article>
+          );
+        })}
       </div>
       <section className='contact-faq section-space'>
         <div className='section-heading'>
           <div>
-            <h2>A few quick answers</h2>
-            <p>A little help to keep you moving.</p>
+            <h2>{t('contact.faqTitle')}</h2>
+            <p>{t('contact.faqText')}</p>
           </div>
           <Icon
             name='info'
             size={21}
           />
         </div>
-        {[
-          {
-            question: 'How do I build my first workout?',
-            answer:
-              'Open the exercise library, choose a category, and add exercises to your workout. They’ll appear on your overview, where you can start each exercise timer. Create your own moves or discover exercises from your friends.',
-          },
-          {
-            question: 'How does goal progress work?',
-            answer:
-              'Exercise and calorie goals update when you finish an exercise timer within your goal dates. For a personal milestone, open the goal, update the progress slider, and save your changes.',
-          },
-          {
-            question: 'Can I personalize my wellness results?',
-            answer:
-              'Absolutely. Add your weight, height, age, activity level, and sex for calculations to your profile. Your wellness tools will use these details as a starting point. You can also try different measurements in each calculator.',
-          },
-          {
-            question: 'How can I suggest an improvement?',
-            answer:
-              'We love a good idea. Email a team member or visit our GitHub repository to share your feedback. Motion Mate gets better with the people who use it.',
-          },
-        ].map((item) => (
-          <details
-            className='faq-item surface'
-            key={item.question}
-          >
-            <summary>
-              {item.question}
-              <Icon
-                name='plus'
-                size={17}
-              />
-            </summary>
-            <p>{item.answer}</p>
-          </details>
-        ))}
+        {[1, 2, 3, 4]
+          .map((number) => ({
+            question: t(`contact.faq${number}Question`),
+            answer: t(`contact.faq${number}Answer`),
+          }))
+          .map((item) => (
+            <details
+              className='faq-item surface'
+              key={item.question}
+            >
+              <summary>
+                {item.question}
+                <Icon
+                  name='plus'
+                  size={17}
+                />
+              </summary>
+              <p>{item.answer}</p>
+            </details>
+          ))}
       </section>
       <a
         className='contact-github'
@@ -166,9 +155,9 @@ export default function ContactUs() {
         target='_blank'
         rel='noreferrer'
       >
-        <span>Built together. Always moving forward.</span>
+        <span>{t('contact.githubText')}</span>
         <strong>
-          Find us on GitHub{' '}
+          {t('contact.githubLink')}{' '}
           <Icon
             name='arrowUp'
             size={15}

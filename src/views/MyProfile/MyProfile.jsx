@@ -13,9 +13,11 @@ import Avatar from '../../components/UI/Avatar';
 import Icon from '../../components/UI/Icon';
 import Modal from '../../components/UI/Modal';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function MyProfile() {
-  usePageTitle('Motion Mate | My profile');
+  const { t, formatDate, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('nav.profile')}`);
   const { userData } = useContext(AppContext);
   const [params, setParams] = useSearchParams();
   const [resetOpen, setResetOpen] = useState(false);
@@ -28,7 +30,7 @@ export default function MyProfile() {
   const completeGoals = Object.values(userData.myGoals || {}).filter(
     (goal) => Number(goal.progress) >= 100
   ).length;
-  const memberSince = new Date(userData.createdOn).toLocaleDateString('en-GB', {
+  const memberSince = formatDate(userData.createdOn, {
     month: 'long',
     year: 'numeric',
   });
@@ -60,27 +62,27 @@ export default function MyProfile() {
   return (
     <div className='profile-page page-enter'>
       <PageHeader
-        eyebrow='YOUR PERSONAL SPACE'
-        title='A little more you.'
-        description='The person behind every small step and every big win.'
+        eyebrow={t('profile.eyebrow')}
+        title={t('profile.title')}
+        description={t('profile.description')}
       />
       <section className='profile-hero surface'>
         <div className='profile-cover'>
-          <span>YOUR JOURNEY. YOUR PACE.</span>
+          <span>{t('profile.cover')}</span>
           <Icon
             name='activity'
             size={110}
           />
           <button
             className='profile-photo-button'
-            aria-label='Change profile photo'
+            aria-label={t('profile.changePhotoLabel')}
             onClick={() => setParams({ tab: 'photo' })}
           >
             <Icon
               name='camera'
               size={16}
             />
-            <span>Change photo</span>
+            <span>{t('profile.changePhoto')}</span>
           </button>
         </div>
         <div className='profile-identity'>
@@ -91,9 +93,11 @@ export default function MyProfile() {
           />
           <div className='profile-name'>
             <span className='pill'>
-              {userData.userRole === 'admin'
-                ? 'COMMUNITY ADMIN'
-                : 'MOTION MATE'}
+              {t(
+                userData.userRole === 'admin'
+                  ? 'profile.admin'
+                  : 'profile.member'
+              )}
             </span>
             <h2>
               {[userData.firstName, userData.lastName]
@@ -101,7 +105,8 @@ export default function MyProfile() {
                 .join(' ') || userData.username}
             </h2>
             <p>
-              @{userData.username} <span>·</span> Moving since {memberSince}
+              @{userData.username} <span>·</span>{' '}
+              {t('profile.movingSince', { date: memberSince })}
             </p>
           </div>
           <button
@@ -112,29 +117,31 @@ export default function MyProfile() {
               name='edit'
               size={16}
             />
-            Edit profile
+            {t('profile.edit')}
           </button>
         </div>
         <div className='profile-social-stats'>
           <Link to='/my-friends'>
-            <strong>{friends}</strong>
-            <span>Motion Mates</span>
+            <strong>{formatNumber(friends)}</strong>
+            <span>{t('profile.mates')}</span>
             <Icon
               name='arrowUp'
               size={14}
             />
           </Link>
           <Link to='/goals'>
-            <strong>{completeGoals}</strong>
-            <span>Goals celebrated</span>
+            <strong>{formatNumber(completeGoals)}</strong>
+            <span>{t('profile.goals')}</span>
             <Icon
               name='arrowUp'
               size={14}
             />
           </Link>
           <Link to='/'>
-            <strong>{userData.updatedScores?.doneExercises || 0}</strong>
-            <span>Exercises completed</span>
+            <strong>
+              {formatNumber(userData.updatedScores?.doneExercises || 0)}
+            </strong>
+            <span>{t('overview.statExercises')}</span>
             <Icon
               name='arrowUp'
               size={14}
@@ -144,11 +151,11 @@ export default function MyProfile() {
       </section>
       <div className='section-heading section-space'>
         <div>
-          <h2>Your wellness snapshot</h2>
-          <p>A starting point for getting to know your body.</p>
+          <h2>{t('profile.snapshotTitle')}</h2>
+          <p>{t('profile.snapshotText')}</p>
         </div>
         <Link to='/wellness-health-tools'>
-          Explore tools{' '}
+          {t('profile.exploreTools')}{' '}
           <Icon
             name='arrow'
             size={14}
@@ -159,23 +166,23 @@ export default function MyProfile() {
         {[
           {
             icon: 'scale',
-            label: 'Weight',
+            label: t('profile.weight'),
             value: userData.weight,
-            unit: 'kg',
+            unit: t('common.kg'),
             tone: 'blue',
           },
           {
             icon: 'activity',
-            label: 'Height',
+            label: t('profile.height'),
             value: userData.height,
-            unit: 'cm',
+            unit: t('common.cm'),
             tone: 'mint',
           },
           {
             icon: 'heart',
-            label: 'Body mass index',
+            label: t('overview.bmi'),
             value: bmi?.value,
-            unit: 'BMI',
+            unit: t('common.bmi'),
             tone: 'lavender',
           },
         ].map((stat) => (
@@ -192,7 +199,8 @@ export default function MyProfile() {
             </span>
             <span>{stat.label}</span>
             <strong>
-              {stat.value || '—'} <small>{stat.unit}</small>
+              {stat.value ? formatNumber(stat.value) : '—'}{' '}
+              <small>{stat.unit}</small>
             </strong>
           </Link>
         ))}
@@ -200,7 +208,7 @@ export default function MyProfile() {
       <UserInfo userData={userData} />
       <section className='surface profile-settings'>
         <div className='section-heading'>
-          <h2>Your space, your way</h2>
+          <h2>{t('profile.settingsTitle')}</h2>
           <Icon
             name='settings'
             size={19}
@@ -211,28 +219,28 @@ export default function MyProfile() {
             {
               to: '/my-friends',
               icon: 'users',
-              label: 'My Motion Mates',
-              detail: 'Good company. Better momentum.',
+              label: t('profile.linkMates'),
+              detail: t('profile.linkMatesText'),
             },
             {
               to: '/about',
               icon: 'leaf',
-              label: 'About Motion Mate',
-              detail: 'A little more about our story.',
+              label: t('profile.linkAbout'),
+              detail: t('profile.linkAboutText'),
             },
             {
               to: '/contact-us',
               icon: 'info',
-              label: 'Help & support',
-              detail: 'We’re here for your journey.',
+              label: t('nav.help'),
+              detail: t('profile.linkHelpText'),
             },
             ...(userData.userRole === 'admin'
               ? [
                   {
                     to: '/admin-panel',
                     icon: 'shield',
-                    label: 'Administration',
-                    detail: 'Look after your community.',
+                    label: t('nav.admin'),
+                    detail: t('profile.linkAdminText'),
                   },
                 ]
               : []),
@@ -271,7 +279,7 @@ export default function MyProfile() {
               name='refresh'
               size={14}
             />
-            Reset workout totals
+            {t('profile.resetTotals')}
           </button>
           <button
             className='text-button danger-button'
@@ -281,7 +289,7 @@ export default function MyProfile() {
               name='logout'
               size={15}
             />
-            Log out
+            {t('nav.logout')}
           </button>
         </div>
         <InlineMessage>{error}</InlineMessage>
@@ -289,8 +297,8 @@ export default function MyProfile() {
       <Modal
         open={resetOpen}
         onClose={() => !busy && setResetOpen(false)}
-        title='Start a fresh count?'
-        description='Your exercise and calorie totals will go back to zero. Your goals and exercise library stay with you.'
+        title={t('profile.resetTitle')}
+        description={t('profile.resetDescription')}
       >
         <InlineMessage>{error}</InlineMessage>
         <div className='dialog-actions'>
@@ -299,14 +307,14 @@ export default function MyProfile() {
             disabled={busy}
             onClick={() => setResetOpen(false)}
           >
-            Keep my totals
+            {t('profile.keepTotals')}
           </button>
           <button
             className='btn btn-primary'
             disabled={busy}
             onClick={reset}
           >
-            {busy ? 'Resetting…' : 'Reset totals'}
+            {t(busy ? 'profile.resetting' : 'profile.resetConfirm')}
           </button>
         </div>
       </Modal>

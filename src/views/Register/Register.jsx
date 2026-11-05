@@ -15,9 +15,11 @@ import { usePageTitle } from '../../hooks/usePageTitle';
 import Icon from '../../components/UI/Icon';
 import FormField from '../../components/UI/FormField';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Register() {
-  usePageTitle('Motion Mate | Your day one');
+  const { t } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('titles.register')}`);
   const { userData } = useContext(AppContext);
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -52,10 +54,7 @@ export default function Register() {
       if (image) {
         validatePhoto(image);
         avatar = await uploadPhoto(image);
-        if (!avatar)
-          throw new Error(
-            'Your photo couldn’t be uploaded. Try another image or add it later.'
-          );
+        if (!avatar) throw new Error(t('register.photoFailed'));
       }
       credential = await registerUser(email, form.password);
       await createUser(
@@ -80,7 +79,7 @@ export default function Register() {
         await deleteUser(credential.user).catch(() => {});
       setError(
         error.code === 'auth/email-already-in-use'
-          ? 'This email already has an account. Try logging in.'
+          ? t('register.emailInUse')
           : error.message
       );
     } finally {
@@ -100,12 +99,10 @@ export default function Register() {
       <aside className='auth-visual'>
         <img
           src='/images/yoga.jpg'
-          alt='A group making time for movement outdoors'
+          alt={t('register.imageAlt')}
         />
         <div className='auth-visual-shade' />
-        <span className='auth-visual-kicker'>
-          A LITTLE MOVEMENT CHANGES EVERYTHING.
-        </span>
+        <span className='auth-visual-kicker'>{t('register.kicker')}</span>
         <div>
           <span className='icon-tile'>
             <Icon
@@ -114,53 +111,49 @@ export default function Register() {
             />
           </span>
           <h2>
-            Meet your
+            {t('register.visualTitleLine1')}
             <br />
-            next chapter.
+            {t('register.visualTitleLine2')}
           </h2>
-          <p>
-            Your goals. Your people. Your kind of movement. It all starts with
-            showing up.
-          </p>
+          <p>{t('register.visualText')}</p>
           <ul className='auth-benefits'>
             <li>
               <Icon
                 name='check'
                 size={16}
               />
-              Workouts that work for you
+              {t('register.benefit1')}
             </li>
             <li>
               <Icon
                 name='check'
                 size={16}
               />
-              Progress you can feel
+              {t('register.benefit2')}
             </li>
             <li>
               <Icon
                 name='check'
                 size={16}
               />
-              A community in your corner
+              {t('register.benefit3')}
             </li>
           </ul>
         </div>
       </aside>
       <section className='auth-form-panel'>
-        <p className='eyebrow'>THIS IS YOUR DAY ONE</p>
+        <p className='eyebrow'>{t('register.eyebrow')}</p>
         <h1>
-          Make your move<span>.</span>
+          {t('register.title')}
+          <span>.</span>
         </h1>
-        <p className='auth-description'>
-          A healthier everyday is closer than you think.
-        </p>
+        <p className='auth-description'>{t('register.description')}</p>
         <form
           onSubmit={submit}
           className='form-stack'
         >
           <FormField
-            label='Username'
+            label={t('fields.username')}
             required
             name='username'
             autoComplete='username'
@@ -168,12 +161,12 @@ export default function Register() {
             spellCheck={false}
             minLength={2}
             maxLength={20}
-            placeholder='Pick a name that feels like you'
+            placeholder={t('register.usernamePlaceholder')}
             value={form.username}
             onChange={change('username')}
           />
           <FormField
-            label='Email address'
+            label={t('fields.email')}
             required
             name='email'
             type='email'
@@ -183,7 +176,7 @@ export default function Register() {
             onChange={change('email')}
           />
           <FormField
-            label='Phone number'
+            label={t('fields.phone')}
             required
             name='phone'
             type='tel'
@@ -193,28 +186,28 @@ export default function Register() {
             minLength={10}
             maxLength={10}
             placeholder='0888123456'
-            hint='10 digits, including the leading zero.'
+            hint={t('register.phoneHint')}
             value={form.phoneNumber}
             onChange={change('phoneNumber')}
           />
           <FormField
-            label='Password'
+            label={t('fields.password')}
             required
             name='password'
             type='password'
             autoComplete='new-password'
             minLength={6}
             maxLength={15}
-            placeholder='Create your password'
-            hint='Use 6–15 characters.'
+            placeholder={t('register.passwordPlaceholder')}
+            hint={t('register.passwordHint')}
             value={form.password}
             onChange={change('password')}
           />
           <FormField
-            label='Profile photo'
+            label={t('fields.photo')}
             type='file'
             accept='image/jpeg,image/png,image/webp,image/gif'
-            hint='Optional. You can always add one later. Maximum 5 MB.'
+            hint={t('register.photoHint')}
             onChange={(event) => setImage(event.target.files?.[0] || null)}
           />
           <InlineMessage>{error}</InlineMessage>
@@ -223,7 +216,7 @@ export default function Register() {
             className='btn btn-primary btn-full'
             disabled={busy}
           >
-            {busy ? 'Creating your space…' : 'Create my account'}
+            {t(busy ? 'register.submitting' : 'register.submit')}
             <Icon
               name='arrow'
               size={18}
@@ -231,9 +224,9 @@ export default function Register() {
           </button>
         </form>
         <p className='auth-switch'>
-          Already a Motion Mate?{' '}
+          {t('register.haveAccount')}{' '}
           <Link to='/login'>
-            Welcome back{' '}
+            {t('register.login')}{' '}
             <Icon
               name='arrowUp'
               size={13}

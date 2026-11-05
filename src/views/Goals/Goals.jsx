@@ -10,11 +10,13 @@ import GoalsTable from '../../components/Goals/GoalsTable';
 import PageHeader from '../../components/UI/PageHeader';
 import Icon from '../../components/UI/Icon';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Goals() {
-  usePageTitle('Motion Mate | My goals');
+  const { t, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('nav.goals')}`);
   const { userData } = useContext(AppContext);
-  const [filter, setFilter] = useState('All goals');
+  const [filter, setFilter] = useState('All');
   const [friendData, setFriendData] = useState({ key: '', goals: [] });
   const [error, setError] = useState('');
   const [now, setNow] = useState(() => Date.now());
@@ -65,7 +67,7 @@ export default function Goals() {
   ).length;
   const filtered = goals.filter(
     (goal) =>
-      filter === 'All goals' ||
+      filter === 'All' ||
       (filter === 'Active'
         ? ['In progress', 'Upcoming'].includes(getGoalStatus(goal, now))
         : getGoalStatus(goal, now) === filter)
@@ -74,9 +76,9 @@ export default function Goals() {
   return (
     <div className='page-enter'>
       <PageHeader
-        eyebrow='SMALL STEPS. REAL PROGRESS.'
-        title='Make room for your goals.'
-        description='Turn your intentions into something you can see, feel, and celebrate.'
+        eyebrow={t('goals.eyebrow')}
+        title={t('goals.title')}
+        description={t('goals.description')}
         actions={<CreateGoal />}
       />
       <section className='goals-summary'>
@@ -88,24 +90,24 @@ export default function Goals() {
             />
           </span>
           <h2>
-            Progress is a practice.
+            {t('goals.summaryLine1')}
             <br />
-            You’re already showing up.
+            {t('goals.summaryLine2')}
           </h2>
-          <p>Keep your eyes on your own finish line.</p>
+          <p>{t('goals.summaryText')}</p>
         </div>
         <div className='goals-summary-stats'>
           <div>
-            <strong>{goals.length}</strong>
-            <span>Goals set</span>
+            <strong>{formatNumber(goals.length)}</strong>
+            <span>{t('goals.statSet')}</span>
           </div>
           <div>
-            <strong>{active}</strong>
-            <span>In motion</span>
+            <strong>{formatNumber(active)}</strong>
+            <span>{t('goals.statActive')}</span>
           </div>
           <div>
-            <strong>{completed}</strong>
-            <span>Celebrated</span>
+            <strong>{formatNumber(completed)}</strong>
+            <span>{t('goals.statCompleted')}</span>
           </div>
         </div>
         <div
@@ -114,40 +116,40 @@ export default function Goals() {
         />
       </section>
       <div className='section-heading section-space'>
-        <h2>Your goals</h2>
+        <h2>{t('goals.yourGoals')}</h2>
         <span className='result-count'>
-          {filtered.length} {filtered.length === 1 ? 'goal' : 'goals'}
+          {t('goals.count', { count: filtered.length })}
         </span>
       </div>
       <div
         className='filter-chips goals-filters'
         role='group'
-        aria-label='Filter goals'
+        aria-label={t('goals.filter')}
       >
-        {['All goals', 'Active', 'Completed', 'Archived'].map((value) => (
+        {['All', 'Active', 'Completed', 'Archived'].map((value) => (
           <button
             key={value}
             className='filter-chip'
             aria-pressed={filter === value}
             onClick={() => setFilter(value)}
           >
-            {value}
+            {t(`goals.filters.${value}`)}
           </button>
         ))}
       </div>
       <GoalsTable
         goals={filtered}
         myGoals
-        filtered={filter !== 'All goals'}
+        filtered={filter !== 'All'}
       />
       <section className='section-space'>
         <div className='section-heading'>
           <div>
-            <h2>A little shared inspiration</h2>
-            <p>See what your Motion Mates are working towards.</p>
+            <h2>{t('goals.sharedTitle')}</h2>
+            <p>{t('goals.sharedText')}</p>
           </div>
           <Link to='/my-friends'>
-            Your circle{' '}
+            {t('goals.yourCircle')}{' '}
             <Icon
               name='arrow'
               size={14}

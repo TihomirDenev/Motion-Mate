@@ -9,16 +9,18 @@ import Icon from '../../components/UI/Icon';
 import LoadingState from '../../components/UI/LoadingState';
 import EmptyState from '../../components/UI/EmptyState';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function MyFriends() {
-  usePageTitle('Motion Mate | My circle');
+  const { t } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('community.myCircle')}`);
   const { userData } = useContext(AppContext);
   const { data, loading, error } = useDatabaseValue('users');
   const [tab, setTab] = useState('friends');
   const tabs = [
-    { key: 'friends', label: 'My mates' },
-    { key: 'myRequests', label: 'Sent requests' },
-    { key: 'requests', label: 'Received' },
+    { key: 'friends', label: t('friends.tabs.friends') },
+    { key: 'myRequests', label: t('friends.tabs.sent') },
+    { key: 'requests', label: t('friends.tabs.received') },
   ];
   const users = Object.values(data || {}).filter(
     (user) => userData[tab]?.[user.username]
@@ -26,10 +28,10 @@ export default function MyFriends() {
   return (
     <div className='page-enter'>
       <PageHeader
-        back={{ to: '/all-users', label: 'The community' }}
-        eyebrow='THE PEOPLE IN YOUR CORNER'
-        title='Your circle. Your energy.'
-        description='Keep good company on your way to feeling good.'
+        back={{ to: '/all-users', label: t('friends.backCommunity') }}
+        eyebrow={t('friends.eyebrow')}
+        title={t('friends.title')}
+        description={t('friends.description')}
         actions={
           <Link
             className='btn btn-primary'
@@ -39,14 +41,14 @@ export default function MyFriends() {
               name='plus'
               size={17}
             />
-            Find more mates
+            {t('friends.findMore')}
           </Link>
         }
       />
       <div
         className='filter-chips friends-tabs'
         role='group'
-        aria-label='Friend lists'
+        aria-label={t('friends.lists')}
       >
         {tabs.map((item) => (
           <button
@@ -76,22 +78,22 @@ export default function MyFriends() {
         <div className='surface'>
           <EmptyState
             icon={tab === 'friends' ? 'users' : 'mail'}
-            title={
+            title={t(
               tab === 'friends'
-                ? 'Your circle starts with a hello'
-                : 'Nothing waiting in the wings'
-            }
-            description={
+                ? 'friends.emptyTitle'
+                : 'friends.requestsEmptyTitle'
+            )}
+            description={t(
               tab === 'friends'
-                ? 'Find a mate, share a little motivation, and make progress together.'
-                : 'Friend requests will appear here. Go meet someone who moves like you.'
-            }
+                ? 'friends.emptyDescription'
+                : 'friends.requestsEmptyDescription'
+            )}
           >
             <Link
               className='btn btn-primary'
               to='/all-users'
             >
-              Explore the community{' '}
+              {t('friends.explore')}{' '}
               <Icon
                 name='arrow'
                 size={16}

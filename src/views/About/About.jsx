@@ -3,34 +3,29 @@ import { Link } from 'react-router';
 import { AppContext } from '../../context/AppContext';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import Icon from '../../components/UI/Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function About() {
-  usePageTitle('Motion Mate | Our story');
+  const { t } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('nav.story')}`);
   const { userData } = useContext(AppContext);
   return (
     <div className='about-page page-enter'>
       <section className='about-intro'>
         <div>
-          <p className='eyebrow'>A LITTLE ABOUT US</p>
+          <p className='eyebrow'>{t('about.eyebrow')}</p>
           <h1>
-            Life feels better
+            {t('about.titleLine1')}
             <br />
-            in <span>motion.</span>
+            {t('about.titleLine2')} <span>{t('about.titleHighlight')}</span>
           </h1>
-          <p>
-            We believe a healthier life isn’t built in one big leap. It’s built
-            in the small things — a morning stretch, one more rep, a friend who
-            says, “You’ve got this.”
-          </p>
-          <p>
-            Motion Mate is a space for those small things. Your goals, your
-            workouts, your kind of progress. All moving with you.
-          </p>
+          <p>{t('about.paragraph1')}</p>
+          <p>{t('about.paragraph2')}</p>
           <Link
             className='btn btn-primary'
             to={userData ? '/exercises' : '/register'}
           >
-            Find your momentum{' '}
+            {t('landing.primaryCta')}{' '}
             <Icon
               name='arrow'
               size={17}
@@ -39,38 +34,39 @@ export default function About() {
         </div>
         <div className='about-photo'>
           <img
-            src='/images/yoga.jpg'
-            alt='Friends finding balance in an outdoor yoga session'
+            src='/images/dumbbells.jpg'
+            alt={t('about.imageAlt')}
           />
-          <span>YOUR PACE. YOUR PEOPLE. YOUR POTENTIAL.</span>
+          <span>{t('about.imageCaption')}</span>
         </div>
       </section>
       <section className='about-values'>
         <div className='landing-section-heading'>
-          <p className='eyebrow'>WHAT WE’RE HERE FOR</p>
+          <p className='eyebrow'>{t('about.valuesEyebrow')}</p>
           <h2>
-            A stronger you.
-            <br />A healthier everyday.
+            {t('about.valuesLine1')}
+            <br />
+            {t('about.valuesLine2')}
           </h2>
         </div>
         <div className='card-grid'>
           {[
             {
               icon: 'dumbbell',
-              title: 'Movement, made yours',
-              copy: 'Build a personal exercise library and turn “I should” into “I did.” Start a timer, find your rhythm, and show up for you.',
+              title: t('about.value1Title'),
+              copy: t('about.value1Text'),
               tone: 'mint',
             },
             {
               icon: 'target',
-              title: 'Progress over perfection',
-              copy: 'Set goals that mean something to you. Track exercises, calories, or your own milestones, and celebrate every small win.',
+              title: t('about.value2Title'),
+              copy: t('about.value2Text'),
               tone: 'lavender',
             },
             {
               icon: 'users',
-              title: 'Good company matters',
-              copy: 'Find people who bring out your best. Share your exercises and goals with a circle that keeps you moving forward.',
+              title: t('about.value3Title'),
+              copy: t('about.value3Text'),
               tone: 'peach',
             },
           ].map((item) => (
@@ -96,19 +92,18 @@ export default function About() {
           size={36}
         />
         <h2>
-          You don’t need to be
-          <br />a different person to begin.
+          {t('about.manifestoLine1')}
           <br />
-          <span>You just need to begin.</span>
+          {t('about.manifestoLine2')}
+          <br />
+          <span>{t('about.manifestoLine3')}</span>
         </h2>
-        <p>
-          Made with care by Tihomir Denev, Radoslav Marinov, and Tanya Zhecheva.
-        </p>
+        <p>{t('about.madeBy')}</p>
         <Link
           className='text-button'
           to='/contact-us'
         >
-          Meet the people behind the movement{' '}
+          {t('about.meetTeam')}{' '}
           <Icon
             name='arrow'
             size={16}

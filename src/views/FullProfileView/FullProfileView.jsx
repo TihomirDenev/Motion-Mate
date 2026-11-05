@@ -12,6 +12,7 @@ import Icon from '../../components/UI/Icon';
 import LoadingState from '../../components/UI/LoadingState';
 import EmptyState from '../../components/UI/EmptyState';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function FullProfileView() {
   const { id } = useParams();
@@ -21,7 +22,8 @@ export default function FullProfileView() {
     loading,
     error,
   } = useDatabaseValue(/^[\w-]+$/.test(id) ? `users/${id}` : null);
-  usePageTitle(`Motion Mate | ${id}’s profile`);
+  const { t, formatDate } = useTranslation();
+  usePageTitle(`Motion Mate | ${t('publicProfile.pageTitle', { name: id })}`);
   if (id === userData.username)
     return (
       <Navigate
@@ -35,14 +37,14 @@ export default function FullProfileView() {
     return (
       <EmptyState
         icon='user'
-        title='This mate isn’t here'
-        description='This profile may no longer be available.'
+        title={t('publicProfile.missingTitle')}
+        description={t('publicProfile.missingDescription')}
       >
         <Link
           className='btn btn-primary'
           to='/all-users'
         >
-          Meet the community
+          {t('community.meet')}
         </Link>
       </EmptyState>
     );
@@ -55,14 +57,14 @@ export default function FullProfileView() {
   return (
     <div className='profile-page page-enter'>
       <PageHeader
-        back={{ to: '/all-users', label: 'The community' }}
-        eyebrow='MEET YOUR MOTION MATE'
-        title='Good company starts here.'
-        description='Every journey is a little better with someone in your corner.'
+        back={{ to: '/all-users', label: t('friends.backCommunity') }}
+        eyebrow={t('publicProfile.eyebrow')}
+        title={t('publicProfile.title')}
+        description={t('publicProfile.description')}
       />
       <section className='profile-hero surface'>
         <div className='profile-cover'>
-          <span>A LITTLE MOVEMENT. A SHARED JOURNEY.</span>
+          <span>{t('publicProfile.cover')}</span>
           <Icon
             name='users'
             size={110}
@@ -76,17 +78,19 @@ export default function FullProfileView() {
           />
           <div className='profile-name'>
             <span className='pill'>
-              {isFriend ? 'YOUR MOTION MATE' : 'PART OF THE COMMUNITY'}
+              {t(isFriend ? 'publicProfile.friend' : 'publicProfile.member')}
             </span>
             <h2>
               {[user.firstName, user.lastName].filter(Boolean).join(' ') ||
                 user.username}
             </h2>
             <p>
-              @{user.username} <span>·</span> Moving since{' '}
-              {new Date(user.createdOn).toLocaleDateString('en-GB', {
-                month: 'long',
-                year: 'numeric',
+              @{user.username} <span>·</span>{' '}
+              {t('profile.movingSince', {
+                date: formatDate(user.createdOn, {
+                  month: 'long',
+                  year: 'numeric',
+                }),
               })}
             </p>
           </div>
@@ -99,7 +103,7 @@ export default function FullProfileView() {
       <UserInfo userData={user} />
       <section className='section-space'>
         <div className='section-heading'>
-          <h2>A little shared inspiration</h2>
+          <h2>{t('goals.sharedTitle')}</h2>
           <Icon
             name='target'
             size={20}
@@ -111,8 +115,8 @@ export default function FullProfileView() {
           <div className='surface'>
             <EmptyState
               icon='users'
-              title='Good things grow together'
-              description='Connect to follow their goals and discover their exercises.'
+              title={t('publicProfile.privateTitle')}
+              description={t('publicProfile.privateDescription')}
             />
           </div>
         )}

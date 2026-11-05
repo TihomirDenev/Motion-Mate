@@ -1,3 +1,4 @@
+import { translate } from '../i18n/i18n';
 import {
   GOAL_MIN_CALORIES,
   GOAL_MIN_EXERCISES,
@@ -21,7 +22,7 @@ export const createGoal = async (
     const snapshot = await get(ref(db, `users/${owner}/myGoals/`));
     snapshot.forEach((child) => {
       if (child.val().name === name) {
-        throw new Error('Goal with this name already exists');
+        throw new Error(translate('errors.goalNameTaken'));
       }
     });
     goalCreateValidation(
@@ -116,7 +117,7 @@ export const getGoalProgress = async (username, goalId) => {
 
 export const updateGoalProgress = async (username, goalId, progress) => {
   if (!Number.isFinite(progress) || progress < 0 || progress > 100)
-    throw new Error('Progress must be between 0 and 100.');
+    throw new Error(translate('errors.progressRange'));
   try {
     return await set(
       ref(db, `users/${username}/myGoals/${goalId}/progress`),

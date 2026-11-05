@@ -7,6 +7,7 @@ import Icon from '../UI/Icon';
 import Modal from '../UI/Modal';
 import FormField from '../UI/FormField';
 import InlineMessage from '../UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function CreateCategory({ onCategoryCreated }) {
   const [open, setOpen] = useState(false);
@@ -15,6 +16,7 @@ export default function CreateCategory({ onCategoryCreated }) {
   const [image, setImage] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
   const submit = async (event) => {
     event.preventDefault();
     setBusy(true);
@@ -22,7 +24,7 @@ export default function CreateCategory({ onCategoryCreated }) {
     try {
       validateCategoryForm(name.trim(), description.trim(), image);
       if (/[.#$[\]/]/.test(name))
-        throw new Error('Use a name without dots, slashes, brackets, #, or $.');
+        throw new Error(t('errors.categoryCharacters'));
       validatePhoto(image);
       const url = await uploadCategoryPhoto(image);
       await createCategory(name.trim(), description.trim(), url);
@@ -50,41 +52,41 @@ export default function CreateCategory({ onCategoryCreated }) {
           name='plus'
           size={16}
         />
-        Category
+        {t('category.button')}
       </button>
       <Modal
         open={open}
         onClose={() => !busy && setOpen(false)}
-        title='A new way to move'
-        description='Create a category for your community’s exercise library.'
+        title={t('category.title')}
+        description={t('category.description')}
       >
         <form
           className='form-stack'
           onSubmit={submit}
         >
           <FormField
-            label='Category name'
+            label={t('category.name')}
             required
             minLength={5}
             maxLength={20}
-            placeholder='e.g. Mobility flow'
+            placeholder={t('category.namePlaceholder')}
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
           <FormField
-            label='Short description'
+            label={t('category.shortDescription')}
             required
             maxLength={40}
-            placeholder='A few words to inspire movement'
+            placeholder={t('category.descriptionPlaceholder')}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
           <FormField
-            label='Cover photo'
+            label={t('category.cover')}
             type='file'
             accept='image/jpeg,image/png,image/webp,image/gif'
             required
-            hint='Choose a landscape image. Maximum 5 MB.'
+            hint={t('category.coverHint')}
             onChange={(event) => setImage(event.target.files?.[0] || null)}
           />
           <InlineMessage>{error}</InlineMessage>
@@ -95,14 +97,14 @@ export default function CreateCategory({ onCategoryCreated }) {
               disabled={busy}
               onClick={() => setOpen(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type='submit'
               className='btn btn-primary'
               disabled={busy}
             >
-              {busy ? 'Creating…' : 'Create category'}
+              {t(busy ? 'common.creating' : 'category.submit')}
             </button>
           </div>
         </form>

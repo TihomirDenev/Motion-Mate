@@ -8,16 +8,20 @@ import Icon from '../UI/Icon';
 import Modal from '../UI/Modal';
 import FormField from '../UI/FormField';
 import InlineMessage from '../UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
+import { exerciseText } from '../../helper/exercise-text';
 
 export const CreateExercise = ({ defaultCategory = '', exercise }) => {
   const { userData } = useContext(AppContext);
   const [open, setOpen] = useState(false);
+  const { t, te, language } = useTranslation();
+  const translated = Boolean(exercise?.translations?.[language]);
   const { data, error: loadError } = useDatabaseValue(
     open ? 'categories' : null
   );
   const initial = () => ({
-    title: exercise?.title || '',
-    content: exercise?.content || '',
+    title: exerciseText(exercise, language).title,
+    content: exerciseText(exercise, language).content,
     hours: exercise?.duration?.hours || 0,
     minutes: exercise?.duration?.minutes || 0,
     seconds: exercise?.duration?.seconds || 0,
@@ -56,8 +60,12 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
       );
       if (exercise)
         await editExercise(exercise.categoryName, exercise.id, {
-          title: form.title.trim(),
-          content: form.content.trim(),
+          ...(translated
+            ? {
+                [`translations/${language}/title`]: form.title.trim(),
+                [`translations/${language}/content`]: form.content.trim(),
+              }
+            : { title: form.title.trim(), content: form.content.trim() }),
           duration: { hours, minutes, seconds },
           calories,
           level: form.level,
@@ -89,32 +97,36 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
       <button
         type='button'
         className={exercise ? 'icon-button' : 'btn btn-primary'}
-        aria-label={exercise ? `Edit ${exercise.title}` : undefined}
+        aria-label={
+          exercise
+            ? t('exercise.edit', {
+                title: exerciseText(exercise, language).title,
+              })
+            : undefined
+        }
         onClick={show}
       >
         <Icon
           name={exercise ? 'edit' : 'plus'}
           size={17}
         />
-        {!exercise && 'Create exercise'}
+        {!exercise && t('exercise.create')}
       </button>
       <Modal
         open={open}
         onClose={() => !busy && setOpen(false)}
-        title={exercise ? 'Fine-tune your exercise' : 'Make it your own'}
-        description={
-          exercise
-            ? 'A few small adjustments can make all the difference.'
-            : 'Add an exercise to your library. Your Motion Mates can discover it too.'
-        }
+        title={t(exercise ? 'exercise.editTitle' : 'exercise.createTitle')}
+        description={t(
+          exercise ? 'exercise.editDescription' : 'exercise.createDescription'
+        )}
       >
         <form
           className='form-stack'
           onSubmit={submit}
         >
           <FormField
-            label='Exercise name'
-            placeholder='e.g. Morning flow'
+            label={t('exercise.name')}
+            placeholder={t('exercise.namePlaceholder')}
             required
             minLength={4}
             maxLength={30}
@@ -122,9 +134,9 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
             onChange={change('title')}
           />
           <FormField
-            label='How to do it'
+            label={t('exercise.instructions')}
             type='textarea'
-            placeholder='A few simple instructions…'
+            placeholder={t('exercise.instructionsPlaceholder')}
             required
             minLength={4}
             maxLength={100}
@@ -133,39 +145,44 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
           />
           <div className='form-grid'>
             <FormField
-              label='Category'
+              label={t('exercise.category')}
               required
               disabled={Boolean(exercise)}
               value={form.category}
               onChange={change('category')}
             >
-              <option value=''>Choose a category</option>
+              <option value=''>{t('exercise.chooseCategory')}</option>
               {Object.keys(data || {}).map((category) => (
                 <option
                   key={category}
                   value={category}
                 >
-                  {category}
+                  {te('categoryNames', category)}
                 </option>
               ))}
             </FormField>
             <FormField
-              label='Intensity'
+              label={t('exercise.intensity')}
               value={form.level}
               onChange={change('level')}
             >
-              <option value='Easy'>Easy · Find your flow</option>
-              <option value='Medium'>Medium · Feel the effort</option>
-              <option value='Hard'>Hard · Push your pace</option>
+              {['Easy', 'Medium', 'Hard'].map((level) => (
+                <option
+                  key={level}
+                  value={level}
+                >
+                  {t(`exercise.levelOption.${level}`)}
+                </option>
+              ))}
             </FormField>
           </div>
           <fieldset>
-            <legend className='field-legend'>Duration</legend>
+            <legend className='field-legend'>{t('exercise.duration')}</legend>
             <div className='form-grid form-grid-three'>
               {['hours', 'minutes', 'seconds'].map((unit) => (
                 <FormField
                   key={unit}
-                  label={unit[0].toUpperCase() + unit.slice(1)}
+                  label={t(`exercise.${unit}`)}
                   type='number'
                   required
                   min={0}
@@ -177,12 +194,12 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
             </div>
           </fieldset>
           <FormField
-            label='Estimated calories (kcal)'
+            label={t('exercise.calories')}
             type='number'
             required
             min={1}
             max={10000}
-            placeholder='e.g. 80'
+            placeholder={t('common.example', { value: 80 })}
             value={form.calories}
             onChange={change('calories')}
           />
@@ -194,14 +211,20 @@ export const CreateExercise = ({ defaultCategory = '', exercise }) => {
               disabled={busy}
               onClick={() => setOpen(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type='submit'
               className='btn btn-primary'
               disabled={busy}
             >
-              {busy ? 'Saving…' : exercise ? 'Save changes' : 'Create exercise'}
+              {t(
+                busy
+                  ? 'common.saving'
+                  : exercise
+                    ? 'common.saveChanges'
+                    : 'exercise.create'
+              )}
               <Icon
                 name='check'
                 size={16}

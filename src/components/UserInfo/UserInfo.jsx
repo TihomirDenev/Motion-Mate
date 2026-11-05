@@ -1,7 +1,9 @@
 import Icon from '../UI/Icon';
 import { activityLevels, normalizeActivity } from '../../helper/wellness';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function UserInfo({ userData }) {
+  const { t, te } = useTranslation();
   const fullName = [userData?.firstName, userData?.lastName]
     .filter(Boolean)
     .join(' ');
@@ -9,15 +11,15 @@ export default function UserInfo({ userData }) {
     (level) => level.value === normalizeActivity(userData?.activityLevel)
   );
   const details = [
-    { label: 'Full name', value: fullName },
-    { label: 'Email address', value: userData?.email },
-    { label: 'Phone number', value: userData?.phoneNumber },
+    { label: t('fields.fullName'), value: fullName },
+    { label: t('fields.email'), value: userData?.email },
+    { label: t('fields.phone'), value: userData?.phoneNumber },
   ];
   return (
     <div className='profile-details-grid'>
       <section className='surface profile-detail-card'>
         <div className='section-heading'>
-          <h2>The everyday details</h2>
+          <h2>{t('userInfo.detailsTitle')}</h2>
           <span className='icon-tile tone-mint'>
             <Icon
               name='user'
@@ -31,7 +33,7 @@ export default function UserInfo({ userData }) {
               <dt>{detail.label}</dt>
               <dd>
                 {detail.value || (
-                  <span className='not-added'>Not added yet</span>
+                  <span className='not-added'>{t('userInfo.notAddedYet')}</span>
                 )}
               </dd>
             </div>
@@ -40,7 +42,7 @@ export default function UserInfo({ userData }) {
       </section>
       <section className='surface profile-detail-card'>
         <div className='section-heading'>
-          <h2>Your kind of movement</h2>
+          <h2>{t('userInfo.movementTitle')}</h2>
           <span className='icon-tile tone-lavender'>
             <Icon
               name='activity'
@@ -49,20 +51,33 @@ export default function UserInfo({ userData }) {
           </span>
         </div>
         <div className='activity-profile'>
-          <span>{activity?.label || 'Find your rhythm'}</span>
+          <span>
+            {activity
+              ? t(`activity.${activity.value}.label`)
+              : t('userInfo.findRhythm')}
+          </span>
           <p>
-            {activity?.description ||
-              'Add your activity level to personalize your wellness insights.'}
+            {activity
+              ? t(`activity.${activity.value}.description`)
+              : t('userInfo.addActivity')}
           </p>
         </div>
         <dl className='profile-small-details'>
           <div>
-            <dt>Age</dt>
-            <dd>{userData?.age ? `${userData.age} years` : 'Not added'}</dd>
+            <dt>{t('userInfo.age')}</dt>
+            <dd>
+              {userData?.age
+                ? t('userInfo.years', { count: Number(userData.age) })
+                : t('userInfo.notAdded')}
+            </dd>
           </div>
           <div>
-            <dt>Sex for calculations</dt>
-            <dd>{userData?.gender || 'Not added'}</dd>
+            <dt>{t('fields.sex')}</dt>
+            <dd>
+              {userData?.gender
+                ? te('gender', userData.gender)
+                : t('userInfo.notAdded')}
+            </dd>
           </div>
         </dl>
       </section>

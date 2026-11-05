@@ -12,6 +12,16 @@
   src: url('/fonts/dm-sans-latin.woff2') format('woff2');
 }
 
+/* DM Sans has no Cyrillic glyphs, so Bulgarian text uses Manrope inside the same family. */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/manrope-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
 @plugin 'daisyui/theme' {
   name: 'fantasy';
   default: true;
@@ -228,6 +238,35 @@
 }
 .btn-full {
   width: 100%;
+}
+.language-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  transition:
+    background 160ms,
+    transform 160ms;
+}
+.language-button:hover {
+  background: var(--mint);
+  color: var(--color-primary);
+}
+.language-button:active {
+  transform: scale(0.92);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
 }
 .icon-button {
   display: inline-flex;
@@ -2789,19 +2828,23 @@
   width: 220px;
   max-width: 100%;
 }
+/* Segment widths follow the WHO ranges on a 10–40 scale: <18.5, 18.5–25, 25–30, 30+. */
 .bmi-scale span {
   height: 7px;
   border-radius: 4px;
-  flex: 1;
+  flex: 8.5 1 0;
   background: #bad6e8;
 }
 .bmi-scale span:nth-child(2) {
+  flex-grow: 6.5;
   background: #a4c99b;
 }
 .bmi-scale span:nth-child(3) {
+  flex-grow: 5;
   background: #e4c185;
 }
 .bmi-scale span:nth-child(4) {
+  flex-grow: 10;
   background: #d7a199;
 }
 .bmi-scale i {
@@ -5409,6 +5452,11 @@
   .topbar-actions .theme-button {
     border-color: transparent;
     background: transparent;
+  }
+  .language-button {
+    min-width: 34px;
+    height: 34px;
+    font-size: 10px;
   }
   .topbar-actions .avatar-sm {
     height: 29px;

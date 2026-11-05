@@ -12,13 +12,16 @@ import Icon from '../../components/UI/Icon';
 import LoadingState from '../../components/UI/LoadingState';
 import EmptyState from '../../components/UI/EmptyState';
 import InlineMessage from '../../components/UI/InlineMessage';
+import { useTranslation } from '../../i18n/useTranslation';
+import { exerciseSearchText } from '../../helper/exercise-text';
 
 export const Exercises = () => {
   const { category } = useParams();
-  usePageTitle(`Motion Mate | ${category}`);
+  const { t, te, formatNumber } = useTranslation();
+  usePageTitle(`Motion Mate | ${te('categoryNames', category)}`);
   const { userData } = useContext(AppContext);
   const { exercises, loading, error: loadError } = useExerciseLibrary();
-  const [level, setLevel] = useState('All levels');
+  const [level, setLevel] = useState('All');
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
@@ -27,10 +30,8 @@ export const Exercises = () => {
   );
   const filtered = categoryExercises.filter(
     (exercise) =>
-      (level === 'All levels' || exercise.level === level) &&
-      `${exercise.title} ${exercise.content}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      (level === 'All' || exercise.level === level) &&
+      exerciseSearchText(exercise).includes(search.trim().toLowerCase())
   );
   const visual = getCategoryVisual(category);
   const act = async (exercise, action) => {
@@ -51,10 +52,10 @@ export const Exercises = () => {
   return (
     <div className='page-enter'>
       <PageHeader
-        back={{ to: '/exercises', label: 'Exercise library' }}
-        eyebrow={visual.label}
-        title={category}
-        description='Your exercises and a little inspiration from your Motion Mates.'
+        back={{ to: '/exercises', label: t('nav.exercises') }}
+        eyebrow={t(`categoryTaglines.${visual.tagline}`)}
+        title={te('categoryNames', category)}
+        description={t('exercises.description')}
         actions={<CreateExercise defaultCategory={category} />}
       />
       <div className='toolbar'>
@@ -65,8 +66,8 @@ export const Exercises = () => {
           />
           <input
             type='search'
-            aria-label='Search exercises'
-            placeholder='Find an exercise…'
+            aria-label={t('exercises.searchLabel')}
+            placeholder={t('exercises.searchPlaceholder')}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -74,16 +75,16 @@ export const Exercises = () => {
         <div
           className='filter-chips'
           role='group'
-          aria-label='Exercise intensity'
+          aria-label={t('exercise.intensity')}
         >
-          {['All levels', 'Easy', 'Medium', 'Hard'].map((value) => (
+          {['All', 'Easy', 'Medium', 'Hard'].map((value) => (
             <button
               key={value}
               className='filter-chip'
               aria-pressed={level === value}
               onClick={() => setLevel(value)}
             >
-              {value}
+              {value === 'All' ? t('exercises.allLevels') : te('levels', value)}
             </button>
           ))}
         </div>
@@ -112,11 +113,13 @@ export const Exercises = () => {
                   <span
                     className={`pill ${exercise.level === 'Hard' ? 'pill-peach' : exercise.level === 'Medium' ? 'pill-lavender' : ''}`}
                   >
-                    {exercise.level}
+                    {te('levels', exercise.level)}
                   </span>
                 </div>
-                <h2>{exercise.title}</h2>
-                <p className='exercise-description'>{exercise.content}</p>
+                <h2>{exercise.display.title}</h2>
+                <p className='exercise-description'>
+                  {exercise.display.content}
+                </p>
                 <div className='exercise-metrics'>
                   <span>
                     <Icon
@@ -126,8 +129,9 @@ export const Exercises = () => {
                     <strong>
                       {Number(exercise.duration?.hours || 0) * 60 +
                         Number(exercise.duration?.minutes || 0)}
-                      <small>m</small> {Number(exercise.duration?.seconds || 0)}
-                      <small>s</small>
+                      <small>{t('common.minutesShort')}</small>{' '}
+                      {Number(exercise.duration?.seconds || 0)}
+                      <small>{t('common.secondsShort')}</small>
                     </strong>
                   </span>
                   <span>
@@ -136,14 +140,16 @@ export const Exercises = () => {
                       size={16}
                     />
                     <strong>
-                      {exercise.calories}
-                      <small> kcal</small>
+                      {formatNumber(exercise.calories)}
+                      <small> {t('common.kcal')}</small>
                     </strong>
                   </span>
                 </div>
                 <div className='exercise-author'>
                   <span className='author-dot' />
-                  {own ? 'Created by you' : `Shared by ${exercise.createdBy}`}
+                  {own
+                    ? t('exercises.createdByYou')
+                    : t('exercises.sharedBy', { name: exercise.createdBy })}
                 </div>
                 <div className='exercise-card-actions'>
                   <button
@@ -155,11 +161,13 @@ export const Exercises = () => {
                       name={exercise.queued ? 'check' : 'plus'}
                       size={16}
                     />
-                    {running
-                      ? 'In progress'
-                      : exercise.queued
-                        ? 'In your workout'
-                        : 'Add to workout'}
+                    {t(
+                      running
+                        ? 'exercises.inProgress'
+                        : exercise.queued
+                          ? 'exercises.inWorkout'
+                          : 'exercises.addToWorkout'
+                    )}
                   </button>
                   {own && (
                     <>
@@ -167,7 +175,9 @@ export const Exercises = () => {
                       <button
                         className='icon-button danger-button'
                         disabled={busy === exercise.id || running}
-                        aria-label={`Delete ${exercise.title}`}
+                        aria-label={t('exercises.delete', {
+                          title: exercise.display.title,
+                        })}
                         onClick={() => act(exercise, 'delete')}
                       >
                         <Icon
@@ -185,27 +195,27 @@ export const Exercises = () => {
       ) : (
         <div className='surface'>
           <EmptyState
-            icon={search || level !== 'All levels' ? 'search' : visual.icon}
-            title={
-              search || level !== 'All levels'
-                ? 'No matching moves just yet'
-                : 'Make the first move'
-            }
-            description={
-              search || level !== 'All levels'
-                ? 'Try another search or intensity level.'
-                : 'Create your first exercise in this category, or connect with mates to discover theirs.'
-            }
+            icon={search || level !== 'All' ? 'search' : visual.icon}
+            title={t(
+              search || level !== 'All'
+                ? 'exercises.noResultsTitle'
+                : 'exercises.emptyTitle'
+            )}
+            description={t(
+              search || level !== 'All'
+                ? 'exercises.noResultsDescription'
+                : 'exercises.emptyDescription'
+            )}
           >
-            {(search || level !== 'All levels') && (
+            {(search || level !== 'All') && (
               <button
                 className='btn btn-ghost'
                 onClick={() => {
                   setSearch('');
-                  setLevel('All levels');
+                  setLevel('All');
                 }}
               >
-                Reset filters
+                {t('common.resetFilters')}
               </button>
             )}
           </EmptyState>

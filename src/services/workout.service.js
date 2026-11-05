@@ -1,3 +1,4 @@
+import { translate } from '../i18n/i18n';
 import { get, ref, runTransaction, update } from 'firebase/database';
 import { db } from '../config/firebase-config';
 
@@ -26,9 +27,7 @@ export async function beginExercise(username, exercise) {
     Number(exercise.duration?.minutes || 0) * 60 +
     Number(exercise.duration?.seconds || 0);
   if (!Number.isFinite(duration) || duration <= 0)
-    throw new Error(
-      'This exercise needs a valid duration before it can start.'
-    );
+    throw new Error(translate('errors.exerciseDurationInvalid'));
   const result = await runTransaction(
     ref(db, `users/${username}/endCurrentExercise`),
     (current) => {
@@ -37,15 +36,13 @@ export async function beginExercise(username, exercise) {
         timeLeft: Date.now() + duration * 1000,
         exerciseId: exercise.id,
         title: exercise.title,
+        translations: exercise.translations || null,
         calories: Number(exercise.calories) || 0,
         countOnComplete: true,
       };
     }
   );
-  if (!result.committed)
-    throw new Error(
-      'Finish or stop your current exercise before starting another.'
-    );
+  if (!result.committed) throw new Error(translate('errors.exerciseRunning'));
 }
 
 export async function finishExercise(username, exerciseId) {

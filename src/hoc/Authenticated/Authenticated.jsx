@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router';
 import { AppContext } from '../../context/AppContext.js';
 import EmptyState from '../../components/UI/EmptyState';
 import { Link } from 'react-router';
+import { useTranslation } from '../../i18n/useTranslation';
 
 /**
  *
@@ -12,6 +13,7 @@ import { Link } from 'react-router';
 export default function Authenticated({ children }) {
   const { user, userData } = useContext(AppContext);
   const location = useLocation();
+  const { t } = useTranslation();
 
   if (!user) {
     return (
@@ -27,14 +29,14 @@ export default function Authenticated({ children }) {
     return (
       <EmptyState
         icon='user'
-        title='Your profile needs a moment'
-        description='We could not load your profile. Please sign in again or contact the team.'
+        title={t('auth.profileMissingTitle')}
+        description={t('auth.profileMissingDescription')}
       >
         <Link
           className='btn btn-primary'
           to='/contact-us'
         >
-          Get help
+          {t('auth.getHelp')}
         </Link>
       </EmptyState>
     );
@@ -52,14 +54,14 @@ export default function Authenticated({ children }) {
     return (
       <EmptyState
         icon='shield'
-        title='Your account is paused'
-        description='Contact the Motion Mate team to get back on track.'
+        title={t('auth.pausedTitle')}
+        description={t('auth.pausedDescription')}
       >
         <Link
           className='btn btn-primary'
           to='/contact-us'
         >
-          Contact support
+          {t('auth.contactSupport')}
         </Link>
       </EmptyState>
     );

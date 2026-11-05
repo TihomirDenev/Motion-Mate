@@ -1,9 +1,11 @@
 import { useEffect, useId, useRef } from 'react';
 import Icon from './Icon';
+import { useTranslation } from '../../i18n/useTranslation';
 
 export default function Modal({ open, onClose, title, description, children }) {
   const dialogRef = useRef(null);
   const titleId = useId();
+  const { t } = useTranslation();
   useEffect(() => {
     const dialog = dialogRef.current;
     if (open && !dialog.open) dialog.showModal();
@@ -21,7 +23,10 @@ export default function Modal({ open, onClose, title, description, children }) {
       ref={dialogRef}
       className='app-dialog'
       aria-labelledby={titleId}
-      onCancel={(event) => { event.preventDefault(); onClose(); }}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -30,13 +35,13 @@ export default function Modal({ open, onClose, title, description, children }) {
         <div className='dialog-handle' />
         <div className='dialog-heading'>
           <div>
-            <p className='eyebrow'>MAKE YOUR NEXT MOVE</p>
+            <p className='eyebrow'>{t('common.dialogEyebrow')}</p>
             <h2 id={titleId}>{title}</h2>
           </div>
           <button
             type='button'
             className='icon-button'
-            aria-label='Close dialog'
+            aria-label={t('common.closeDialog')}
             onClick={onClose}
           >
             <Icon name='close' />

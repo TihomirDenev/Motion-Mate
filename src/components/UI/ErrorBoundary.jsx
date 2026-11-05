@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import Icon from './Icon';
+import { translate } from '../../i18n/i18n';
 
 export default class ErrorBoundary extends Component {
   state = { failed: false };
@@ -19,18 +20,18 @@ export default class ErrorBoundary extends Component {
               size={30}
             />
           </span>
-          <p className='eyebrow'>LET’S TRY THAT AGAIN</p>
+          <p className='eyebrow'>{translate('errorBoundary.eyebrow')}</p>
           <h1>
-            A little pause
+            {translate('errorBoundary.titleLine1')}
             <br />
-            in the momentum.
+            {translate('errorBoundary.titleLine2')}
           </h1>
-          <p>This screen couldn’t load. Refresh to get back on track.</p>
+          <p>{translate('errorBoundary.description')}</p>
           <button
             className='btn btn-primary'
             onClick={() => window.location.reload()}
           >
-            Refresh the app{' '}
+            {translate('errorBoundary.refresh')}{' '}
             <Icon
               name='refresh'
               size={16}

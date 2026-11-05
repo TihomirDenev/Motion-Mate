@@ -1,9 +1,12 @@
 import { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useDatabaseValue } from './useDatabaseValue';
+import { useTranslation } from '../i18n/useTranslation';
+import { exerciseText } from '../helper/exercise-text';
 
 export function useExerciseLibrary() {
   const { userData } = useContext(AppContext);
+  const { language } = useTranslation();
   const { data, loading, error } = useDatabaseValue(
     userData ? 'exercises' : null
   );
@@ -23,6 +26,7 @@ export function useExerciseLibrary() {
   return {
     exercises: visible.map((exercise) => ({
       ...exercise,
+      display: exerciseText(exercise, language),
       queued: userData?.workoutListInitialized
         ? Boolean(userData.workoutList?.[exercise.id])
         : exercise.createdBy === userData?.username &&
