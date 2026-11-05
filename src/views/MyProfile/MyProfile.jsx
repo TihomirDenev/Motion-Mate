@@ -1,124 +1,315 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { AppContext } from '../../context/AppContext';
-import { fullFormatDate } from '../../helper/format-date';
-import { getUserByUsername } from '../../services/users.service';
+import { usePageTitle } from '../../hooks/usePageTitle';
+import { logoutUser } from '../../services/auth.service';
+import { profileWellness } from '../../helper/wellness';
+import { resetUserScores } from '../../services/users.service';
 import EditProfileInfo from '../../components/EditProfileInfo/EditProfilePhoto/EditProfileInfo';
 import ChangeProfilePhoto from '../../components/EditProfileInfo/ChangeProfilePhoto/ChangeProfilePhoto';
 import UserInfo from '../../components/UserInfo/UserInfo';
-import { FriendAvatar } from '../../components/Exercise/FriendAvatar';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCameraRetro,
-  faPen,
-  faUserGroup,
-} from '@fortawesome/free-solid-svg-icons';
-import { APP_NAME } from '../../common/constants';
-import { usePageTitle } from '../../hooks/usePageTitle';
+import PageHeader from '../../components/UI/PageHeader';
+import Avatar from '../../components/UI/Avatar';
+import Icon from '../../components/UI/Icon';
+import Modal from '../../components/UI/Modal';
+import InlineMessage from '../../components/UI/InlineMessage';
 
 export default function MyProfile() {
-  usePageTitle(`${APP_NAME} | My Profile`);
-
-  const { userData, setAppState } = useContext(AppContext);
-  const [editProfile, setEditProfile] = useState(false);
-  const [changeProfilePhoto, setChangeProfilePhoto] = useState(false);
-
-  const generateFriendTooltips = () => {
-    const friendNames = Object.keys(userData.friends).join(', ');
-    return friendNames;
+  usePageTitle('Motion Mate | My profile');
+  const { userData } = useContext(AppContext);
+  const [params, setParams] = useSearchParams();
+  const [resetOpen, setResetOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const tab = params.get('tab');
+  const friends = Object.keys(userData.friends || {}).length;
+  const bmi = profileWellness('bmi', userData);
+  const completeGoals = Object.values(userData.myGoals || {}).filter(
+    (goal) => Number(goal.progress) >= 100
+  ).length;
+  const memberSince = new Date(userData.createdOn).toLocaleDateString('en-GB', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const closeEditor = () => setParams({});
+  const logout = async () => {
+    try {
+      await logoutUser();
+      navigate('/login', { replace: true });
+    } catch (error) {
+      setError(error.message);
+    }
   };
-
-  useEffect(() => {
-    getUserByUsername(userData?.username).then((res) => {
-      setAppState((prev) => {
-        return { ...prev, userData: res.val() };
-      });
-    });
-  }, [userData?.username, editProfile, changeProfilePhoto, setAppState]);
+  const reset = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      await resetUserScores(userData.username);
+      setResetOpen(false);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (tab === 'edit') return <EditProfileInfo setEditProfile={closeEditor} />;
+  if (tab === 'photo')
+    return <ChangeProfilePhoto setChangeProfilePhoto={closeEditor} />;
 
   return (
-    <div className='flex flex-col'>
-      {userData && editProfile === false && changeProfilePhoto === false ? (
-        <div className='flex flex-col'>
-          <h1 className='my-5 text-4xl font-bold text-center'>My Profile</h1>
-
-          <div className='flex items-center justify-between'>
-            <div className='avatar flex items-center'>
-              <div className='w-36 mr-6 rounded-full border-2 border-primary'>
-                <FriendAvatar username={userData?.username} />
-              </div>
-
-              <div>
-                <small>Username:</small>
-                <h1 className='text-4xl font-bold'>{userData?.username}</h1>
-              </div>
-            </div>
-
-            <div className='flex flex-col place-items-end  gap-2'>
-              <div className='flex place-content-end items-center'>
-                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>
-                  Friends
-                </label>
-                {userData?.friends ? (
-                  <div
-                    title={`You have ${Object.keys(userData?.friends).length} ${
-                      Object.keys(userData.friends).length > 1
-                        ? `friends: ${generateFriendTooltips()}`
-                        : `friend: ${generateFriendTooltips()}`
-                    }`}
-                    className='flex items-center text-xs text-primary border border-primary rounded-lg p-2'
-                  >
-                    <strong className='mr-1'>
-                      {Object.keys(userData.friends).length}
-                    </strong>
-                    <FontAwesomeIcon icon={faUserGroup} />
-                  </div>
-                ) : (
-                  <div className='flex items-center text-xs text-primary  border border-primary rounded-lg p-2'>
-                    <strong className='mr-1'>0</strong>
-                    <FontAwesomeIcon icon={faUserGroup} />
-                  </div>
-                )}
-              </div>
-
-              <div className='flex  place-content-end items-center '>
-                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>
-                  Edit profile
-                </label>
-                <button
-                  onClick={() => setEditProfile(!editProfile)}
-                  className='btn btn-primary btn-sm rounded-md'
-                  title='Edit Profile'
-                >
-                  <FontAwesomeIcon icon={faPen} />
-                </button>
-              </div>
-              <div className='flex  place-content-end items-center'>
-                <label className='flex items-center select-none justify-between px-1 py-2 gap-1'>
-                  Change profile picture
-                </label>
-                <button
-                  onClick={() => setChangeProfilePhoto(!changeProfilePhoto)}
-                  className='btn btn-primary btn-sm rounded-md'
-                  title='Change Profile Picture'
-                >
-                  <FontAwesomeIcon icon={faCameraRetro} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className='info border-t border-t-gray-500 mt-4 pt-4'>
-            <UserInfo userData={userData} />
-          </div>
+    <div className='profile-page page-enter'>
+      <PageHeader
+        eyebrow='YOUR PERSONAL SPACE'
+        title='A little more you.'
+        description='The person behind every small step and every big win.'
+      />
+      <section className='profile-hero surface'>
+        <div className='profile-cover'>
+          <span>YOUR JOURNEY. YOUR PACE.</span>
+          <Icon
+            name='activity'
+            size={110}
+          />
+          <button
+            className='profile-photo-button'
+            aria-label='Change profile photo'
+            onClick={() => setParams({ tab: 'photo' })}
+          >
+            <Icon
+              name='camera'
+              size={16}
+            />
+            <span>Change photo</span>
+          </button>
         </div>
-      ) : editProfile === true ? (
-        <EditProfileInfo setEditProfile={setEditProfile} />
-      ) : (
-        <ChangeProfilePhoto setChangeProfilePhoto={setChangeProfilePhoto} />
-      )}
-      <p className='mt-4'>
-        Account created on: {fullFormatDate(userData?.createdOn)}
-      </p>
+        <div className='profile-identity'>
+          <Avatar
+            user={userData}
+            size='xl'
+            zoomable
+          />
+          <div className='profile-name'>
+            <span className='pill'>
+              {userData.userRole === 'admin'
+                ? 'COMMUNITY ADMIN'
+                : 'MOTION MATE'}
+            </span>
+            <h2>
+              {[userData.firstName, userData.lastName]
+                .filter(Boolean)
+                .join(' ') || userData.username}
+            </h2>
+            <p>
+              @{userData.username} <span>·</span> Moving since {memberSince}
+            </p>
+          </div>
+          <button
+            className='btn btn-primary'
+            onClick={() => setParams({ tab: 'edit' })}
+          >
+            <Icon
+              name='edit'
+              size={16}
+            />
+            Edit profile
+          </button>
+        </div>
+        <div className='profile-social-stats'>
+          <Link to='/my-friends'>
+            <strong>{friends}</strong>
+            <span>Motion Mates</span>
+            <Icon
+              name='arrowUp'
+              size={14}
+            />
+          </Link>
+          <Link to='/goals'>
+            <strong>{completeGoals}</strong>
+            <span>Goals celebrated</span>
+            <Icon
+              name='arrowUp'
+              size={14}
+            />
+          </Link>
+          <Link to='/'>
+            <strong>{userData.updatedScores?.doneExercises || 0}</strong>
+            <span>Exercises completed</span>
+            <Icon
+              name='arrowUp'
+              size={14}
+            />
+          </Link>
+        </div>
+      </section>
+      <div className='section-heading section-space'>
+        <div>
+          <h2>Your wellness snapshot</h2>
+          <p>A starting point for getting to know your body.</p>
+        </div>
+        <Link to='/wellness-health-tools'>
+          Explore tools{' '}
+          <Icon
+            name='arrow'
+            size={14}
+          />
+        </Link>
+      </div>
+      <div className='profile-health-grid'>
+        {[
+          {
+            icon: 'scale',
+            label: 'Weight',
+            value: userData.weight,
+            unit: 'kg',
+            tone: 'blue',
+          },
+          {
+            icon: 'activity',
+            label: 'Height',
+            value: userData.height,
+            unit: 'cm',
+            tone: 'mint',
+          },
+          {
+            icon: 'heart',
+            label: 'Body mass index',
+            value: bmi?.value,
+            unit: 'BMI',
+            tone: 'lavender',
+          },
+        ].map((stat) => (
+          <Link
+            className={`profile-health-card tone-${stat.tone}`}
+            to='/wellness-health-tools'
+            key={stat.label}
+          >
+            <span className='icon-tile'>
+              <Icon
+                name={stat.icon}
+                size={20}
+              />
+            </span>
+            <span>{stat.label}</span>
+            <strong>
+              {stat.value || '—'} <small>{stat.unit}</small>
+            </strong>
+          </Link>
+        ))}
+      </div>
+      <UserInfo userData={userData} />
+      <section className='surface profile-settings'>
+        <div className='section-heading'>
+          <h2>Your space, your way</h2>
+          <Icon
+            name='settings'
+            size={19}
+          />
+        </div>
+        <div className='profile-links'>
+          {[
+            {
+              to: '/my-friends',
+              icon: 'users',
+              label: 'My Motion Mates',
+              detail: 'Good company. Better momentum.',
+            },
+            {
+              to: '/about',
+              icon: 'leaf',
+              label: 'About Motion Mate',
+              detail: 'A little more about our story.',
+            },
+            {
+              to: '/contact-us',
+              icon: 'info',
+              label: 'Help & support',
+              detail: 'We’re here for your journey.',
+            },
+            ...(userData.userRole === 'admin'
+              ? [
+                  {
+                    to: '/admin-panel',
+                    icon: 'shield',
+                    label: 'Administration',
+                    detail: 'Look after your community.',
+                  },
+                ]
+              : []),
+          ].map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+            >
+              <span className='icon-tile'>
+                <Icon
+                  name={link.icon}
+                  size={18}
+                />
+              </span>
+              <span>
+                <strong>{link.label}</strong>
+                <small>{link.detail}</small>
+              </span>
+              <Icon
+                name='chevron'
+                size={16}
+              />
+            </Link>
+          ))}
+        </div>
+        <div className='profile-settings-bottom'>
+          <button
+            className='text-button muted'
+            disabled={Boolean(userData.endCurrentExercise)}
+            onClick={() => {
+              setError('');
+              setResetOpen(true);
+            }}
+          >
+            <Icon
+              name='refresh'
+              size={14}
+            />
+            Reset workout totals
+          </button>
+          <button
+            className='text-button danger-button'
+            onClick={logout}
+          >
+            <Icon
+              name='logout'
+              size={15}
+            />
+            Log out
+          </button>
+        </div>
+        <InlineMessage>{error}</InlineMessage>
+      </section>
+      <Modal
+        open={resetOpen}
+        onClose={() => !busy && setResetOpen(false)}
+        title='Start a fresh count?'
+        description='Your exercise and calorie totals will go back to zero. Your goals and exercise library stay with you.'
+      >
+        <InlineMessage>{error}</InlineMessage>
+        <div className='dialog-actions'>
+          <button
+            className='btn btn-ghost'
+            disabled={busy}
+            onClick={() => setResetOpen(false)}
+          >
+            Keep my totals
+          </button>
+          <button
+            className='btn btn-primary'
+            disabled={busy}
+            onClick={reset}
+          >
+            {busy ? 'Resetting…' : 'Reset totals'}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

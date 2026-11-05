@@ -1,218 +1,246 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router';
+import { deleteUser } from 'firebase/auth';
 import { registerUser } from '../../services/auth.service';
-import { alertHelper } from '../../helper/alert-helper';
-import { useNavigate } from 'react-router';
+import { createUser, uploadPhoto } from '../../services/users.service';
 import { AppContext } from '../../context/AppContext';
-import AlertError from '../../components/Alerts/AlertError/AlertError';
-import AlertSuccess from '../../components/Alerts/AlertSuccess/AlertSuccess';
-import {
-  createUser,
-  getUserData,
-  uploadPhoto,
-} from '../../services/users.service';
 import {
   validatePassword,
-  validateRequiredFieldsReg,
   validateEmailRegAsync,
   validateUserNameRegAsync,
   validatePhoneNumberAsync,
   validatePhoto,
 } from '../../common/user.validations';
-import { APP_NAME } from '../../common/constants';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import Icon from '../../components/UI/Icon';
+import FormField from '../../components/UI/FormField';
+import InlineMessage from '../../components/UI/InlineMessage';
 
 export default function Register() {
-  usePageTitle(`${APP_NAME} | Register`);
-
+  usePageTitle('Motion Mate | Your day one');
+  const { userData } = useContext(AppContext);
   const navigate = useNavigate();
-  const { user, setAppState } = useContext(AppContext);
-
-  const [image, setImage] = useState(null);
-  const [alert, setAlert] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
     username: '',
-    phoneNumber: '',
     email: '',
+    phoneNumber: '',
     password: '',
-    age: '',
-    weight: '',
-    height: '',
-    activityLevel: '',
-    gender: '',
   });
+  const [image, setImage] = useState(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const change = (key) => (event) =>
+    setForm((form) => ({ ...form, [key]: event.target.value }));
 
-  const updateForm = (props) => (e) => {
-    setForm({
-      ...form,
-      [props]: e.target.value,
-    });
-  };
-
-  const handleFileChange = (event) => {
-    const files = event.target.files;
-    if (files && files[0]) {
-      setImage(files[0]);
-    }
-  };
-
-  const validateRegisterForm = async () => {
-    validateRequiredFieldsReg(form);
-    await validateUserNameRegAsync(form.username);
-    await validateEmailRegAsync(form.email);
-    await validatePhoneNumberAsync(form.phoneNumber);
-    validatePassword(form.password);
-    validatePhoto(image);
-  };
-
-  const register = async (event) => {
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setBusy(true);
+    let credential;
+    let profileCreated = false;
     try {
-      event.preventDefault();
-      await validateRegisterForm();
-
-      const url = await uploadPhoto(image);
-      if (!url) {
-        throw new Error('Photo upload failed. Please try again.');
+      const username = form.username.trim();
+      const email = form.email.trim();
+      validatePassword(form.password);
+      await Promise.all([
+        validateUserNameRegAsync(username),
+        validateEmailRegAsync(email),
+        validatePhoneNumberAsync(form.phoneNumber),
+      ]);
+      let avatar = '';
+      if (image) {
+        validatePhoto(image);
+        avatar = await uploadPhoto(image);
+        if (!avatar)
+          throw new Error(
+            'Your photo couldn’t be uploaded. Try another image or add it later.'
+          );
       }
-      const userCredential = await registerUser(form.email, form.password);
-
+      credential = await registerUser(email, form.password);
       await createUser(
-        userCredential.user.uid,
-        form.username,
-        userCredential.user.email,
+        credential.user.uid,
+        username,
+        email,
         form.phoneNumber,
-        form.firstName,
-        form.lastName,
-        url,
-        form.age,
-        form.weight,
-        form.height,
-        form.activityLevel,
-        form.gender
+        '',
+        '',
+        avatar,
+        '',
+        '',
+        '',
+        '',
+        ''
       );
-
-      const snapshot = await getUserData(userCredential.user.uid);
-      const userData = snapshot.val() ? Object.values(snapshot.val())[0] : null;
-      setAppState((prev) => ({ ...prev, user: userCredential.user, userData }));
-      alertHelper(setMessage, setSuccess, 'User registered successfully!');
-      navigate('/register-additional-info');
+      profileCreated = true;
+      setRegistered(true);
+      navigate('/register-additional-info', { replace: true });
     } catch (error) {
-      alertHelper(setMessage, setAlert, error.message);
+      if (credential && !profileCreated)
+        await deleteUser(credential.user).catch(() => {});
+      setError(
+        error.code === 'auth/email-already-in-use'
+          ? 'This email already has an account. Try logging in.'
+          : error.message
+      );
+    } finally {
+      setBusy(false);
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
-
+  if (userData && !busy && !registered)
+    return (
+      <Navigate
+        to='/'
+        replace
+      />
+    );
   return (
-    <>
-      <div
-        id='register'
-        className='hero min-h-screen bg-base-300'
-      >
-        <div className='hero-content flex-col lg:flex-row-reverse'>
-          <div className='text-center lg:text-left'>
-            <h1 className='text-5xl font-bold'>Register!</h1>
-            <p className='py-6'>Join our journey!</p>
-          </div>
-          <div className='card shrink-0 w-full max-w-sm shadow-2xl bg-base-100'>
-            <form className='card-body '>
-              <div className='flex flex-col'>
-                <label className='flex items-center select-none justify-between px-1 py-2'>
-                  <span className='text-sm'>
-                    Username: <span className='text-red-600'>*</span>
-                  </span>
-                </label>
-                <input
-                  onChange={updateForm('username')}
-                  type='text'
-                  placeholder='username'
-                  className='input w-full'
-                  required
-                  value={form.username}
-                />
-              </div>
-              <div className='flex flex-col'>
-                <label className='flex items-center select-none justify-between px-1 py-2'>
-                  <span className='text-sm'>
-                    Email: <span className='text-red-600'>*</span>
-                  </span>
-                </label>
-                <input
-                  onChange={updateForm('email')}
-                  type='email'
-                  placeholder='email'
-                  className='input w-full'
-                  required
-                  value={form.email}
-                />
-              </div>
-
-              <div className='flex flex-col'>
-                <label className='flex items-center select-none justify-between px-1 py-2'>
-                  <span className='text-sm'>
-                    Phone: <span className='text-red-600'>*</span>
-                  </span>
-                </label>
-                <input
-                  onChange={updateForm('phoneNumber')}
-                  type='number'
-                  placeholder='+359 123-456-789'
-                  className='input no-spinners w-full'
-                  pattern='[0-9]{3}-[0-9]{3}-[0-9]{3}'
-                  required
-                  value={form.phoneNumber}
-                />
-              </div>
-              <div className='flex flex-col'>
-                <label className='flex items-center select-none justify-between px-1 py-2'>
-                  <span className='text-sm'>
-                    Password: <span className='text-red-600'>*</span>
-                  </span>
-                </label>
-                <input
-                  onChange={updateForm('password')}
-                  type='password'
-                  placeholder='password'
-                  className='input w-full'
-                  required
-                  value={form.password}
-                />
-              </div>
-              <div className='flex flex-col'>
-                <label className='flex items-center select-none justify-between px-1 py-2'>
-                  <span className='text-sm'>
-                    Upload Photo <span className='text-red-600'>*</span>
-                  </span>
-                </label>
-                <input
-                  onChange={handleFileChange}
-                  type='file'
-                  accept='image/*'
-                  placeholder='avatar'
-                  className='file-input w-full max-w-xs'
-                />
-              </div>
-              <div className='flex flex-col mt-6'>
-                <button
-                  onClick={register}
-                  className='btn btn-primary '
-                >
-                  Register
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className='auth-layout register-layout page-enter'>
+      <aside className='auth-visual'>
+        <img
+          src='/images/yoga.jpg'
+          alt='A group making time for movement outdoors'
+        />
+        <div className='auth-visual-shade' />
+        <span className='auth-visual-kicker'>
+          A LITTLE MOVEMENT CHANGES EVERYTHING.
+        </span>
+        <div>
+          <span className='icon-tile'>
+            <Icon
+              name='sparkles'
+              size={25}
+            />
+          </span>
+          <h2>
+            Meet your
+            <br />
+            next chapter.
+          </h2>
+          <p>
+            Your goals. Your people. Your kind of movement. It all starts with
+            showing up.
+          </p>
+          <ul className='auth-benefits'>
+            <li>
+              <Icon
+                name='check'
+                size={16}
+              />
+              Workouts that work for you
+            </li>
+            <li>
+              <Icon
+                name='check'
+                size={16}
+              />
+              Progress you can feel
+            </li>
+            <li>
+              <Icon
+                name='check'
+                size={16}
+              />
+              A community in your corner
+            </li>
+          </ul>
         </div>
-      </div>
-      {success && <AlertSuccess message={message} />}
-      {alert && <AlertError message={message} />}
-    </>
+      </aside>
+      <section className='auth-form-panel'>
+        <p className='eyebrow'>THIS IS YOUR DAY ONE</p>
+        <h1>
+          Make your move<span>.</span>
+        </h1>
+        <p className='auth-description'>
+          A healthier everyday is closer than you think.
+        </p>
+        <form
+          onSubmit={submit}
+          className='form-stack'
+        >
+          <FormField
+            label='Username'
+            required
+            name='username'
+            autoComplete='username'
+            autoCapitalize='none'
+            spellCheck={false}
+            minLength={2}
+            maxLength={20}
+            placeholder='Pick a name that feels like you'
+            value={form.username}
+            onChange={change('username')}
+          />
+          <FormField
+            label='Email address'
+            required
+            name='email'
+            type='email'
+            autoComplete='email'
+            placeholder='you@example.com'
+            value={form.email}
+            onChange={change('email')}
+          />
+          <FormField
+            label='Phone number'
+            required
+            name='phone'
+            type='tel'
+            autoComplete='tel-national'
+            inputMode='numeric'
+            pattern='[0-9]{10}'
+            minLength={10}
+            maxLength={10}
+            placeholder='0888123456'
+            hint='10 digits, including the leading zero.'
+            value={form.phoneNumber}
+            onChange={change('phoneNumber')}
+          />
+          <FormField
+            label='Password'
+            required
+            name='password'
+            type='password'
+            autoComplete='new-password'
+            minLength={6}
+            maxLength={15}
+            placeholder='Create your password'
+            hint='Use 6–15 characters.'
+            value={form.password}
+            onChange={change('password')}
+          />
+          <FormField
+            label='Profile photo'
+            type='file'
+            accept='image/jpeg,image/png,image/webp,image/gif'
+            hint='Optional. You can always add one later. Maximum 5 MB.'
+            onChange={(event) => setImage(event.target.files?.[0] || null)}
+          />
+          <InlineMessage>{error}</InlineMessage>
+          <button
+            type='submit'
+            className='btn btn-primary btn-full'
+            disabled={busy}
+          >
+            {busy ? 'Creating your space…' : 'Create my account'}
+            <Icon
+              name='arrow'
+              size={18}
+            />
+          </button>
+        </form>
+        <p className='auth-switch'>
+          Already a Motion Mate?{' '}
+          <Link to='/login'>
+            Welcome back{' '}
+            <Icon
+              name='arrowUp'
+              size={13}
+            />
+          </Link>
+        </p>
+      </section>
+    </div>
   );
 }

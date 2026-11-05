@@ -85,7 +85,7 @@ export const getGoalById = async (username, goalId) => {
 
 export const updateGoal = async (username, goalId, updates) => {
   try {
-    const goal = await getGoalById(goalId);
+    const goal = await getGoalById(username, goalId);
     return await set(ref(db, `users/${username}/myGoals/${goalId}`), {
       ...goal,
       ...updates,
@@ -115,6 +115,8 @@ export const getGoalProgress = async (username, goalId) => {
 };
 
 export const updateGoalProgress = async (username, goalId, progress) => {
+  if (!Number.isFinite(progress) || progress < 0 || progress > 100)
+    throw new Error('Progress must be between 0 and 100.');
   try {
     return await set(
       ref(db, `users/${username}/myGoals/${goalId}/progress`),

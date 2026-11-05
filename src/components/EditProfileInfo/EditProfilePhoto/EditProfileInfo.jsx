@@ -9,191 +9,236 @@ import {
   validatePhoneNumberAsync,
   validateWeight,
 } from '../../../common/user.validations';
-import { alertHelper } from '../../../helper/alert-helper';
-import AlertSuccess from '../../Alerts/AlertSuccess/AlertSuccess';
-import AlertError from '../../Alerts/AlertError/AlertError';
-import UserInfo from '../../UserInfo/UserInfo';
+import { activityLevels, normalizeActivity } from '../../../helper/wellness';
+import PageHeader from '../../UI/PageHeader';
+import FormField from '../../UI/FormField';
+import Icon from '../../UI/Icon';
+import InlineMessage from '../../UI/InlineMessage';
 
-export default function EditProfileInfo({ setEditProfile }) {
+export default function EditProfileInfo({
+  setEditProfile,
+  onboarding = false,
+}) {
   const { userData } = useContext(AppContext);
-  const [message, setMessage] = useState(null);
-  const [alert, setAlert] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [form, setForm] = useState({
-    firstName: userData?.firstName || '',
-    lastName: userData?.lastName || '',
-    age: userData?.age || '',
-    weight: userData?.weight || '',
-    height: userData?.height || '',
-    activityLevel: userData?.activityLevel || '',
-    gender: userData?.gender || '',
-    phoneNumber: userData?.phoneNumber || '',
-  });
-
-  const updateForm = (key) => (e) => {
-    setForm({ ...form, [key]: e.target.value });
-  };
-
-  const validateFieldsAsync = async () => {
-    if (userData?.firstName !== form.firstName && form.firstName !== '') {
-      validateFirstName(form.firstName);
-    }
-    if (userData?.lastName !== form.lastName && form.lastName !== '') {
-      validateLastName(form.lastName);
-    }
-    if (userData?.age !== form.age && form.age !== '') {
-      validateAge(form.age);
-    }
-    if (userData.weight !== form.weight && form.weight !== '') {
-      validateWeight(form.weight);
-    }
-    if (userData?.height !== form.height && form.height !== '') {
-      validateHeight(form.height);
-    }
-    if (userData?.phoneNumber !== form.phoneNumber) {
-      await validatePhoneNumberAsync(form.phoneNumber);
-    }
-  };
-
-  const editProfileInformation = async () => {
+  const [form, setForm] = useState(() => ({
+    firstName: userData.firstName || '',
+    lastName: userData.lastName || '',
+    age: userData.age || '',
+    weight: userData.weight || '',
+    height: userData.height || '',
+    activityLevel: normalizeActivity(userData.activityLevel),
+    gender: userData.gender || '',
+    phoneNumber: String(userData.phoneNumber || ''),
+  }));
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const change = (key) => (event) =>
+    setForm((value) => ({ ...value, [key]: event.target.value }));
+  const submit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setBusy(true);
     try {
-      await validateFieldsAsync();
-      await updateUserByUsername(userData?.username, form);
+      if (form.firstName) validateFirstName(form.firstName.trim());
+      if (form.lastName) validateLastName(form.lastName.trim());
+      if (form.age !== '') validateAge(Number(form.age));
+      if (form.weight !== '') validateWeight(Number(form.weight));
+      if (form.height !== '') validateHeight(Number(form.height));
+      if (form.phoneNumber !== String(userData.phoneNumber || ''))
+        await validatePhoneNumberAsync(form.phoneNumber);
+      await updateUserByUsername(userData.username, {
+        ...form,
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        age: form.age === '' ? '' : Number(form.age),
+        weight: form.weight === '' ? '' : Number(form.weight),
+        height: form.height === '' ? '' : Number(form.height),
+      });
       setEditProfile(false);
-      alertHelper(setMessage, setSuccess, 'Info Changed successfully!');
     } catch (error) {
-      alertHelper(setMessage, setAlert, error.message);
+      setError(error.message);
+    } finally {
+      setBusy(false);
     }
   };
-
   return (
-    <div className='flex flex-col text-center mx-2'>
-      <h1 className='mb-4 text-xl'>
-        <p>Greetings, {userData?.username}! Ready to make updates? </p>
-        <p>Edit your account details here.</p>
-      </h1>
-      <div className='border-2 border-gray-500 rounded-sm bg-base-300 p-4 shadow-lg flex flex-col justify-center items-center'>
-        <div className='flex'>
-          <div className='text-left text-lg mr-5'>
-            <div>
-              <p className='font-bold underline text-primary mb-6'>
-                Main Information:
-              </p>
-              <UserInfo userData={userData} />
+    <div className='profile-editor page-enter'>
+      <PageHeader
+        back={
+          !onboarding ? { to: '/my-profile', label: 'My profile' } : undefined
+        }
+        eyebrow={
+          onboarding
+            ? 'YOUR SPACE IS READY · STEP 02 / 02'
+            : 'MAKE THIS SPACE YOURS'
+        }
+        title={
+          onboarding ? 'Let’s get to know you.' : 'The details that make you.'
+        }
+        description={
+          onboarding
+            ? 'A few details make your wellness insights more personal. You can also add them later.'
+            : 'A little update for a more personal experience.'
+        }
+      />
+      <form onSubmit={submit}>
+        <div className='profile-edit-grid'>
+          <section className='surface surface-padding'>
+            <div className='form-section-heading'>
+              <span className='icon-tile tone-mint'>
+                <Icon
+                  name='user'
+                  size={22}
+                />
+              </span>
+              <div>
+                <h2>A little about you</h2>
+                <p>The person behind the progress.</p>
+              </div>
             </div>
-          </div>
-          <div className='mr-4 flex flex-col text-left text-lg px-4'>
-            <p className='font-bold underline text-primary mb-3'>
-              Edit Personal Information here:
-            </p>
-            <label htmlFor='firstName'>First Name:</label>
-            <input
-              type='text'
-              name='firstName'
-              placeholder='First Name'
-              id='firstName'
-              value={form?.firstName}
-              onChange={updateForm('firstName')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            />
-            <label htmlFor='lastName'>Last Name:</label>
-            <input
-              type='text'
-              name='lastName'
-              placeholder='Last Name'
-              id='lastName'
-              value={form?.lastName}
-              onChange={updateForm('lastName')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            />
-            <label htmlFor='age'>Age:</label>
-            <input
-              type='number'
-              name='age'
-              placeholder='Age'
-              id='age'
-              value={form?.age}
-              onChange={updateForm('age')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            />
-            <label htmlFor='phoneNumber'>Phone Number:</label>
-            <input
-              type='number'
-              name='phoneNumber'
-              placeholder='Phone Number'
-              id='phoneNumber'
-              value={form?.phoneNumber}
-              onChange={updateForm('phoneNumber')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            />
-          </div>
-          <div className='mr-4 flex flex-col text-left text-lg px-4'>
-            <p className='font-bold underline text-primary mb-3'>
-              Edit Physical Attributes:
-            </p>
-            <label htmlFor='weight'>Weight in kg:</label>
-            <input
-              type='number'
-              name='weight'
-              placeholder='Weight'
-              id='weight'
-              value={form?.weight}
-              onChange={updateForm('weight')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            />
-            <label htmlFor='height'>Height in cm:</label>
-            <input
-              type='number'
-              name='height'
-              placeholder='Height'
-              id='height'
-              value={form?.height}
-              onChange={updateForm('height')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            />
-            <label htmlFor='activity-level'>Activity Level:</label>
-            <select
-              name='activity-level'
-              id='activity-level'
-              value={form?.activityLevel}
-              onChange={updateForm('activityLevel')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            >
-              <option value='Sedentary'>Sedentary</option>
-              <option value='Lightly-Active'>Lightly Active</option>
-              <option value='Moderately-Active'>Moderately Active</option>
-              <option value='Very-Active'>Very Active</option>
-            </select>
-            <label htmlFor='gender'>Gender:</label>
-            <select
-              name='gender'
-              id='gender'
-              value={form?.gender}
-              onChange={updateForm('gender')}
-              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
-            >
-              <option value='Male'>Male</option>
-              <option value='Female'>Female</option>
-            </select>
-          </div>
+            <div className='form-stack'>
+              <div className='form-grid'>
+                <FormField
+                  label='First name'
+                  autoComplete='given-name'
+                  placeholder='First name'
+                  value={form.firstName}
+                  onChange={change('firstName')}
+                />
+                <FormField
+                  label='Last name'
+                  autoComplete='family-name'
+                  placeholder='Last name'
+                  value={form.lastName}
+                  onChange={change('lastName')}
+                />
+              </div>
+              {!onboarding && (
+                <FormField
+                  label='Phone number'
+                  type='tel'
+                  inputMode='numeric'
+                  required
+                  pattern='[0-9]{10}'
+                  maxLength={10}
+                  autoComplete='tel-national'
+                  value={form.phoneNumber}
+                  onChange={change('phoneNumber')}
+                />
+              )}
+              <div className='form-grid'>
+                <FormField
+                  label='Age (years)'
+                  type='number'
+                  min={10}
+                  max={100}
+                  placeholder='Your age'
+                  value={form.age}
+                  onChange={change('age')}
+                />
+                <FormField
+                  label='Sex for calculations'
+                  value={form.gender}
+                  onChange={change('gender')}
+                >
+                  <option value=''>Not specified</option>
+                  <option value='Female'>Female</option>
+                  <option value='Male'>Male</option>
+                </FormField>
+              </div>
+            </div>
+          </section>
+          <section className='surface surface-padding'>
+            <div className='form-section-heading'>
+              <span className='icon-tile tone-lavender'>
+                <Icon
+                  name='heart'
+                  size={22}
+                />
+              </span>
+              <div>
+                <h2>Your starting point</h2>
+                <p>Personalize your wellness snapshot.</p>
+              </div>
+            </div>
+            <div className='form-stack'>
+              <div className='form-grid'>
+                <FormField
+                  label='Weight (kg)'
+                  type='number'
+                  step='any'
+                  min={20}
+                  max={500}
+                  placeholder='e.g. 70'
+                  value={form.weight}
+                  onChange={change('weight')}
+                />
+                <FormField
+                  label='Height (cm)'
+                  type='number'
+                  step='any'
+                  min={50}
+                  max={300}
+                  placeholder='e.g. 175'
+                  value={form.height}
+                  onChange={change('height')}
+                />
+              </div>
+              <FormField
+                label='Your activity level'
+                value={form.activityLevel}
+                onChange={change('activityLevel')}
+              >
+                <option value=''>Choose your rhythm</option>
+                {activityLevels.map((level) => (
+                  <option
+                    key={level.value}
+                    value={level.value}
+                  >
+                    {level.label}
+                  </option>
+                ))}
+              </FormField>
+              <div className='profile-edit-tip'>
+                <Icon
+                  name='sparkles'
+                  size={18}
+                />
+                <p>
+                  Your health details help tailor your hydration, energy, and
+                  body balance estimates.
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
-        <div className='my-5'>
+        <InlineMessage>{error}</InlineMessage>
+        <div className='profile-edit-actions'>
           <button
-            className='btn btn-primary mr-4'
-            onClick={() => editProfileInformation()}
-          >
-            Save Changes
-          </button>
-          <button
-            className='btn btn-error'
+            className='btn btn-ghost'
+            type='button'
+            disabled={busy}
             onClick={() => setEditProfile(false)}
           >
-            Discard Changes
+            {onboarding ? 'I’ll do this later' : 'Discard changes'}
+          </button>
+          <button
+            className='btn btn-primary'
+            type='submit'
+            disabled={busy}
+          >
+            {busy
+              ? 'Saving your details…'
+              : onboarding
+                ? 'Find my momentum'
+                : 'Save my changes'}
+            <Icon
+              name={onboarding ? 'arrow' : 'check'}
+              size={17}
+            />
           </button>
         </div>
-      </div>
-      {success && <AlertSuccess message={message} />}
-      {alert && <AlertError message={message} />}
+      </form>
     </div>
   );
 }

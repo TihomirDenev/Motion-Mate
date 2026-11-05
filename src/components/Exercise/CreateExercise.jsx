@@ -1,227 +1,215 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
-import { createExercises } from '../../services/exercise.service';
+import { createExercises, editExercise } from '../../services/exercise.service';
 import { addUserExercise } from '../../services/users.service';
-import { getAllCategories } from '../../services/category.service';
+import { useDatabaseValue } from '../../hooks/useDatabaseValue';
 import { validateExerciseForm } from '../../common/exercise.validations';
-import AlertError from '../Alerts/AlertError/AlertError';
-import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess';
-import { alertHelper } from '../../helper/alert-helper';
+import Icon from '../UI/Icon';
+import Modal from '../UI/Modal';
+import FormField from '../UI/FormField';
+import InlineMessage from '../UI/InlineMessage';
 
-export const CreateExercise = () => {
+export const CreateExercise = ({ defaultCategory = '', exercise }) => {
   const { userData } = useContext(AppContext);
-
-  const [categories, setCategories] = useState([]);
-  const [takeResult, setTakeResult] = useState([]);
-  const [showError, setShowError] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
-  const [content, setContent] = useState({
-    title: '',
-    content: '',
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    calories: '',
-    level: '',
-    categoryId: '',
+  const [open, setOpen] = useState(false);
+  const { data, error: loadError } = useDatabaseValue(
+    open ? 'categories' : null
+  );
+  const initial = () => ({
+    title: exercise?.title || '',
+    content: exercise?.content || '',
+    hours: exercise?.duration?.hours || 0,
+    minutes: exercise?.duration?.minutes || 0,
+    seconds: exercise?.duration?.seconds || 0,
+    calories: exercise?.calories || '',
+    level: exercise?.level || 'Easy',
+    category: exercise?.categoryName || defaultCategory,
   });
-
-  useEffect(() => {
-    const getCategories = async () => {
-      const result = await getAllCategories();
-      setCategories(result);
-    };
-    getCategories();
-  }, []);
-
-  const updateContent = (e, prop) => {
-    setContent({
-      ...content,
-      [prop]: e,
-    });
+  const [form, setForm] = useState(initial);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const change = (key) => (event) =>
+    setForm((value) => ({ ...value, [key]: event.target.value }));
+  const show = () => {
+    setForm(initial());
+    setError('');
+    setOpen(true);
   };
-
-  const submitExercise = async () => {
+  const submit = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
     try {
+      const hours = Number(form.hours),
+        minutes = Number(form.minutes),
+        seconds = Number(form.seconds),
+        calories = Number(form.calories);
       validateExerciseForm(
-        content.title,
-        content.content,
-        content.hours,
-        content.minutes,
-        content.seconds,
-        content.calories,
-        content.level,
-        selectedCategoryId
+        form.title.trim(),
+        form.content.trim(),
+        hours,
+        minutes,
+        seconds,
+        calories,
+        form.level,
+        form.category
       );
-      const result = await createExercises(
-        selectedCategoryId,
-        content.title,
-        content.content,
-        content.hours,
-        content.minutes,
-        content.seconds,
-        content.calories,
-        content.level,
-        userData.username
-      );
-      setTakeResult(result);
-
-      setContent({
-        title: '',
-        content: '',
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        calories: '',
-        level: '',
-        categoryId: '',
-      });
-
-      document.getElementById('exercise-create-modal').close();
-
-      alertHelper(
-        setAlertMessage,
-        setShowSuccess,
-        'Successfully created exercise!'
-      );
+      if (exercise)
+        await editExercise(exercise.categoryName, exercise.id, {
+          title: form.title.trim(),
+          content: form.content.trim(),
+          duration: { hours, minutes, seconds },
+          calories,
+          level: form.level,
+        });
+      else {
+        const id = await createExercises(
+          form.category,
+          form.title.trim(),
+          form.content.trim(),
+          hours,
+          minutes,
+          seconds,
+          calories,
+          form.level,
+          userData.username
+        );
+        await addUserExercise(userData.username, id);
+      }
+      setOpen(false);
     } catch (error) {
-      alertHelper(setAlertMessage, setShowError, error.message);
+      setError(error.message);
+    } finally {
+      setBusy(false);
     }
-    await addUserExercise(userData.username, takeResult);
   };
 
   return (
-    <div>
+    <>
       <button
-        className='btn btn-outline btn-primary'
-        onClick={() => {
-          document.getElementById('exercise-create-modal').showModal();
-        }}
+        type='button'
+        className={exercise ? 'icon-button' : 'btn btn-primary'}
+        aria-label={exercise ? `Edit ${exercise.title}` : undefined}
+        onClick={show}
       >
-        Create Exercise
+        <Icon
+          name={exercise ? 'edit' : 'plus'}
+          size={17}
+        />
+        {!exercise && 'Create exercise'}
       </button>
-      <div>
-        <dialog
-          id='exercise-create-modal'
-          className='modal'
+      <Modal
+        open={open}
+        onClose={() => !busy && setOpen(false)}
+        title={exercise ? 'Fine-tune your exercise' : 'Make it your own'}
+        description={
+          exercise
+            ? 'A few small adjustments can make all the difference.'
+            : 'Add an exercise to your library. Your Motion Mates can discover it too.'
+        }
+      >
+        <form
+          className='form-stack'
+          onSubmit={submit}
         >
-          <div className='modal-box w-full max-w-lg overflow-hidden'>
-            <h3 className='font-bold text-lg mb-3'>Ready to workout</h3>
-            <label className='input flex items-center mb-3 w-full'>
-              <input
-                onChange={(e) => updateContent(e.target.value, 'title')}
-                type='text'
-                className='grow'
-                placeholder='Title'
-                value={content.title}
-              />
-            </label>
-            <label className='input flex items-center mb-3 w-full'>
-              <input
-                onChange={(e) => updateContent(e.target.value, 'content')}
-                type='text'
-                className='grow'
-                placeholder='Content'
-                value={content.content}
-              />
-            </label>
-            <div className='flex gap-2'>
-              <label className='input flex items-center mb-3 w-1/3'>
-                Hours:
-                <input
-                  onChange={(e) => updateContent(e.target.value, 'hours')}
-                  type='number'
-                  className='w-full'
-                  placeholder='Hours'
-                  value={content.hours}
-                />
-              </label>
-              <label className='input flex items-center mb-3 w-1/3'>
-                Minutes:
-                <input
-                  onChange={(e) => updateContent(e.target.value, 'minutes')}
-                  type='number'
-                  className='w-full'
-                  placeholder='Minutes'
-                  value={content.minutes}
-                />
-              </label>
-              <label className='input flex items-center mb-3 w-1/3'>
-                Seconds:
-                <input
-                  onChange={(e) => updateContent(e.target.value, 'seconds')}
-                  type='number'
-                  className='w-full'
-                  placeholder='Seconds'
-                  value={content.seconds}
-                />
-              </label>
-            </div>
-            <select
-              className='select select-primary w-full mb-3'
-              value={content.level}
-              onChange={(e) => updateContent(e.target.value, 'level')}
+          <FormField
+            label='Exercise name'
+            placeholder='e.g. Morning flow'
+            required
+            minLength={4}
+            maxLength={30}
+            value={form.title}
+            onChange={change('title')}
+          />
+          <FormField
+            label='How to do it'
+            type='textarea'
+            placeholder='A few simple instructions…'
+            required
+            minLength={4}
+            maxLength={100}
+            value={form.content}
+            onChange={change('content')}
+          />
+          <div className='form-grid'>
+            <FormField
+              label='Category'
+              required
+              disabled={Boolean(exercise)}
+              value={form.category}
+              onChange={change('category')}
             >
-              <option
-                disabled
-                value=''
-              >
-                Select level
-              </option>
-              <option value='Easy'>Easy</option>
-              <option value='Medium'>Medium</option>
-              <option value='Hard'>Hard</option>
-            </select>
-            <select
-              className='select select-primary w-full mb-3'
-              value={selectedCategoryId}
-              onChange={(e) => setSelectedCategoryId(e.target.value)}
-            >
-              <option
-                disabled
-                value=''
-              >
-                Select category
-              </option>
-              {categories.map((cat) => (
+              <option value=''>Choose a category</option>
+              {Object.keys(data || {}).map((category) => (
                 <option
-                  key={cat.id}
-                  value={cat.category}
+                  key={category}
+                  value={category}
                 >
-                  {cat.category}
+                  {category}
                 </option>
               ))}
-            </select>
-            <label className='input flex items-center mb-3 w-full'>
-              <input
-                onChange={(e) => updateContent(e.target.value, 'calories')}
-                type='number'
-                className='w-full'
-                placeholder='Calories'
-                value={content.calories}
-              />
-            </label>
-            <div className='flex justify-between'>
-              <form method='dialog'>
-                <button
-                  onClick={submitExercise}
-                  className='btn btn-outline btn-primary'
-                  type='button'
-                >
-                  Submit
-                </button>
-              </form>
-              <form method='dialog'>
-                <button className='btn btn-outline btn-primary'>Cancel</button>
-              </form>
-            </div>
+            </FormField>
+            <FormField
+              label='Intensity'
+              value={form.level}
+              onChange={change('level')}
+            >
+              <option value='Easy'>Easy · Find your flow</option>
+              <option value='Medium'>Medium · Feel the effort</option>
+              <option value='Hard'>Hard · Push your pace</option>
+            </FormField>
           </div>
-        </dialog>
-        {showError && <AlertError message={alertMessage} />}
-        {showSuccess && <AlertSuccess message='Exercise Created!' />}
-      </div>
-    </div>
+          <fieldset>
+            <legend className='field-legend'>Duration</legend>
+            <div className='form-grid form-grid-three'>
+              {['hours', 'minutes', 'seconds'].map((unit) => (
+                <FormField
+                  key={unit}
+                  label={unit[0].toUpperCase() + unit.slice(1)}
+                  type='number'
+                  required
+                  min={0}
+                  max={unit === 'hours' ? 23 : 59}
+                  value={form[unit]}
+                  onChange={change(unit)}
+                />
+              ))}
+            </div>
+          </fieldset>
+          <FormField
+            label='Estimated calories (kcal)'
+            type='number'
+            required
+            min={1}
+            max={10000}
+            placeholder='e.g. 80'
+            value={form.calories}
+            onChange={change('calories')}
+          />
+          <InlineMessage>{error || loadError}</InlineMessage>
+          <div className='dialog-actions'>
+            <button
+              type='button'
+              className='btn btn-ghost'
+              disabled={busy}
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type='submit'
+              className='btn btn-primary'
+              disabled={busy}
+            >
+              {busy ? 'Saving…' : exercise ? 'Save changes' : 'Create exercise'}
+              <Icon
+                name='check'
+                size={16}
+              />
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </>
   );
 };

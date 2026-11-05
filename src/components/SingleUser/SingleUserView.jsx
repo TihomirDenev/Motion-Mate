@@ -1,113 +1,172 @@
-import { useNavigate } from 'react-router';
-import { shortFormatDate } from '../../helper/format-date';
+import { useContext, useState } from 'react';
+import { Link } from 'react-router';
+import { AppContext } from '../../context/AppContext';
 import {
+  addFriendService,
   removeFriendRequestService,
   removeFriendService,
   sendRequestService,
 } from '../../services/users.service';
-import { onValue, ref } from 'firebase/database';
-import { useContext, useEffect, useState } from 'react';
-import { db } from '../../config/firebase-config';
-import { AppContext } from '../../context/AppContext';
-import SizedAvatar from '../Avatar/Avatar';
+import Avatar from '../UI/Avatar';
+import Icon from '../UI/Icon';
+import InlineMessage from '../UI/InlineMessage';
 
-export default function SingleUserView({ user, setRefresh }) {
+export function FriendActions({ user, showProfile = true }) {
   const { userData } = useContext(AppContext);
-  const navigate = useNavigate();
-  const [isFriend, setIsFriend] = useState(false);
-  const [hasRequest, setHasRequest] = useState(false);
-  const [hasMyRequest, setHasMyRequest] = useState(false);
-
-  const handleSendFriendRequest = async () => {
-    await sendRequestService(userData?.username, user.username);
-    setRefresh((prev) => !prev);
-    setHasRequest(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const friend = Boolean(userData.friends?.[user.username]);
+  const incoming = Boolean(userData.requests?.[user.username]);
+  const outgoing = Boolean(userData.myRequests?.[user.username]);
+  const act = async (action) => {
+    setBusy(true);
+    setError('');
+    try {
+      await action(userData.username, user.username);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setBusy(false);
+    }
   };
-
-  const handleRemoveFriend = async () => {
-    await removeFriendService(userData?.username, user.username);
-    setIsFriend(false);
-    setHasRequest(false);
-    setRefresh((prev) => !prev);
-  };
-
-  const handleRemoveFriendRequest = async () => {
-    await removeFriendRequestService(userData?.username, user.username);
-    setIsFriend(false);
-    setHasRequest(false);
-    setRefresh((prev) => !prev);
-  };
-
-  useEffect(() => {
-    return onValue(ref(db, `users/${userData?.username}`), (snapshot) => {
-      const data = snapshot?.val();
-
-      const dataRequests = data?.requests || [];
-      const dataFriends = data?.friends || [];
-      const dataMyRequests = data?.myRequests || [];
-
-      Object.keys(dataRequests).includes(user?.username)
-        ? setHasRequest(() => true)
-        : setHasRequest(() => false);
-
-      Object.keys(dataMyRequests).includes(user?.username)
-        ? setHasMyRequest(() => true)
-        : setHasMyRequest(() => false);
-
-      Object.keys(dataFriends).includes(user?.username)
-        ? setIsFriend(() => true)
-        : setIsFriend(() => false);
-    });
-  }, [userData?.username, user?.username]);
-
   return (
-    <div className='card card-side shadow-xl m-5 bg-base-300 border-2 border-gray-500 rounded-2xl h-72 w-full'>
-      <SizedAvatar user={user} />
-      <div className='container card-body text-left justify-between'>
-        <div className='top-div text-center'>
-          {user?.firstName && user?.lastName ? (
-            <h2 className='font-bold mb-8 text-primary'>{`${user?.firstName} ${user?.lastName}`}</h2>
-          ) : (
-            <h2 className='font-bold mb-8 text-primary'>{user?.username}</h2>
-          )}
-          <p>Username: {user?.username}</p>
-          <p>Member Since: {shortFormatDate(user?.createdOn)}</p>
-        </div>
-        <div className='bottom-div card-actions justify-end mt-4'>
-          {hasRequest || hasMyRequest ? (
+    <div className='friend-actions'>
+      <div>
+        {incoming && !friend ? (
+          <>
             <button
-              type='button'
-              onClick={handleRemoveFriendRequest}
-              className='btn btn-error'
-            >
-              Remove Friend Request
-            </button>
-          ) : isFriend ? (
-            <button
-              type='button'
-              onClick={handleRemoveFriend}
-              className='btn btn-error'
-            >
-              Remove Friend
-            </button>
-          ) : (
-            <button
-              type='button'
-              onClick={handleSendFriendRequest}
               className='btn btn-primary'
+              disabled={busy}
+              onClick={() => act(addFriendService)}
             >
-              Add Friend
+              <Icon
+                name='check'
+                size={15}
+              />
+              Accept request
             </button>
-          )}
-
+            <button
+              className='icon-button danger-icon'
+              aria-label={`Decline request from ${user.username}`}
+              disabled={busy}
+              onClick={() => act(removeFriendRequestService)}
+            >
+              <Icon
+                name='close'
+                size={16}
+              />
+            </button>
+          </>
+        ) : friend ? (
           <button
-            onClick={() => navigate(`/users/${user?.username}`)}
-            className='btn btn-primary'
+            className='btn btn-danger'
+            disabled={busy}
+            onClick={() => act(removeFriendService)}
+            aria-label={`Remove ${user.username} from friends`}
           >
-            View Profile
+            <Icon
+              name='users'
+              size={15}
+            />
+            Remove friend
           </button>
-        </div>
+        ) : outgoing ? (
+          <button
+            className='btn btn-ghost'
+            disabled={busy}
+            onClick={() => act(removeFriendRequestService)}
+          >
+            <Icon
+              name='close'
+              size={15}
+            />
+            Cancel request
+          </button>
+        ) : (
+          <button
+            className='btn btn-primary'
+            disabled={busy}
+            onClick={() => act(sendRequestService)}
+          >
+            <Icon
+              name='plus'
+              size={15}
+            />
+            {busy ? 'Connecting…' : 'Add mate'}
+          </button>
+        )}
+        {showProfile && (
+          <Link
+            className='btn btn-ghost'
+            to={`/users/${encodeURIComponent(user.username)}`}
+          >
+            Profile
+            <Icon
+              name='arrowUp'
+              size={14}
+            />
+          </Link>
+        )}
       </div>
+      <InlineMessage>{error}</InlineMessage>
     </div>
+  );
+}
+
+export default function SingleUserView({ user }) {
+  const { userData } = useContext(AppContext);
+  const friend = Boolean(userData.friends?.[user.username]);
+  const pending = Boolean(userData.myRequests?.[user.username]);
+  const name =
+    [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username;
+  return (
+    <article className='person-card surface'>
+      <div className='person-card-top'>
+        <Avatar
+          user={user}
+          size='lg'
+        />
+        {friend ? (
+          <span className='pill'>
+            <Icon
+              name='check'
+              size={11}
+            />
+            Your mate
+          </span>
+        ) : pending ? (
+          <span className='pill pill-neutral'>Request sent</span>
+        ) : (
+          <span
+            className='person-flower'
+            aria-hidden='true'
+          >
+            <Icon
+              name='sparkles'
+              size={20}
+            />
+          </span>
+        )}
+      </div>
+      <Link
+        className='person-name'
+        to={`/users/${encodeURIComponent(user.username)}`}
+      >
+        <h2>{name}</h2>
+        <p>@{user.username}</p>
+      </Link>
+      <p className='person-joined'>
+        <Icon
+          name='calendar'
+          size={12}
+        />
+        Moving since{' '}
+        {new Date(user.createdOn).toLocaleDateString('en-GB', {
+          month: 'short',
+          year: 'numeric',
+        })}
+      </p>
+      <FriendActions user={user} />
+    </article>
   );
 }

@@ -17,7 +17,7 @@ import {
 
 export const validateRequiredFieldsReg = (form) => {
   if (
-    form.userName === '' ||
+    form.username === '' ||
     form.email === '' ||
     form.password === '' ||
     form.phoneNumber === ''
@@ -27,6 +27,10 @@ export const validateRequiredFieldsReg = (form) => {
 };
 
 export const validateUserNameRegAsync = async (username) => {
+  if (!/^[a-zA-Z0-9_-]+$/.test(username))
+    throw new Error(
+      'Use letters, numbers, underscores, or hyphens for your username.'
+    );
   if (
     username.length < MIN_USERNAME_LENGTH ||
     username.length > MAX_USERNAME_LENGTH
@@ -47,7 +51,7 @@ export const validateEmailRegAsync = async (email) => {
     throw new Error('Please enter a valid email address.');
   }
   const snapshot = await getAllUsers();
-  const allUsers = Object.values(snapshot.val());
+  const allUsers = Object.values(snapshot.val() || {});
   const userEmail = allUsers.find((user) => user.email === email);
   if (userEmail) {
     throw new Error('User with this email already exists!');
@@ -62,7 +66,7 @@ export const validatePhoneNumberAsync = async (phoneNumber) => {
     throw new Error('Phone number must contain only digits!');
   }
   const snapshot = await getAllUsers();
-  const allUsers = Object.values(snapshot.val());
+  const allUsers = Object.values(snapshot.val() || {});
   const userPhoneNumber = allUsers.find(
     (user) => user.phoneNumber === phoneNumber
   );
@@ -86,6 +90,12 @@ export const validatePhoto = (photo) => {
   if (!photo) {
     throw new Error('Please upload a photo.');
   }
+  if (
+    !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(photo.type)
+  )
+    throw new Error('Choose a JPG, PNG, WebP, or GIF image.');
+  if (photo.size > 5 * 1024 * 1024)
+    throw new Error('Choose an image smaller than 5 MB.');
 };
 
 export const validateRequiredFieldsLogUsername = (form) => {
@@ -121,7 +131,7 @@ export const validateEmailLogAsync = async (email) => {
     throw new Error('Please enter a valid email address.');
   }
   const snapshot = await getAllUsers();
-  const allUsers = Object.values(snapshot.val());
+  const allUsers = Object.values(snapshot.val() || {});
   const userEmail = allUsers.find((user) => user.email === email);
   if (!userEmail) {
     throw new Error('User with this email does not exist!');
@@ -129,7 +139,7 @@ export const validateEmailLogAsync = async (email) => {
 };
 
 export const validateFirstName = (firstName) => {
-  const alphabeticRegex = /^[A-Za-z]+$/;
+  const alphabeticRegex = /^[\p{L}]+(?:[ '-][\p{L}]+)*$/u;
   if (
     firstName.length < MIN_NAME_LENGTH ||
     firstName.length > MAX_NAME_LENGTH
@@ -144,7 +154,7 @@ export const validateFirstName = (firstName) => {
 };
 
 export const validateLastName = (lastName) => {
-  const alphabeticRegex = /^[A-Za-z]+$/;
+  const alphabeticRegex = /^[\p{L}]+(?:[ '-][\p{L}]+)*$/u;
   if (lastName.length < MIN_NAME_LENGTH || lastName.length > MAX_NAME_LENGTH) {
     throw new Error(
       `Last name must be between ${MIN_NAME_LENGTH} and ${MAX_NAME_LENGTH} characters long!`

@@ -4,107 +4,112 @@ import {
   stopTimerWorkout,
 } from '../../services/users.service';
 import { AppContext } from '../../context/AppContext';
-import { workoutTimer } from '../../helper/workout-timer';
+import Modal from '../UI/Modal';
+import Icon from '../UI/Icon';
+import FormField from '../UI/FormField';
+import InlineMessage from '../UI/InlineMessage';
 
-export const StartWorkoutButton = ({ startWorkout }) => {
+export const StartWorkoutButton = () => {
   const { userData } = useContext(AppContext);
-  const [content, setContent] = useState({
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
-  const updateContent = (e, prop) => {
-    setContent({
-      ...content,
-      [prop]: e,
-    });
+  const [open, setOpen] = useState(false);
+  const [minutes, setMinutes] = useState(30);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const running = Boolean(userData?.workoutTimer?.timer);
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!Number.isFinite(Number(minutes)) || minutes < 1 || minutes > 180) {
+      setError('Choose a workout between 1 and 180 minutes.');
+      return;
+    }
+    setBusy(true);
+    setError('');
+    try {
+      await StartTimerWorkout(
+        userData.username,
+        Date.now() + Number(minutes) * 60000
+      );
+      setOpen(false);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setBusy(false);
+    }
   };
-
-  const endTimer = async () => {
-    await stopTimerWorkout(userData.username);
+  const stop = async () => {
+    setBusy(true);
+    try {
+      await stopTimerWorkout(userData.username);
+    } catch (error) {
+      setError(error.message);
+      setOpen(true);
+    } finally {
+      setBusy(false);
+    }
   };
-
   return (
-    <div className='stat-desc text-secondary'>
-      {!startWorkout ? (
-        <div>
-          <button
-            className='btn btn-secondary'
-            onClick={() => document.getElementById('my_modal_1').showModal()}
-          >
-            Start workout
-          </button>
-        </div>
-      ) : (
-        <div>
-          <button
-            className='btn btn-secondary'
-            onClick={endTimer}
-          >
-            End workout
-          </button>
-        </div>
-      )}
-
-      <dialog
-        id='my_modal_1'
-        className='modal'
+    <>
+      <button
+        className='btn btn-lime'
+        disabled={busy}
+        onClick={() => (running ? stop() : setOpen(true))}
       >
-        <div className='modal-box skeleton'>
-          <h3 className='font-bold text-lg mb-4'>Set workout timer</h3>
-          <div className='flex flex-col gap-3'>
-            <label className='input flex items-center gap-2 w-full'>
-              Hours:
-              <input
-                onChange={(e) => updateContent(e.target.value, 'hours')}
-                type='number'
-                className='grow'
-                placeholder='Hours'
-                value={content.hours}
-              />
-            </label>
-
-            <label className='input flex items-center gap-2 w-full'>
-              Minutes:
-              <input
-                onChange={(e) => updateContent(e.target.value, 'minutes')}
-                type='number'
-                className='grow'
-                placeholder='Minutes'
-                value={content.minutes}
-              />
-            </label>
-
-            <label className='input flex items-center gap-2 w-full'>
-              Seconds:
-              <input
-                onChange={(e) => updateContent(e.target.value, 'seconds')}
-                type='number'
-                className='grow'
-                placeholder='Seconds'
-                value={content.seconds}
-              />
-            </label>
-          </div>
-          <div className='modal-action'>
-            <form
-              method='dialog'
-              className='flex gap-2'
-            >
+        <Icon
+          name={running ? 'stop' : 'play'}
+          size={16}
+        />
+        {running ? 'End workout' : 'Start a workout'}
+        <Icon
+          name='arrow'
+          size={16}
+        />
+      </button>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title='Make time for you'
+        description='Set a session timer, then start individual exercises from your workout list.'
+      >
+        <form
+          onSubmit={submit}
+          className='form-stack'
+        >
+          <div className='workout-presets'>
+            {[15, 30, 45, 60].map((value) => (
               <button
-                onClick={() =>
-                  workoutTimer(content, userData, setContent, StartTimerWorkout)
-                }
-                className='btn btn-primary'
+                key={value}
+                type='button'
+                aria-pressed={Number(minutes) === value}
+                onClick={() => setMinutes(value)}
               >
-                Start
+                <strong>{value}</strong>
+                <span>min</span>
               </button>
-              <button className='btn btn-secondary ml-2'>Cancel</button>
-            </form>
+            ))}
           </div>
-        </div>
-      </dialog>
-    </div>
+          <FormField
+            label='Or choose your duration (minutes)'
+            type='number'
+            min='1'
+            max='180'
+            required
+            value={minutes}
+            onChange={(event) => setMinutes(event.target.value)}
+          />
+          <InlineMessage>{error}</InlineMessage>
+          <button
+            className='btn btn-primary btn-full'
+            disabled={busy}
+            type='submit'
+          >
+            <Icon
+              name='play'
+              size={16}
+            />
+            {busy ? 'Getting ready…' : 'Let’s do this'}
+          </button>
+        </form>
+      </Modal>
+    </>
   );
 };

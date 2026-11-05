@@ -1,24 +1,34 @@
-const Progress = ({ progress }) => {
+export default function Progress({ progress = 0 }) {
+  const value = Math.max(0, Math.min(100, Number(progress) || 0));
   return (
-    <div
-      className={`radial-progress 
-  ${
-    progress < 25
-      ? 'bg-red-500/45'
-      : progress >= 25 && progress < 50
-        ? 'bg-yellow-400/45'
-        : progress >= 50 && progress < 75
-          ? 'bg-yellow-500/45'
-          : progress >= 75 && progress < 100
-            ? 'bg-green-300/45'
-            : 'bg-green-400/45'
-  }`}
-      style={{ '--value': progress }}
+    <span
+      className='progress-ring'
       role='progressbar'
+      aria-label='Goal progress'
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={value}
     >
-      {progress}
-    </div>
+      <svg
+        viewBox='0 0 56 56'
+        aria-hidden='true'
+      >
+        <circle
+          className='progress-track'
+          cx='28'
+          cy='28'
+          r='23'
+        />
+        <circle
+          className='progress-value'
+          cx='28'
+          cy='28'
+          r='23'
+          strokeDasharray='144.51'
+          strokeDashoffset={144.51 * (1 - value / 100)}
+        />
+      </svg>
+      <strong>{Math.round(value)}%</strong>
+    </span>
   );
-};
-
-export default Progress;
+}

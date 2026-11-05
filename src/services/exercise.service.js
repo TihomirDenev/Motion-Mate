@@ -38,7 +38,7 @@ export const createExercises = async (
 export const getExercises = async () => {
   try {
     const snapshot = await get(ref(db, `exercises`));
-    return Object.values(snapshot.val());
+    return Object.values(snapshot.val() || {});
   } catch (error) {
     throw new Error(error.message, { cause: error });
   }
