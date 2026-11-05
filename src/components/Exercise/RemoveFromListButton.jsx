@@ -1,7 +1,6 @@
 import { alertHelper } from '../../helper/alert-helper';
 import { handleRemoveFromList } from '../../helper/exercise-control';
 import { removeExerciseInProgress } from '../../services/exercise.service';
-import PropTypes from 'prop-types';
 
 export const RemoveFromListButton = ({
   exercise,
@@ -29,12 +28,4 @@ export const RemoveFromListButton = ({
       Remove from list
     </button>
   );
-};
-
-RemoveFromListButton.propTypes = {
-  exercise: PropTypes.object,
-  category: PropTypes.string,
-  setAlertMessage: PropTypes.func,
-  setShowSuccess: PropTypes.func,
-  setShowError: PropTypes.func,
 };

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 const Progress = ({ progress }) => {
   return (
     <div
@@ -22,7 +21,4 @@ const Progress = ({ progress }) => {
   );
 };
 
-Progress.propTypes = {
-  progress: PropTypes.number.isRequired,
-};
 export default Progress;

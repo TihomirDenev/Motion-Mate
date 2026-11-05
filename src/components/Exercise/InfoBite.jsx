@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types';
-
 const InfoBite = ({ title, content, isBlock }) => {
   const flexClass = isBlock ? '' : 'flex items-center';
   const hasTitle = title ? `${title}:` : '';
@@ -11,12 +9,6 @@ const InfoBite = ({ title, content, isBlock }) => {
       <p>{content}</p>
     </div>
   );
-};
-
-InfoBite.propTypes = {
-  title: PropTypes.string,
-  content: PropTypes.string,
-  isBlock: PropTypes.bool,
 };
 
 export default InfoBite;

@@ -1,14 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 import { getFilterUserBySearchTerm } from '../../services/users.service';
 import SingleUserView from '../../components/SingleUser/SingleUserView';
 import { onValue, ref } from 'firebase/database';
 import { db } from '../../config/firebase-config';
 import { APP_NAME } from '../../common/constants';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function AllUsers() {
-  document.querySelector('title').textContent = `${APP_NAME} | All Users`;
+  usePageTitle(`${APP_NAME} | All Users`);
 
   const { userData } = useContext(AppContext);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -86,7 +87,7 @@ export default function AllUsers() {
           </div>
           <ul
             tabIndex={0}
-            className='dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2 border border-gray-500 absolute right-0'
+            className='dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 rounded-box w-52 mt-2 border border-gray-500 absolute right-0'
           >
             <li>
               <a

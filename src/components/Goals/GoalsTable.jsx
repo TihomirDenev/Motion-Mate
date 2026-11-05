@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import Goal from './Goal';
 
 const GoalsTable = ({ goals, myGoals = false }) => {
@@ -56,8 +55,4 @@ const GoalsTable = ({ goals, myGoals = false }) => {
   );
 };
 
-GoalsTable.propTypes = {
-  goals: PropTypes.array,
-  myGoals: PropTypes.bool,
-};
 export default GoalsTable;

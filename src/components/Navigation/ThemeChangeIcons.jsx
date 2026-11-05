@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { DARK_THEME, LIGHT_THEME } from '../../common/constants';
-import PropTypes from 'prop-types';
 
 export default function ThemeChangeIcons({ toggleTheme, currentTheme }) {
   useEffect(() => {
@@ -40,8 +39,3 @@ export default function ThemeChangeIcons({ toggleTheme, currentTheme }) {
     </label>
   );
 }
-
-ThemeChangeIcons.propTypes = {
-  toggleTheme: PropTypes.func.isRequired,
-  currentTheme: PropTypes.string.isRequired,
-};

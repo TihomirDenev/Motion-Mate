@@ -1,11 +1,12 @@
-import { useNavigate } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { fullFormatDate } from '../../helper/format-date';
 import { getUserByUsername } from '../../services/users.service';
 import { useEffect, useState } from 'react';
 import UserInfo from '../../components/UserInfo/UserInfo';
 import SizedAvatar from '../../components/Avatar/Avatar';
 import { APP_NAME } from '../../common/constants';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function FullProfileView() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export default function FullProfileView() {
 
   const [user, setUser] = useState(null);
 
-  document.querySelector('title').textContent = `${APP_NAME} | ${id} Profile`;
+  usePageTitle(`${APP_NAME} | ${id} Profile`);
 
   useEffect(() => {
     try {
@@ -26,7 +27,7 @@ export default function FullProfileView() {
   }, [id]);
 
   return (
-    <div className='card card-side shadow-xl bg-base-300 m-4 border-2 border-gray-500 flex flex-wrap rounded-sm '>
+    <div className='card card-side shadow-xl bg-base-300 m-4 border-2 border-gray-500 flex flex-wrap rounded-xs '>
       <div className='flex ml-8'>
         <SizedAvatar user={user} />
       </div>

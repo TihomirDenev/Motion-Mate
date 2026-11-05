@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useContext, useState } from 'react';
 import { AppContext } from '../../../context/AppContext';
 import { updateUserByUsername } from '../../../services/users.service';
@@ -73,7 +72,7 @@ export default function EditProfileInfo({ setEditProfile }) {
         <p>Greetings, {userData?.username}! Ready to make updates? </p>
         <p>Edit your account details here.</p>
       </h1>
-      <div className='border-2 border-gray-500 rounded bg-base-300 p-4 shadow-lg flex flex-col justify-center items-center'>
+      <div className='border-2 border-gray-500 rounded-sm bg-base-300 p-4 shadow-lg flex flex-col justify-center items-center'>
         <div className='flex'>
           <div className='text-left text-lg mr-5'>
             <div>
@@ -95,7 +94,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='firstName'
               value={form?.firstName}
               onChange={updateForm('firstName')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             />
             <label htmlFor='lastName'>Last Name:</label>
             <input
@@ -105,7 +104,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='lastName'
               value={form?.lastName}
               onChange={updateForm('lastName')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             />
             <label htmlFor='age'>Age:</label>
             <input
@@ -115,7 +114,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='age'
               value={form?.age}
               onChange={updateForm('age')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             />
             <label htmlFor='phoneNumber'>Phone Number:</label>
             <input
@@ -125,7 +124,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='phoneNumber'
               value={form?.phoneNumber}
               onChange={updateForm('phoneNumber')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             />
           </div>
           <div className='mr-4 flex flex-col text-left text-lg px-4'>
@@ -140,7 +139,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='weight'
               value={form?.weight}
               onChange={updateForm('weight')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             />
             <label htmlFor='height'>Height in cm:</label>
             <input
@@ -150,7 +149,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='height'
               value={form?.height}
               onChange={updateForm('height')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             />
             <label htmlFor='activity-level'>Activity Level:</label>
             <select
@@ -158,7 +157,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='activity-level'
               value={form?.activityLevel}
               onChange={updateForm('activityLevel')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             >
               <option value='Sedentary'>Sedentary</option>
               <option value='Lightly-Active'>Lightly Active</option>
@@ -171,7 +170,7 @@ export default function EditProfileInfo({ setEditProfile }) {
               id='gender'
               value={form?.gender}
               onChange={updateForm('gender')}
-              className='border-2 border-gray-500 rounded p-2 m-2 bg-gray-200 shadow-xl text-black'
+              className='border-2 border-gray-500 rounded-sm p-2 m-2 bg-gray-200 shadow-xl text-black'
             >
               <option value='Male'>Male</option>
               <option value='Female'>Female</option>
@@ -198,7 +197,3 @@ export default function EditProfileInfo({ setEditProfile }) {
     </div>
   );
 }
-
-EditProfileInfo.propTypes = {
-  setEditProfile: PropTypes.func.isRequired,
-};

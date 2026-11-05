@@ -1,14 +1,14 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 import { AppContext } from '../../../context/AppContext.js';
 import { useContext, useEffect, useState } from 'react';
 import { logoutUser } from '../../../services/auth.service.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import ThemeChangeIcons from '../ThemeChangeIcons.jsx';
 import {
   AvatarWithName,
   AvatarWithNameAndDropDownMenu,
 } from '../AvatarWithName.jsx';
-import { BASE, DARK_THEME, LIGHT_THEME } from '../../../common/constants.js';
+import { DARK_THEME, LIGHT_THEME } from '../../../common/constants.js';
 
 export const NavBar = () => {
   const { setAppState, userData } = useContext(AppContext);
@@ -31,7 +31,7 @@ export const NavBar = () => {
     e.preventDefault();
     await logoutUser();
     setAppState({ user: null, userData: null });
-    navigate(`${BASE}`);
+    navigate('/');
   };
 
   return (
@@ -43,8 +43,8 @@ export const NavBar = () => {
       />
       <div className='drawer-content max-w-7xl place-self-center justify-between'>
         {/* Navbar */}
-        <div className='flex-grow w-full navbar flex justify-between px-3 '>
-          <div>
+        <div className='grow w-full navbar flex justify-between px-3'>
+          <div className='flex items-center'>
             <ThemeChangeIcons
               toggleTheme={handleToggle}
               currentTheme={theme}
@@ -76,7 +76,7 @@ export const NavBar = () => {
                 {userData?.userRole === 'admin' && (
                   <li>
                     <NavLink
-                      to={`${BASE}admin-panel`}
+                      to='/admin-panel'
                       className={'font-bold'}
                     >
                       Admin Panel
@@ -84,34 +84,34 @@ export const NavBar = () => {
                   </li>
                 )}
                 <li>
-                  <NavLink to={`${BASE}/`}>Home</NavLink>
+                  <NavLink to='/'>Home</NavLink>
                 </li>
                 {userData && !userData?.isBlocked && (
                   <>
                     <li>
-                      <NavLink to={`${BASE}wellness-health-tools`}>
+                      <NavLink to='/wellness-health-tools'>
                         Wellness & Health Tools
                       </NavLink>
                     </li>
                     <li>
-                      <NavLink to={`${BASE}goals`}>Goals</NavLink>
+                      <NavLink to='/goals'>Goals</NavLink>
                     </li>
                     <li>
-                      <NavLink to={`${BASE}exercises`}>Exercises</NavLink>
+                      <NavLink to='/exercises'>Exercises</NavLink>
                     </li>
                   </>
                 )}
                 <li>
-                  <NavLink to={`${BASE}about`}>About</NavLink>
+                  <NavLink to='/about'>About</NavLink>
                 </li>
                 {!userData && (
                   <>
                     <li>
-                      <NavLink to={`${BASE}login`}>Login</NavLink>
+                      <NavLink to='/login'>Login</NavLink>
                     </li>
 
                     <li>
-                      <NavLink to={`${BASE}register`}>Register</NavLink>
+                      <NavLink to='/register'>Register</NavLink>
                     </li>
                   </>
                 )}
@@ -144,7 +144,7 @@ export const NavBar = () => {
           {userData?.userRole === 'admin' && (
             <li>
               <NavLink
-                to={`${BASE}admin-panel`}
+                to='/admin-panel'
                 className={'font-bold'}
               >
                 Admin Panel
@@ -152,45 +152,45 @@ export const NavBar = () => {
             </li>
           )}
           <li>
-            <NavLink to={`${BASE}/`}>Home</NavLink>
+            <NavLink to='/'>Home</NavLink>
           </li>
           {userData && (
             <li>
-              <NavLink to={`${BASE}my-profile`}>My Profile</NavLink>
+              <NavLink to='/my-profile'>My Profile</NavLink>
             </li>
           )}
           {userData && !userData?.isBlocked && (
             <>
               <li>
-                <NavLink to={`${BASE}my-friends`}>My Friends</NavLink>
+                <NavLink to='/my-friends'>My Friends</NavLink>
               </li>
               <li>
-                <NavLink to={`${BASE}all-users`}>All Users</NavLink>
+                <NavLink to='/all-users'>All Users</NavLink>
               </li>
               <li>
-                <NavLink to={`${BASE}wellness-health-tools`}>
+                <NavLink to='/wellness-health-tools'>
                   Wellness & Health Tools
                 </NavLink>
               </li>
               <li>
-                <NavLink to={`${BASE}goals`}>Goals</NavLink>
+                <NavLink to='/goals'>Goals</NavLink>
               </li>
               <li>
-                <NavLink to={`${BASE}exercises`}>Exercises</NavLink>
+                <NavLink to='/exercises'>Exercises</NavLink>
               </li>
             </>
           )}
           <li>
-            <NavLink to={`${BASE}about`}>About</NavLink>
+            <NavLink to='/about'>About</NavLink>
           </li>
           {!userData ? (
             <>
               <li>
-                <NavLink to={`${BASE}login`}>Login</NavLink>
+                <NavLink to='/login'>Login</NavLink>
               </li>
 
               <li>
-                <NavLink to={`${BASE}register`}>Register</NavLink>
+                <NavLink to='/register'>Register</NavLink>
               </li>
             </>
           ) : (

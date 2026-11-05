@@ -109,7 +109,7 @@ export const CreateExercise = () => {
         >
           <div className='modal-box w-full max-w-lg overflow-hidden'>
             <h3 className='font-bold text-lg mb-3'>Ready to workout</h3>
-            <label className='input input-bordered flex items-center mb-3'>
+            <label className='input flex items-center mb-3 w-full'>
               <input
                 onChange={(e) => updateContent(e.target.value, 'title')}
                 type='text'
@@ -118,7 +118,7 @@ export const CreateExercise = () => {
                 value={content.title}
               />
             </label>
-            <label className='input input-bordered flex items-center mb-3'>
+            <label className='input flex items-center mb-3 w-full'>
               <input
                 onChange={(e) => updateContent(e.target.value, 'content')}
                 type='text'
@@ -128,7 +128,7 @@ export const CreateExercise = () => {
               />
             </label>
             <div className='flex gap-2'>
-              <label className='input input-bordered flex items-center mb-3 w-1/3'>
+              <label className='input flex items-center mb-3 w-1/3'>
                 Hours:
                 <input
                   onChange={(e) => updateContent(e.target.value, 'hours')}
@@ -138,7 +138,7 @@ export const CreateExercise = () => {
                   value={content.hours}
                 />
               </label>
-              <label className='input input-bordered flex items-center mb-3 w-1/3'>
+              <label className='input flex items-center mb-3 w-1/3'>
                 Minutes:
                 <input
                   onChange={(e) => updateContent(e.target.value, 'minutes')}
@@ -148,7 +148,7 @@ export const CreateExercise = () => {
                   value={content.minutes}
                 />
               </label>
-              <label className='input input-bordered flex items-center mb-3 w-1/3'>
+              <label className='input flex items-center mb-3 w-1/3'>
                 Seconds:
                 <input
                   onChange={(e) => updateContent(e.target.value, 'seconds')}
@@ -194,7 +194,7 @@ export const CreateExercise = () => {
                 </option>
               ))}
             </select>
-            <label className='input input-bordered flex items-center mb-3 w-full'>
+            <label className='input flex items-center mb-3 w-full'>
               <input
                 onChange={(e) => updateContent(e.target.value, 'calories')}
                 type='number'
