@@ -30,13 +30,21 @@ export const validateExerciseForm = (
   if (content.length > EXERCISE_MAX_CONTENT_LENGTH) {
     throw new Error('content is too long');
   }
+  if (
+    ![hours, minutes, seconds, calories].every((value) =>
+      Number.isFinite(Number(value))
+    )
+  )
+    throw new Error('Enter valid numbers for duration and calories.');
+  if (hours > 23 || minutes > 59 || seconds > 59)
+    throw new Error('Use up to 23 hours, 59 minutes, and 59 seconds.');
   if (hours < 0 || minutes < 0 || seconds < 0) {
     throw new Error('duration cannot be negative!');
   }
-  if (!hours && !minutes && !seconds) {
+  if (Number(hours) + Number(minutes) + Number(seconds) === 0) {
     throw new Error('missing time duration for exercise');
   }
-  if (!calories) {
+  if (Number(calories) <= 0 || Number(calories) > 10000) {
     throw new Error('please add calories');
   }
   if (!level) {

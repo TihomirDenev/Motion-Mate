@@ -1,123 +1,239 @@
-import { useContext, useEffect, useState } from 'react';
-import {
-  deleteCategory,
-  getAllCategories,
-} from '../../services/category.service';
+import { useContext, useState } from 'react';
+import { Link } from 'react-router';
+import { AppContext } from '../../context/AppContext';
+import { useDatabaseValue } from '../../hooks/useDatabaseValue';
+import { useExerciseLibrary } from '../../hooks/useExerciseLibrary';
+import { usePageTitle } from '../../hooks/usePageTitle';
+import { deleteCategory } from '../../services/category.service';
+import { getCategoryVisual } from '../../helper/category-visuals';
 import { CreateExercise } from '../Exercise/CreateExercise';
 import CreateCategory from './CreateCategory';
-import { DeleteIcon } from './DeleteIcon';
-import { alertHelper } from '../../helper/alert-helper';
-import { useNavigate } from 'react-router';
-import AlertError from '../Alerts/AlertError/AlertError';
-import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess';
-import { APP_NAME } from '../../common/constants';
-import { AppContext } from '../../context/AppContext';
-import { usePageTitle } from '../../hooks/usePageTitle';
+import PageHeader from '../UI/PageHeader';
+import Icon from '../UI/Icon';
+import EmptyState from '../UI/EmptyState';
+import InlineMessage from '../UI/InlineMessage';
+import LoadingState from '../UI/LoadingState';
 
-const Categories = () => {
-  usePageTitle(`${APP_NAME} | Exercises`);
-
-  const navigate = useNavigate();
+export default function Categories() {
+  usePageTitle('Motion Mate | Exercise library');
   const { userData } = useContext(AppContext);
-
-  const [showError, setShowError] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [allCategories, setAllCategories] = useState([]);
-
-  const navigateToExercise = (category) => {
-    navigate(`/exercises/${category?.category}`);
-  };
-
-  const [reloadKey, setReloadKey] = useState(0);
-
-  const fetchCategories = () => setReloadKey((key) => key + 1);
-
-  const handleDelete = async (category) => {
+  const { data, loading, error: loadError } = useDatabaseValue('categories');
+  const { exercises } = useExerciseLibrary();
+  const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState('');
+  const categories = Object.entries(data || {}).flatMap(([category, entries]) =>
+    Object.entries(entries).map(([id, value]) => ({ ...value, id, category }))
+  );
+  const filtered = categories.filter((category) =>
+    `${category.category} ${category.description}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+  const curated = [
+    'Ab workout',
+    'Jog',
+    'Legs Workout',
+    'Muscle Gain',
+    'Weight loss exercises',
+    'Yoga',
+  ];
+  const remove = async (category) => {
+    setBusy(category.id);
+    setError('');
     try {
       await deleteCategory(category.category, category.id);
-      fetchCategories();
-      alertHelper(
-        setAlertMessage,
-        setShowSuccess,
-        'Successfully deleted category!'
-      );
     } catch (error) {
-      alertHelper(setAlertMessage, setShowError, error.message);
+      setError(error.message);
+    } finally {
+      setBusy('');
     }
   };
 
-  useEffect(() => {
-    getAllCategories()
-      .then(setAllCategories)
-      .catch((error) => console.error('Error fetching categories:', error));
-  }, [reloadKey]);
-
   return (
-    <div className='flex flex-col'>
-      <>
-        <div className='mb-6'>
-          <h1 className='text-3xl font-bold'>
-            Here you can browse through different category exercises. <br />{' '}
-            <br /> You can also{' '}
-            {userData?.userRole === 'admin' && (
-              <>
-                <span className='inline-block'>
-                  <CreateCategory onCategoryCreated={fetchCategories} />
-                </span>{' '}
-                and{' '}
-              </>
-            )}
-            <span className='inline-block'>
-              <CreateExercise />
-            </span>
-          </h1>
+    <div className='page-enter'>
+      <PageHeader
+        eyebrow='THE EXERCISE LIBRARY'
+        title='Find your next move.'
+        description='A little strength. A little balance. A whole lot of possibility.'
+        actions={
+          <>
+            {userData.userRole === 'admin' && <CreateCategory />}
+            <CreateExercise />
+          </>
+        }
+      />
+      <section className='library-banner'>
+        <div>
+          <span className='pill'>MOVE YOUR WAY</span>
+          <h2>
+            There’s a rhythm
+            <br />
+            with your name on it.
+          </h2>
+          <p>Explore your exercises and the ones your mates share.</p>
         </div>
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8'>
-          {allCategories.length > 0 &&
-            allCategories.map((category) => (
-              <div
-                className='card max-h-[400px] bg-base-100 shadow-xl image-full relative'
+        <img
+          src='/images/yoga.jpg'
+          alt='Outdoor group yoga session'
+        />
+        <span
+          className='library-banner-icon'
+          aria-hidden='true'
+        >
+          <Icon
+            name='sparkles'
+            size={32}
+          />
+        </span>
+      </section>
+      <div className='toolbar section-space'>
+        <label className='search-field'>
+          <Icon
+            name='search'
+            size={19}
+          />
+          <input
+            type='search'
+            aria-label='Search categories'
+            placeholder='Find your kind of movement…'
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </label>
+        <Link
+          className='text-button'
+          to='/'
+        >
+          <Icon
+            name='dumbbell'
+            size={16}
+          />
+          My workout{' '}
+          <span className='count-badge'>
+            {exercises.filter((exercise) => exercise.queued).length}
+          </span>
+        </Link>
+      </div>
+      <div className='section-heading'>
+        <h2>Explore categories</h2>
+        <span className='result-count'>{filtered.length} ways to move</span>
+      </div>
+      <InlineMessage>{error || loadError}</InlineMessage>
+      {loading ? (
+        <LoadingState cards={6} />
+      ) : filtered.length ? (
+        <div className='category-grid'>
+          {filtered.map((category, index) => {
+            const visual = getCategoryVisual(category.category);
+            const count = exercises.filter(
+              (exercise) => exercise.categoryName === category.category
+            ).length;
+            return (
+              <article
+                className='category-card'
                 key={category.id}
               >
-                <figure>
+                <Link
+                  to={`/exercises/${encodeURIComponent(category.category)}`}
+                >
                   <img
-                    className='w-full'
-                    src={category.imageUrl}
-                    alt={category.category}
+                    src={
+                      curated.includes(category.category)
+                        ? visual.image
+                        : category.imageUrl || visual.image
+                    }
+                    alt=''
+                    loading='lazy'
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = visual.image;
+                    }}
                   />
-                </figure>
-                <div className='card-body text-xl'>
-                  {userData?.userRole === 'admin' && (
-                    <button
-                      onClick={() => handleDelete(category)}
-                      className='absolute top-2 right-2'
-                    >
-                      <DeleteIcon />
-                    </button>
-                  )}
-
-                  <h2 className='card-title text-white'>{category.category}</h2>
-                  <p className='text-white opacity-70'>
-                    {category.description}
-                  </p>
-                  <div className='flex flex-row'></div>
+                  <div className='category-shade' />
+                  <span className='category-number'>
+                    0{index + 1} /{' '}
+                    <Icon
+                      name={visual.icon}
+                      size={16}
+                    />
+                  </span>
+                  <div className='category-copy'>
+                    <span>{visual.label}</span>
+                    <h3>{category.category}</h3>
+                    <div>
+                      <small>
+                        {count} {count === 1 ? 'exercise' : 'exercises'} in your
+                        circle
+                      </small>
+                      <span className='category-arrow'>
+                        <Icon
+                          name='arrowUp'
+                          size={18}
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+                {userData.userRole === 'admin' && (
                   <button
-                    onClick={() => navigateToExercise(category)}
-                    className='btn btn-primary'
+                    className='category-delete'
+                    aria-label={`Delete category ${category.category}`}
+                    disabled={busy === category.id}
+                    onClick={() => remove(category)}
                   >
-                    Join Now
+                    <Icon
+                      name='trash'
+                      size={15}
+                    />
                   </button>
-                </div>
-              </div>
-            ))}
+                )}
+              </article>
+            );
+          })}
         </div>
-      </>
-
-      {showError && <AlertError message={alertMessage} />}
-      {showSuccess && <AlertSuccess message={alertMessage} />}
+      ) : (
+        <div className='surface'>
+          <EmptyState
+            icon='search'
+            title={
+              search
+                ? 'A different kind of move?'
+                : 'A fresh space for movement'
+            }
+            description={
+              search
+                ? 'Try another search to find your category.'
+                : 'Categories will appear here as your community grows.'
+            }
+          >
+            {search && (
+              <button
+                className='btn btn-ghost'
+                onClick={() => setSearch('')}
+              >
+                Clear search
+              </button>
+            )}
+          </EmptyState>
+        </div>
+      )}
+      <div className='library-note'>
+        <Icon
+          name='users'
+          size={18}
+        />
+        <p>
+          Your library grows with your circle.{' '}
+          <Link to='/all-users'>
+            Find more Motion Mates{' '}
+            <Icon
+              name='arrow'
+              size={13}
+            />
+          </Link>
+        </p>
+      </div>
     </div>
   );
-};
-
-export default Categories;
+}
