@@ -2828,19 +2828,23 @@
   width: 220px;
   max-width: 100%;
 }
+/* Segment widths follow the WHO ranges on a 10–40 scale: <18.5, 18.5–25, 25–30, 30+. */
 .bmi-scale span {
   height: 7px;
   border-radius: 4px;
-  flex: 1;
+  flex: 8.5 1 0;
   background: #bad6e8;
 }
 .bmi-scale span:nth-child(2) {
+  flex-grow: 6.5;
   background: #a4c99b;
 }
 .bmi-scale span:nth-child(3) {
+  flex-grow: 5;
   background: #e4c185;
 }
 .bmi-scale span:nth-child(4) {
+  flex-grow: 10;
   background: #d7a199;
 }
 .bmi-scale i {

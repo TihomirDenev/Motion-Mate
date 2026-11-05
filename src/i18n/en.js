@@ -866,7 +866,7 @@ export default {
     heightCm: 'Enter a height between 50 and 300 cm.',
     heightIn: 'Enter a height between 19.7 and 118.1 in.',
     activity: 'Choose the activity level that best fits your week.',
-    age: 'Enter an age between 10 and 100.',
+    age: 'The calorie formula is designed for adults. Enter an age between 18 and 100.',
     sex: 'Choose a sex for the calorie formula.',
     requiredFields: 'Please fill in all required fields.',
     usernameCharacters:

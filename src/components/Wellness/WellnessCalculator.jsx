@@ -185,7 +185,7 @@ export default function WellnessCalculator({ tool }) {
                   type='number'
                   inputMode='numeric'
                   required
-                  min={10}
+                  min={18}
                   max={100}
                   placeholder='30'
                   value={form.age}

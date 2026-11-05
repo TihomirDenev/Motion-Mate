@@ -62,10 +62,11 @@ export function calculateWellness(tool, form, units = 'metric') {
     );
   if (tool === 'bmi') {
     const bmi = weight / (height / 100) ** 2;
+    const rounded = Number(bmi.toFixed(1));
     return {
-      value: Number(bmi.toFixed(1)),
+      value: rounded,
       unitKey: 'common.bmi',
-      labelKey: `wellness.bmiRange.${bmiCategory(bmi)}`,
+      labelKey: `wellness.bmiRange.${bmiCategory(rounded)}`,
       metricValue: bmi,
     };
   }
@@ -84,7 +85,7 @@ export function calculateWellness(tool, form, units = 'metric') {
       metricValue: liters,
     };
   }
-  if (!Number.isFinite(age) || age < 10 || age > 100)
+  if (!Number.isFinite(age) || age < 18 || age > 100)
     throw new Error(translate('errors.age'));
   if (!['Male', 'Female'].includes(form.gender))
     throw new Error(translate('errors.sex'));

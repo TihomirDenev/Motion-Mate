@@ -74,7 +74,7 @@ export const GOAL_MAX_CALORIES = 10000;
 
 export const GOAL_MIN_CALORIES = 0;
 
-export const KG_TO_LBS_CONVERSION_FACTOR = 2.2046;
+export const KG_TO_LBS_CONVERSION_FACTOR = 2.2046226218;
 
 export const INCHES_TO_CM_CONVERSION_FACTOR = 2.54;
 
