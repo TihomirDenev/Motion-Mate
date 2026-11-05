@@ -18,9 +18,10 @@ import {
 } from '../../helper/exercise-control';
 import { getFriends } from '../../services/users.service';
 import { ExerciseCard } from '../../components/Exercise/ExerciseCard';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 import { RemoveFromListButton } from '../../components/Exercise/RemoveFromListButton';
 import { APP_NAME } from '../../common/constants';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export const Exercises = () => {
   const { userData } = useContext(AppContext);
@@ -39,16 +40,25 @@ export const Exercises = () => {
   const { category } = useParams();
   const navigate = useNavigate();
 
-  document.querySelector('title').textContent = `${APP_NAME} | ${category}`;
+  usePageTitle(`${APP_NAME} | ${category}`);
+
+  const username = userData?.username;
+
+  useEffect(() => {
+    if (!username) return;
+
+    let ignore = false;
+    getFriends(username).then((friendList) => {
+      if (!ignore) setFriends(friendList ?? []);
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [username]);
 
   useEffect(() => {
     return onValue(ref(db, `exercises/${category}`), (snapshot) => {
-      const fetchFriends = async () => {
-        const snapshot = await getFriends(userData?.username);
-        setFriends(snapshot);
-      };
-      fetchFriends();
-
       const allExercises = [];
       snapshot.forEach((child) => {
         allExercises.push({
@@ -57,23 +67,15 @@ export const Exercises = () => {
         });
       });
 
-      const filtered = allExercises.filter(
-        (exercise) => exercise.createdBy === userData.username
+      const ownExercises = allExercises.filter(
+        (exercise) => exercise?.createdBy === username
       );
-      const exerciseByFriend = friends?.map((friend) => {
-        return allExercises.filter(
-          (exercise) => exercise?.createdBy === friend
-        );
-      });
-
-      const flatten = exerciseByFriend?.filter((arr) => arr.length > 0).flat();
-      if (flatten?.length > 0) {
-        setExercises(filtered.concat(flatten));
-      } else {
-        setExercises(filtered);
-      }
+      const friendExercises = (friends ?? []).flatMap((friend) =>
+        allExercises.filter((exercise) => exercise?.createdBy === friend)
+      );
+      setExercises(ownExercises.concat(friendExercises));
     });
-  }, [friends]);
+  }, [category, username, friends]);
 
   const cancelEditing = () => {
     setEditingExerciseId(null);
@@ -112,27 +114,27 @@ export const Exercises = () => {
                       name='title'
                       value={editForm.title}
                       onChange={handleEditFormChange}
-                      className='input input-bordered mb-2'
+                      className='input mb-2 w-full'
                     />
                     <textarea
                       name='content'
                       value={editForm.content}
                       onChange={handleEditFormChange}
-                      className='textarea textarea-bordered mb-2'
+                      className='textarea mb-2 w-full'
                     />
                     <input
                       type='text'
                       name='calories'
                       value={editForm.calories}
                       onChange={handleEditFormChange}
-                      className='input input-bordered mb-2'
+                      className='input mb-2 w-full'
                     />
                     <input
                       type='text'
                       name='level'
                       value={editForm.level}
                       onChange={handleEditFormChange}
-                      className='input input-bordered mb-2'
+                      className='input mb-2 w-full'
                     />
                   </>
                 ) : (

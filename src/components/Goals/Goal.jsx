@@ -1,10 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { getUserByUsername } from '../../services/users.service';
 import GoalButton from './GoalButton';
-import PropTypes from 'prop-types';
-import { calculateTimeLeft } from '../../helper/format-date';
 import { AppContext } from '../../context/AppContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import AlertError from '../Alerts/AlertError/AlertError';
 import { alertHelper } from '../../helper/alert-helper';
 import TimeLeft from './TimeLeft';
@@ -13,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashCan } from '@fortawesome/free-regular-svg-icons';
 import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess';
 import { deleteGoal } from '../../services/goal.service';
-import { BASE } from '../../common/constants';
+import { handleAvatarError } from '../../helper/avatar-fallback';
 
 export default function Goal({ id, owner, name, from, to, progress, type }) {
   const navigate = useNavigate();
@@ -21,7 +19,6 @@ export default function Goal({ id, owner, name, from, to, progress, type }) {
   const [showError, setShowError] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
   const [showMessage, setShowMessage] = useState('');
-  const [timeLeft, setTimeLeft] = useState(null);
   const [ownerObj, setOwnerObj] = useState({
     avatar: '',
     firstName: '',
@@ -30,7 +27,7 @@ export default function Goal({ id, owner, name, from, to, progress, type }) {
   });
 
   const handleDetailsClick = () => {
-    navigate(`${BASE}goals/${(userData?.username, id)}`);
+    navigate(`/goals/${id}`);
   };
 
   const handleDeleteClick = async (user) => {
@@ -55,13 +52,6 @@ export default function Goal({ id, owner, name, from, to, progress, type }) {
     goalOwner();
   }, [owner]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setTimeLeft({ ...calculateTimeLeft(new Date(to)) });
-    }, 1000);
-    return () => clearTimeout();
-  }, [timeLeft]);
-
   return (
     <>
       <th>
@@ -70,6 +60,7 @@ export default function Goal({ id, owner, name, from, to, progress, type }) {
             <div className='mask mask-squircle w-12 h-12'>
               <img
                 src={ownerObj?.avatar}
+                onError={handleAvatarError}
                 alt={`Avatar of ${ownerObj?.firstName} ${ownerObj?.lastName}`}
               />
             </div>
@@ -116,13 +107,3 @@ export default function Goal({ id, owner, name, from, to, progress, type }) {
     </>
   );
 }
-
-Goal.propTypes = {
-  id: PropTypes.string.isRequired,
-  owner: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  from: PropTypes.any.isRequired,
-  to: PropTypes.any.isRequired,
-  progress: PropTypes.number.isRequired,
-  type: PropTypes.string.isRequired,
-};

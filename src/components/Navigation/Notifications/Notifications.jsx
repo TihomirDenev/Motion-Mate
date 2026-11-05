@@ -9,12 +9,13 @@ import {
   removeFriendRequestService,
 } from '../../../services/users.service';
 import DropDownNoNotifications from './DropDownWithoutNotifications';
-import PropTypes from 'prop-types';
+import { handleAvatarError } from '../../../helper/avatar-fallback';
 
-const Notifications = ({ requests, refresher }) => {
+const Notifications = ({ requests }) => {
   const { userData } = useContext(AppContext);
   const [users, setUsers] = useState([]);
-  const [requestsCount, setRequestsCount] = useState(0);
+  const requestsCount = requests?.length ?? 0;
+  const username = userData?.username;
 
   const handleAddFriend = async (friendUsername) => {
     try {
@@ -33,13 +34,17 @@ const Notifications = ({ requests, refresher }) => {
   };
 
   useEffect(() => {
-    setRequestsCount(requests?.length);
-    if (requests?.length > 0) {
-      getAllUsersDataRequests(userData.username).then((data) => {
-        setUsers(data);
-      });
-    }
-  }, [refresher]);
+    if (!requests?.length || !username) return;
+
+    let ignore = false;
+    getAllUsersDataRequests(username).then((data) => {
+      if (!ignore) setUsers(data);
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [requests, username]);
 
   return (
     <div className='dropdown dropdown-hover flex items-center'>
@@ -54,7 +59,7 @@ const Notifications = ({ requests, refresher }) => {
 
           <ul
             tabIndex={0}
-            className='text-center dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-96 border border-gray-400 absolute right-0'
+            className='text-center dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 rounded-box w-96 border border-gray-400 absolute right-0'
           >
             {users?.map((user) => {
               return (
@@ -63,6 +68,7 @@ const Notifications = ({ requests, refresher }) => {
                     <div className='flex items-center'>
                       <img
                         src={user?.avatar}
+                        onError={handleAvatarError}
                         title={`${user?.username}`}
                         alt='Account'
                         className='avatar w-16 rounded-2xl mr-4'
@@ -101,8 +107,4 @@ const Notifications = ({ requests, refresher }) => {
   );
 };
 
-Notifications.propTypes = {
-  requests: PropTypes.array,
-  refresher: PropTypes.bool,
-};
 export default Notifications;

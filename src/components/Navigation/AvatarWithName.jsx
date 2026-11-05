@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router';
 import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { logoutUser } from '../../services/auth.service';
@@ -6,19 +6,18 @@ import userPhoto from '../../assets/userPhoto.png';
 import Notifications from './Notifications/Notifications';
 import { onValue, ref } from 'firebase/database';
 import { db } from '../../config/firebase-config';
-import { BASE } from '../../common/constants';
+import { handleAvatarError } from '../../helper/avatar-fallback';
 
 export function AvatarWithNameAndDropDownMenu() {
   const { user, userData, setAppState } = useContext(AppContext);
   const [requests, setRequests] = useState([]);
   const navigate = useNavigate();
-  const [refresher, setRefresher] = useState(false);
 
   const logout = async (e) => {
     e.preventDefault();
     await logoutUser();
     setAppState({ user: null, userData: null });
-    navigate(`${BASE}`);
+    navigate('/');
   };
 
   useEffect(() => {
@@ -26,7 +25,6 @@ export function AvatarWithNameAndDropDownMenu() {
       const data = snapshot?.val();
       const dataRequests = data?.requests || [];
       setRequests(Object.keys(dataRequests));
-      setRefresher((prev) => !prev);
     });
   }, [userData?.username]);
 
@@ -34,10 +32,7 @@ export function AvatarWithNameAndDropDownMenu() {
     <div className='flex justify-end'>
       {user && (
         <div className='flex items-center'>
-          <Notifications
-            requests={requests}
-            refresher={refresher}
-          />
+          <Notifications requests={requests} />
           <div>
             {userData?.firstName ? (
               <div className='flex flex-col'>
@@ -53,10 +48,11 @@ export function AvatarWithNameAndDropDownMenu() {
           <div className='dropdown dropdown-hover flex items-center'>
             <div>
               <div className='avatar'>
-                <div className='avatar w-16 rounded-full border-1 border-black'>
+                <div className='avatar w-16 rounded-full border-black'>
                   {userData?.avatar ? (
                     <img
                       src={userData?.avatar}
+                      onError={handleAvatarError}
                       title='Account'
                       alt='Account'
                     />
@@ -72,18 +68,18 @@ export function AvatarWithNameAndDropDownMenu() {
               </div>
               <ul
                 tabIndex={0}
-                className='dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 border border-gray-400 absolute right-0'
+                className='dropdown-content z-[1] menu p-2 shadow-sm bg-base-100 rounded-box w-52 border border-gray-400 absolute right-0'
               >
                 <li>
-                  <NavLink to={`${BASE}my-profile`}>My Profile</NavLink>
+                  <NavLink to='/my-profile'>My Profile</NavLink>
                 </li>
                 {userData && !userData?.isBlocked && (
                   <>
                     <li>
-                      <NavLink to={`${BASE}my-friends`}>My Friends</NavLink>
+                      <NavLink to='/my-friends'>My Friends</NavLink>
                     </li>
                     <li>
-                      <NavLink to={`${BASE}all-users`}>All Users</NavLink>
+                      <NavLink to='/all-users'>All Users</NavLink>
                     </li>
                   </>
                 )}
@@ -110,10 +106,11 @@ export function AvatarWithName() {
     user && (
       <div className='flex items-center justify-left'>
         <div className='avatar'>
-          <div className='avatar w-16 rounded-full border-1 border-black mr-2 mb-2'>
+          <div className='avatar w-16 rounded-full border-black mr-2 mb-2'>
             {userData?.avatar ? (
               <img
                 src={userData?.avatar}
+                onError={handleAvatarError}
                 title='Account'
                 alt='Account'
               />

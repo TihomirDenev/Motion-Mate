@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { shortFormatDate } from '../../helper/format-date';
-import PropTypes from 'prop-types';
 import {
   removeFriendRequestService,
   removeFriendService,
@@ -11,7 +10,6 @@ import { useContext, useEffect, useState } from 'react';
 import { db } from '../../config/firebase-config';
 import { AppContext } from '../../context/AppContext';
 import SizedAvatar from '../Avatar/Avatar';
-import { BASE } from '../../common/constants';
 
 export default function SingleUserView({ user, setRefresh }) {
   const { userData } = useContext(AppContext);
@@ -60,7 +58,7 @@ export default function SingleUserView({ user, setRefresh }) {
         ? setIsFriend(() => true)
         : setIsFriend(() => false);
     });
-  }, [userData?.username, isFriend, hasRequest]);
+  }, [userData?.username, user?.username]);
 
   return (
     <div className='card card-side shadow-xl m-5 bg-base-300 border-2 border-gray-500 rounded-2xl h-72 w-full'>
@@ -103,7 +101,7 @@ export default function SingleUserView({ user, setRefresh }) {
           )}
 
           <button
-            onClick={() => navigate(`${BASE}users/${user?.username}`)}
+            onClick={() => navigate(`/users/${user?.username}`)}
             className='btn btn-primary'
           >
             View Profile
@@ -113,8 +111,3 @@ export default function SingleUserView({ user, setRefresh }) {
     </div>
   );
 }
-
-SingleUserView.propTypes = {
-  user: PropTypes.object,
-  setRefresh: PropTypes.func,
-};

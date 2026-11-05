@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   validateFormInImperial,
   validateFormInMetric,
@@ -20,19 +20,17 @@ export default function BodyMassIndex() {
   const [alert, setAlert] = useState(false);
   const [success, setSuccess] = useState(false);
   const [BMI, setBMI] = useState(0);
-  const [userBMI, setUserBMI] = useState(0);
   const [form, setForm] = useState({
     weight: '',
     height: '',
   });
-
-  useEffect(() => {
-    if (userData?.weight && userData?.height) {
-      const squaredHeight = (Math.pow(userData?.height, 2) / 10000).toFixed(2);
-      const bmi = (userData?.weight / squaredHeight).toFixed(1);
-      setUserBMI(bmi);
-    }
-  }, []);
+  const userBMI =
+    userData?.weight && userData?.height
+      ? (
+          userData.weight /
+          (Math.pow(userData.height, 2) / 10000).toFixed(2)
+        ).toFixed(1)
+      : 0;
 
   const handleChange = () => {
     setIsChecked(!isChecked);
@@ -117,9 +115,9 @@ export default function BodyMassIndex() {
             />
           )}
           <div className='flex mt-4 items-center justify-end'>
-            <div className='form-control flex flex-row items-center border-2 border-gray-500 rounded-2xl p-2 bg-blue-200 text-black h-14'>
+            <div className='flex flex-col flex flex-row items-center border-2 border-gray-500 rounded-2xl p-2 bg-blue-200 text-black h-14'>
               <p>Imperial or Metric System</p>
-              <label className='cursor-pointer label'>
+              <label className='cursor-pointer flex items-center select-none justify-between px-1 py-2'>
                 <input
                   type='checkbox'
                   className='toggle toggle-info'

@@ -1,6 +1,6 @@
 import { onValue, ref } from 'firebase/database';
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 import { db } from '../../config/firebase-config';
 import { AppContext } from '../../context/AppContext';
 import { APP_NAME } from '../../common/constants';
@@ -11,6 +11,8 @@ import { updateGoalProgress } from '../../services/goal.service';
 import { alertHelper } from '../../helper/alert-helper';
 import AlertError from '../Alerts/AlertError/AlertError';
 import { shortFormatDate } from '../../helper/format-date';
+import { usePageTitle } from '../../hooks/usePageTitle';
+import { handleAvatarError } from '../../helper/avatar-fallback';
 
 const DetailedGoal = () => {
   const params = useParams();
@@ -28,9 +30,9 @@ const DetailedGoal = () => {
   const innerTableDiv = 'flex place-content-between w-full gap-2';
   const paragraph = 'text-lg text-secondary';
 
-  document.querySelector('title').textContent = `${APP_NAME} | ${
+  usePageTitle(`${APP_NAME} | ${
     goal?.name || 'Detailed Goal'
-  }`;
+  }`);
 
   const handleProgressChange = async (e) => {
     e.preventDefault();
@@ -53,19 +55,20 @@ const DetailedGoal = () => {
         setProgressSlider(snapshot.val()?.progress);
       }
     );
-  }, []);
+  }, [userData?.username, params.id]);
 
   return (
     <div className='w-2/3 place-self-center'>
       <div
         className={
-          'flex place-content-center gap-3 mb-2 border-2 border-primary rounded p-2 shadow-lg'
+          'flex place-content-center gap-3 mb-2 border-2 border-primary rounded-sm p-2 shadow-lg'
         }
       >
         <div className='avatar'>
           <div className='mask mask-squircle w-12 h-12'>
             <img
               src={userData?.avatar}
+              onError={handleAvatarError}
               alt={`Avatar of ${userData?.firstName} ${userData?.lastName}`}
             />
           </div>
@@ -77,7 +80,7 @@ const DetailedGoal = () => {
           <div className='text-sm opacity-50'>{userData?.email}</div>
         </div>
       </div>
-      <div className='flex flex-col w-full justify-around gap-2 overflow-x-auto border-2 border-primary rounded p-2 shadow-2xl'>
+      <div className='flex flex-col w-full justify-around gap-2 overflow-x-auto border-2 border-primary rounded-sm p-2 shadow-2xl'>
         <div className='flex justify-around items-center border-2 border-secondary rounded-lg p-3 shadow-xl'>
           <TimeLeft goal={goal} />
           {typeof goal?.progress !== 'undefined' ? (
@@ -122,7 +125,7 @@ const DetailedGoal = () => {
             <h2>Goal Type</h2>
           </div>
 
-          <div className='label border-b-2 border-primary place-content-center p-2 bg-base-200'>
+          <div className='flex items-center select-none justify-between border-b-2 border-primary place-content-center p-2 bg-base-200'>
             <div className='text-lg text-secondary first-letter:uppercase'>
               {goal?.type}
             </div>

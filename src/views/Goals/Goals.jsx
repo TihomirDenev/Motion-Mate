@@ -5,17 +5,16 @@ import { db } from '../../config/firebase-config';
 import { AppContext } from '../../context/AppContext';
 import CreateGoal from '../../components/Goals/CreateGoal';
 import GoalsTable from '../../components/Goals/GoalsTable';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function Goals() {
-  document.querySelector('title').textContent = `${APP_NAME} | Goals`;
+  usePageTitle(`${APP_NAME} | Goals`);
 
   const { userData } = useContext(AppContext);
 
   const [goals, setGoals] = useState([]);
   const [friends, setFriends] = useState([]);
   const [friendsGoals, setFriendsGoals] = useState([]);
-
-  const friendGoalsMap = new Map();
 
   useEffect(() => {
     return onValue(ref(db, `users/${userData?.username}`), (snapshot) => {
@@ -35,13 +34,14 @@ export default function Goals() {
         setGoals(_goals);
       }
     });
-  }, []);
+  }, [userData?.username]);
 
   useEffect(() => {
     if (!friends.length) return;
 
-    friends.forEach((friend) => {
-      return onValue(ref(db, `users/${friend}`), (snapshot) => {
+    const friendGoalsMap = new Map();
+    const unsubscribes = friends.map((friend) =>
+      onValue(ref(db, `users/${friend}`), (snapshot) => {
         const friendGoals = snapshot.val()?.myGoals;
         if (!friendGoals) return;
 
@@ -52,14 +52,16 @@ export default function Goals() {
           });
         }
         setFriendsGoals([...friendGoalsMap.values()]);
-      });
-    });
+      })
+    );
+
+    return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
   }, [friends]);
 
   return (
     <div className='flex flex-col w-full gap-2  overflow-x-auto'>
       <CreateGoal />
-      <h2 className='label place-content-center border-2 border-primary rounded m-2'>
+      <h2 className='flex items-center select-none justify-between px-1 py-2 place-content-center border-2 border-primary rounded-sm m-2'>
         My Goals
       </h2>
 
@@ -69,7 +71,7 @@ export default function Goals() {
       />
       <br />
 
-      <h2 className='label place-content-center border-2 border-primary rounded m-2'>
+      <h2 className='flex items-center select-none justify-between px-1 py-2 place-content-center border-2 border-primary rounded-sm m-2'>
         My Friends Goals
       </h2>
 

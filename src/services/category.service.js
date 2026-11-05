@@ -21,7 +21,7 @@ export const getAllCategories = async () => {
 
     return exercises;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -35,7 +35,7 @@ export const createCategory = async (name, description, imageUrl) => {
     const result = await push(ref(db, `categories/${name}`), category);
     return result.key;
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };
 
@@ -44,6 +44,6 @@ export const deleteCategory = async (categoryName, categoryId) => {
     const data = ref(db, `categories/${categoryName}/${categoryId}`);
     await remove(data);
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message, { cause: error });
   }
 };

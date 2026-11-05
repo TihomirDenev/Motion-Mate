@@ -1,8 +1,8 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import { loginUser, loginUserByUsername } from '../../services/auth.service.js';
 import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext.js';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import LoginBy from './LoginBy.jsx';
 import {
   validateEmailLogAsync,
@@ -14,27 +14,32 @@ import {
 import AlertSuccess from '../Alerts/AlertSuccess/AlertSuccess.jsx';
 import AlertError from '../Alerts/AlertError/AlertError.jsx';
 import { alertHelper } from '../../helper/alert-helper.js';
-import { APP_NAME, BASE } from '../../common/constants.js';
+import { APP_NAME } from '../../common/constants.js';
+import { usePageTitle } from '../../hooks/usePageTitle';
 
 export default function Login() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { setAppState, user, refresh } = useContext(AppContext);
+  const { user } = useContext(AppContext);
+  const redirectTo = location.state?.from?.pathname || '/';
 
   const [alert, setAlert] = useState(false);
   const [success, setSuccess] = useState(false);
   const [message, setMessage] = useState(null);
-  const [usernameEmail, setUsernameEmail] = useState(true);
+  const [usernameEmail, setUsernameEmail] = useState(() => {
+    const login = localStorage.getItem('login');
+    return login ? JSON.parse(login) : true;
+  });
   const [form, setForm] = useState({
     username: '',
     email: '',
     password: '',
   });
 
-  document.querySelector('title').textContent = `${APP_NAME} | Login by ${
+  usePageTitle(`${APP_NAME} | Login by ${
     usernameEmail ? 'Username' : 'Email'
-  }`;
+  }`);
 
   const updateForm = (props) => (e) => {
     setForm({
@@ -58,10 +63,9 @@ export default function Login() {
   const handleLoginByEmail = async () => {
     try {
       await validateLoginFormByEmail();
-      const { user } = await loginUser(form.email, form.password);
-      setAppState({ user, userData: null, refresh: !refresh });
+      await loginUser(form.email, form.password);
       alertHelper(setMessage, setSuccess, 'User login successfully!');
-      navigate(location.state.from.pathname || `${BASE}`);
+      navigate(redirectTo);
     } catch (error) {
       if (error.message.includes('auth/invalid-credential')) {
         alertHelper(setMessage, setAlert, 'Wrong Password!');
@@ -75,9 +79,8 @@ export default function Login() {
     try {
       await validateLoginFormByUsername();
       await loginUserByUsername(form.username, form.password);
-      setAppState({ user, userData: null, refresh: !refresh });
       alertHelper(setMessage, setSuccess, 'User login successfully!');
-      navigate(location.state.from.pathname || `${BASE}`);
+      navigate(redirectTo);
     } catch (error) {
       if (error.message.includes('auth/invalid-credential')) {
         alertHelper(setMessage, setAlert, 'Wrong Password!');
@@ -89,16 +92,9 @@ export default function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate(`${BASE}`);
+      navigate(redirectTo);
     }
-  }, [user]);
-
-  useEffect(() => {
-    const login = localStorage.getItem('login');
-    if (login) {
-      setUsernameEmail(JSON.parse(login));
-    }
-  }, []);
+  }, [user, navigate, redirectTo]);
 
   return (
     <div
@@ -138,7 +134,7 @@ export default function Login() {
               name='radio-btn'
               className='radio radio-accent'
               onChange={() => {
-                setUsernameEmail((prev) => (prev = !prev));
+                setUsernameEmail(true);
                 localStorage.setItem('login', true);
               }}
               checked={usernameEmail}
@@ -149,7 +145,7 @@ export default function Login() {
               name='radio-btn'
               className='radio radio-accent'
               onChange={() => {
-                setUsernameEmail((prev) => (prev = !prev));
+                setUsernameEmail(false);
                 localStorage.setItem('login', false);
               }}
               checked={!usernameEmail}
@@ -159,7 +155,7 @@ export default function Login() {
             <p className='py-6'>
               Don`t have an account?
               <Link
-                to={`${BASE}register`}
+                to='/register'
                 className='link link-hover text-accent-700 font-bold ml-1'
               >
                 Register
