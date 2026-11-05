@@ -1,8 +1,6 @@
 import { Footer } from '../../components/Navigation/Footer/Footer';
 import { NavBar } from '../../components/Navigation/NavBar/NavBar';
 
-import PropTypes from 'prop-types';
-
 export const Layout = ({ children }) => {
   return (
     <div className='flex flex-col w-full min-h-[100vh]'>
@@ -14,8 +12,4 @@ export const Layout = ({ children }) => {
       <Footer />
     </div>
   );
-};
-
-Layout.propTypes = {
-  children: PropTypes.node.isRequired,
 };
