@@ -1,9 +1,29 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@plugin 'daisyui' {
+  themes:
+    fantasy --default,
+    sunset;
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 .no-spinners {
-  appearance: 'none';
+  appearance: none;
+  -moz-appearance: textfield;
   margin: 0;
   &::-webkit-inner-spin-button,
   &::-webkit-outer-spin-button {
